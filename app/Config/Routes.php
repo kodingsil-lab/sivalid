@@ -69,8 +69,6 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings/profile', 'Admin\Settings::saveProfile');
     $routes->post('settings/category', 'Admin\Settings::saveCategory');
-
-    $routes->get('analysis', 'Admin\Analysis::index');
 });
 
 $routes->get('isi/(:segment)', 'PublicForm::show/$1');

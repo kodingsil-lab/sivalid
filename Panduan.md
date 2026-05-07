@@ -772,10 +772,11 @@ app/
 |   |   |-- InstrumentValidation.php
 |   |   |-- Products.php
 |   |   |-- ProductValidation.php
-|   |   |-- Responses.php
-|   |   |-- Analysis.php
+|   |   |-- RespondentLinks.php
+|   |   |-- ReportPdf.php
 |   |   |-- Reports.php
-|   |   `-- Settings.php
+|   |   |-- Settings.php
+|   |   `-- SubmissionResults.php
 |   |-- PublicForm.php
 |   `-- Auth.php
 |-- Models/
@@ -811,16 +812,18 @@ app/
 |   |   |-- revisions/
 |   |   |-- links/
 |   |   |-- products/
+|   |   |-- respondent_links/
 |   |   |-- validations/
-|   |   |-- responses/
-|   |   |-- analysis/
+|   |   |-- submissions/
+|   |   |-- settings/
 |   |   `-- reports/
 |   `-- public/
 |       |-- validasi_instrumen.php
 |       |-- validasi_produk.php
-|       |-- responden.php
+|       |-- respon_mahasiswa.php
 |       |-- observasi.php
 |       |-- fgd.php
+|       |-- tes_kinerja.php
 |       `-- thanks.php
 |-- Filters/
 |   `-- AuthFilter.php
@@ -863,8 +866,6 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('validasi-produk/hasil/(:num)', 'Admin\ProductValidation::show/$1');
     $routes->get('validasi-produk/analisis/(:num)', 'Admin\ProductValidation::analysis/$1');
 
-    $routes->get('responses', 'Admin\Responses::index');
-    $routes->get('analysis', 'Admin\Analysis::index');
     $routes->get('reports', 'Admin\Reports::index');
     $routes->get('reports/cetak/(:num)', 'Admin\Reports::print/$1');
 });
@@ -1185,7 +1186,6 @@ Menghitung hasil validasi instrumen secara otomatis.
 
 ```text
 app/Controllers/Admin/InstrumentValidation.php
-app/Controllers/Admin/Analysis.php
 app/Models/AnalysisResultModel.php
 app/Models/AnalysisAspectModel.php
 app/Models/AnalysisItemModel.php
@@ -1788,7 +1788,7 @@ Status sampai pembaruan terakhir:
 | 26.6 Penguatan keamanan dan integritas data | Selesai diterapkan tahap awal | Token diperpanjang, index ditambahkan, submit publik dikunci dengan transaksi. |
 | 26.7 Pagination, filter, dan export data mentah | Selesai diterapkan tahap awal | Pagination, filter lanjutan, dan export CSV sudah tersedia. |
 | 26.8 Uji PDF end-to-end | Belum dikerjakan | Perlu uji manual dari browser dengan data nyata. |
-| 26.9 Rapikan route/controller `Analysis` | Belum dikerjakan | Perlu keputusan: hapus atau jadikan dashboard analisis. |
+| 26.9 Rapikan route/controller `Analysis` | Selesai diterapkan tahap awal | Route `admin/analysis` dan controller `Analysis` dihapus karena alur analisis sudah ditangani menu Laporan dan Validasi. |
 | 26.10 Normalisasi status produk legacy | Belum dikerjakan | Perlu migration normalisasi status produk lama. |
 | 26.11 User admin, audit log, backup | Belum dikerjakan | Masuk pengembangan lanjutan setelah alur utama stabil. |
 
@@ -1796,7 +1796,6 @@ Prioritas aktif setelah pembaruan ini:
 
 ```text
 26.8 Uji PDF nyata
--> 26.9 Rapikan route/controller Analysis
 -> 26.10 Normalisasi status produk legacy
 -> 26.11 User admin, audit log, backup
 ```
@@ -2291,6 +2290,16 @@ Checklist 26.8:
 
 ### 26.9 Rapikan Route dan Controller `Analysis`
 
+Status pengerjaan: **Selesai diterapkan tahap awal**.
+
+Keputusan:
+
+Route `admin/analysis` tidak dipertahankan. Alur analisis sudah jelas melalui:
+
+1. Menu Validasi Instrumen untuk proses dan hasil analisis instrumen.
+2. Menu Validasi Produk untuk proses dan hasil analisis produk.
+3. Menu Laporan untuk membuka laporan analisis dan laporan pengisian.
+
 Masalah:
 
 Masih ada route `admin/analysis`, tetapi controller `Analysis` hanya menampilkan ulang view hasil validasi instrumen dengan `links` kosong. Menu sidebar juga tidak lagi memakai route ini secara langsung.
@@ -2314,16 +2323,24 @@ Yang harus dikerjakan:
 
 Referensi PHP:
 
-1. `app/Config/Routes.php` line 71: route `admin/analysis`.
-2. `app/Controllers/Admin/Analysis.php` line 8: controller `Analysis`.
-3. `app/Controllers/Admin/Analysis.php` line 36: memakai view `admin/validations/instrument_result`.
-4. `app/Controllers/Admin/Analysis.php` line 38: `links` dikirim sebagai array kosong.
+1. `app/Config/Routes.php` line 71: route `admin/analysis` sebelum perbaikan.
+2. `app/Controllers/Admin/Analysis.php` line 8: controller `Analysis` sebelum perbaikan.
+3. `app/Controllers/Admin/Analysis.php` line 36: sebelum perbaikan memakai view `admin/validations/instrument_result`.
+4. `app/Controllers/Admin/Analysis.php` line 38: sebelum perbaikan `links` dikirim sebagai array kosong.
 
 Checklist 26.9:
 
-[ ] Keputusan route `admin/analysis` dibuat.  
-[ ] Jika tidak dipakai, route dan controller dihapus.  
-[ ] Jika dipakai, view khusus analisis dibuat.  
+[x] Keputusan route `admin/analysis` dibuat.  
+[x] Route dan controller yang tidak dipakai dihapus.  
+[x] View khusus analisis tidak dibuat karena route diputuskan dihapus.  
+
+Catatan implementasi:
+
+1. Route `$routes->get('analysis', 'Admin\Analysis::index')` dihapus dari `app/Config/Routes.php`.
+2. File `app/Controllers/Admin/Analysis.php` dihapus.
+3. View khusus analisis tidak dibuat karena keputusan akhirnya adalah menghapus route duplikatif, bukan mempertahankannya.
+4. Menu sidebar tetap aman karena tidak lagi mengarah ke `admin/analysis`.
+5. Daftar struktur folder dan route awal pada dokumen ini diperbarui agar tidak lagi menyebut `Analysis.php` sebagai controller aktif.
 
 ---
 
@@ -2408,9 +2425,8 @@ Checklist 26.11:
 Urutan paling aman setelah pembaruan terakhir:
 
 1. Kerjakan 26.8: uji PDF end-to-end dengan data nyata.
-2. Kerjakan 26.9: rapikan route dan controller `Analysis`.
-3. Kerjakan 26.10: normalisasi status produk legacy.
-4. Kerjakan 26.11: user admin, audit log, dan backup.
+2. Kerjakan 26.10: normalisasi status produk legacy.
+3. Kerjakan 26.11: user admin, audit log, dan backup.
 
 Pekerjaan yang sudah selesai tahap awal:
 
@@ -2421,15 +2437,16 @@ Pekerjaan yang sudah selesai tahap awal:
 5. 26.5 sinkronisasi dokumentasi lama.
 6. 26.6 penguatan keamanan dan integritas data.
 7. 26.7 pagination, filter lanjutan, dan export data mentah.
+8. 26.9 rapikan route dan controller `Analysis`.
 
 Prioritas teknis terdekat:
 
 ```text
 26.8 Uji PDF nyata
--> 26.9 Rapikan route/controller Analysis
 -> 26.10 Normalisasi status produk legacy
+-> 26.11 User admin, audit log, backup
 ```
 
 Kesimpulan:
 
-SIVALID sudah melewati tahap fondasi utama dan beberapa penguatan tahap 26 sudah selesai diterapkan. Bagian berikutnya lebih banyak berupa uji manual, perapian route yang tidak lagi jelas fungsinya, normalisasi data lama, dan penguatan operasional sebelum aplikasi dipakai lebih luas.
+SIVALID sudah melewati tahap fondasi utama dan beberapa penguatan tahap 26 sudah selesai diterapkan. Bagian berikutnya lebih banyak berupa uji manual PDF, normalisasi data lama, dan penguatan operasional sebelum aplikasi dipakai lebih luas.
