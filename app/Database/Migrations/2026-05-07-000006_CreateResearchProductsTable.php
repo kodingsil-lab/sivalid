@@ -44,7 +44,7 @@ class CreateResearchProductsTable extends Migration
             'status' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
-                'default'    => 'Draft Produk',
+                'default'    => 'Draft',
             ],
             'created_at' => [
                 'type' => 'DATETIME',

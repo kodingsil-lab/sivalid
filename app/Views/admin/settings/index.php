@@ -164,13 +164,12 @@
 <div class="card">
     <h3>User Admin</h3>
     <p>
-        Pengaturan user admin sementara masih mengikuti modul login/admin yang sudah ada.
-        Jika nanti diperlukan, bagian ini dapat dikembangkan menjadi manajemen user lengkap.
+        Kelola akun admin yang dapat login ke sistem. Tambah admin baru, ubah nama/password, atau nonaktifkan akun yang tidak lagi digunakan.
     </p>
-
-    <a href="<?= base_url('admin/dashboard') ?>" class="btn btn-light">
-        Kembali ke Dashboard
-    </a>
+    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+        <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-primary">Manajemen User Admin</a>
+        <a href="<?= base_url('admin/backup') ?>" class="btn btn-light">Backup &amp; Restore</a>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\AuditLogService;
 use App\Libraries\CategorySettingService;
 use App\Libraries\WorkflowStatusService;
 use App\Models\AnalysisAspectModel;
@@ -27,6 +28,7 @@ class InstrumentValidation extends BaseController
     protected AnalysisItemModel $analysisItemModel;
     protected WorkflowStatusService $workflowStatusService;
     protected CategorySettingService $categorySettingService;
+    protected AuditLogService $auditLog;
 
     public function __construct()
     {
@@ -40,6 +42,7 @@ class InstrumentValidation extends BaseController
         $this->analysisItemModel   = new AnalysisItemModel();
         $this->workflowStatusService = new WorkflowStatusService();
         $this->categorySettingService = new CategorySettingService();
+        $this->auditLog               = new AuditLogService();
     }
 
     public function index()
@@ -407,6 +410,13 @@ class InstrumentValidation extends BaseController
         }
 
         $this->workflowStatusService->markInstrumentValid($instrumentId);
+
+        $this->auditLog->log(
+            AuditLogService::ACTION_MARK_INSTRUMENT_VALID,
+            AuditLogService::ENTITY_INSTRUMENT,
+            $instrumentId,
+            'Instrumen ditetapkan Valid. Link ID=' . $link['id']
+        );
 
         $this->linkModel->update((int) $link['id'], [
             'status' => 'Ditutup',

@@ -3,10 +3,17 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\AuditLogService;
 use App\Models\UserModel;
 
 class Auth extends BaseController
 {
+    protected AuditLogService $auditLog;
+
+    public function __construct()
+    {
+        $this->auditLog = new AuditLogService();
+    }
     public function login()
     {
         if (session()->get('isLoggedIn')) {
@@ -60,11 +67,28 @@ class Auth extends BaseController
             'isLoggedIn' => true,
         ]);
 
+        $this->auditLog->log(
+            AuditLogService::ACTION_LOGIN,
+            'user',
+            (int) $user['id'],
+            'Login: ' . $user['email']
+        );
+
         return redirect()->to(base_url('admin/dashboard'));
     }
 
     public function logout()
     {
+        $userId   = session()->get('user_id');
+        $userEmail = session()->get('user_email');
+
+        $this->auditLog->log(
+            AuditLogService::ACTION_LOGOUT,
+            'user',
+            $userId ? (int) $userId : null,
+            'Logout: ' . ($userEmail ?? '-')
+        );
+
         session()->destroy();
 
         return redirect()

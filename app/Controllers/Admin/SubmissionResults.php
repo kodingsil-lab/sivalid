@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\AuditLogService;
 use App\Models\InstrumentLinkModel;
 use App\Models\InstrumentModel;
 use App\Models\ResearchProductModel;
@@ -16,6 +17,7 @@ class SubmissionResults extends BaseController
     protected InstrumentModel $instrumentModel;
     protected InstrumentLinkModel $linkModel;
     protected ResearchProductModel $productModel;
+    protected AuditLogService $auditLog;
 
     protected array $allowedModes = [
         'validasi_instrumen',
@@ -33,6 +35,7 @@ class SubmissionResults extends BaseController
         $this->instrumentModel = new InstrumentModel();
         $this->linkModel       = new InstrumentLinkModel();
         $this->productModel    = new ResearchProductModel();
+        $this->auditLog        = new AuditLogService();
     }
 
     public function index()
@@ -128,6 +131,13 @@ class SubmissionResults extends BaseController
             ->delete();
 
         $this->responseModel->delete($responseId);
+
+        $this->auditLog->log(
+            AuditLogService::ACTION_DELETE_SUBMISSION,
+            AuditLogService::ENTITY_RESPONSE,
+            $responseId,
+            'Hapus data pengisian mode=' . $response['mode']
+        );
 
         return redirect()
             ->to(base_url('admin/submissions?mode=' . $response['mode']))

@@ -69,6 +69,17 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings/profile', 'Admin\Settings::saveProfile');
     $routes->post('settings/category', 'Admin\Settings::saveCategory');
+
+    $routes->get('admin-users', 'Admin\AdminUsers::index');
+    $routes->get('admin-users/new', 'Admin\AdminUsers::new');
+    $routes->post('admin-users', 'Admin\AdminUsers::create');
+    $routes->get('admin-users/(:num)/edit', 'Admin\AdminUsers::edit/$1');
+    $routes->put('admin-users/(:num)', 'Admin\AdminUsers::update/$1');
+    $routes->post('admin-users/(:num)/toggle-status', 'Admin\AdminUsers::toggleStatus/$1');
+
+    $routes->get('backup', 'Admin\Backup::index');
+    $routes->get('backup/export-database', 'Admin\Backup::exportDatabase');
+    $routes->get('backup/export-files', 'Admin\Backup::exportFiles');
 });
 
 $routes->get('isi/(:segment)', 'PublicForm::show/$1');
