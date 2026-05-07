@@ -146,6 +146,10 @@
                             <a href="<?= base_url('admin/reports/fgd/' . $link['id']) ?>" class="btn btn-primary">
                                 Laporan
                             </a>
+                        <?php elseif ($link['mode'] === 'tes_kinerja'): ?>
+                            <a href="<?= base_url('admin/reports/tes-kinerja/' . $link['id']) ?>" class="btn btn-primary">
+                                Laporan
+                            </a>
                         <?php else: ?>
                             <span class="badge">Belum tersedia</span>
                         <?php endif; ?>

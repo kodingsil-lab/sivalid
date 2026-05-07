@@ -53,6 +53,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('reports/respon-mahasiswa/(:num)', 'Admin\Reports::responMahasiswa/$1');
     $routes->get('reports/observasi/(:num)', 'Admin\Reports::observasi/$1');
     $routes->get('reports/fgd/(:num)', 'Admin\Reports::fgd/$1');
+    $routes->get('reports/tes-kinerja/(:num)', 'Admin\Reports::tesKinerja/$1');
     $routes->get('reports/validasi-instrumen/(:num)/print', 'Admin\Reports::printValidasiInstrumen/$1');
     $routes->get('reports/validasi-produk/(:num)/print', 'Admin\Reports::printValidasiProduk/$1');
     $routes->get('reports/validasi-instrumen/(:num)/pdf', 'Admin\ReportPdf::validasiInstrumen/$1');
@@ -61,6 +62,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('reports/validasi-produk/(:num)/pdf-preview', 'Admin\ReportPdf::previewValidasiProduk/$1');
 
     $routes->get('submissions', 'Admin\SubmissionResults::index');
+    $routes->get('submissions/export', 'Admin\SubmissionResults::export');
     $routes->get('submissions/(:num)', 'Admin\SubmissionResults::show/$1');
     $routes->delete('submissions/(:num)', 'Admin\SubmissionResults::delete/$1');
 

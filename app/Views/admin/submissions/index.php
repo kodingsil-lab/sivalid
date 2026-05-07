@@ -17,21 +17,103 @@
 <?php endif; ?>
 
 <div class="card">
-    <form action="<?= base_url('admin/submissions') ?>" method="get" class="search-form">
-        <select name="mode" class="form-control" style="min-width: 280px;">
-            <option value="">-- Semua Mode --</option>
-            <?php foreach ($allowedModes as $modeOption): ?>
-                <option value="<?= esc($modeOption) ?>" <?= ($mode ?? '') === $modeOption ? 'selected' : '' ?>>
-                    <?= esc(str_replace('_', ' ', strtoupper($modeOption))) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    <?php
+    $activeFilters = array_filter($filters ?? [], static function ($value) {
+        return $value !== null && $value !== '';
+    });
 
-        <button type="submit" class="btn btn-primary">Tampilkan</button>
+    $exportUrl = base_url('admin/submissions/export');
 
-        <a href="<?= base_url('admin/submissions') ?>" class="btn btn-light">
-            Reset
-        </a>
+    if (!empty($activeFilters)) {
+        $exportUrl .= '?' . http_build_query($activeFilters);
+    }
+    ?>
+
+    <form action="<?= base_url('admin/submissions') ?>" method="get">
+        <div class="form-grid">
+            <div class="form-row">
+                <label for="mode">Mode</label>
+                <select name="mode" id="mode" class="form-control">
+                    <option value="">-- Semua Mode --</option>
+                    <?php foreach ($allowedModes as $modeOption): ?>
+                        <option value="<?= esc($modeOption) ?>" <?= ($filters['mode'] ?? '') === $modeOption ? 'selected' : '' ?>>
+                            <?= esc(str_replace('_', ' ', strtoupper($modeOption))) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="instrument_id">Instrumen</label>
+                <select name="instrument_id" id="instrument_id" class="form-control">
+                    <option value="">-- Semua Instrumen --</option>
+                    <?php foreach ($instruments as $instrument): ?>
+                        <option value="<?= esc($instrument['id']) ?>" <?= ($filters['instrument_id'] ?? '') === (string) $instrument['id'] ? 'selected' : '' ?>>
+                            <?= esc($instrument['kode']) ?> - <?= esc($instrument['judul']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="instrument_link_id">Link Pengisian</label>
+                <select name="instrument_link_id" id="instrument_link_id" class="form-control">
+                    <option value="">-- Semua Link --</option>
+                    <?php foreach ($links as $link): ?>
+                        <option value="<?= esc($link['id']) ?>" <?= ($filters['instrument_link_id'] ?? '') === (string) $link['id'] ? 'selected' : '' ?>>
+                            <?= esc($link['kode']) ?> - <?= esc($link['judul_link']) ?> (<?= esc($link['mode']) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="product_id">Produk</label>
+                <select name="product_id" id="product_id" class="form-control">
+                    <option value="">-- Semua Produk --</option>
+                    <?php foreach ($products as $product): ?>
+                        <option value="<?= esc($product['id']) ?>" <?= ($filters['product_id'] ?? '') === (string) $product['id'] ? 'selected' : '' ?>>
+                            <?= esc($product['kode']) ?> - <?= esc($product['nama_produk']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="date_from">Tanggal Dari</label>
+                <input
+                    type="date"
+                    name="date_from"
+                    id="date_from"
+                    class="form-control"
+                    value="<?= esc($filters['date_from'] ?? '') ?>"
+                >
+            </div>
+
+            <div class="form-row">
+                <label for="date_to">Tanggal Sampai</label>
+                <input
+                    type="date"
+                    name="date_to"
+                    id="date_to"
+                    class="form-control"
+                    value="<?= esc($filters['date_to'] ?? '') ?>"
+                >
+            </div>
+        </div>
+
+        <div class="toolbar" style="margin-top: 10px; margin-bottom: 0;">
+            <div>
+                <button type="submit" class="btn btn-primary">Tampilkan</button>
+                <a href="<?= base_url('admin/submissions') ?>" class="btn btn-light">
+                    Reset
+                </a>
+            </div>
+
+            <a href="<?= esc($exportUrl) ?>" class="btn btn-light">
+                Export CSV
+            </a>
+        </div>
     </form>
 </div>
 
@@ -65,7 +147,7 @@
         <tbody>
             <?php foreach ($responses as $index => $response): ?>
                 <tr>
-                    <td><?= $index + 1 ?></td>
+                    <td><?= ($offset ?? 0) + $index + 1 ?></td>
                     <td>
                         <strong><?= esc($response['nama']) ?></strong><br>
                         <small><?= esc($response['jenis_responden']) ?></small>
@@ -109,6 +191,12 @@
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <?php if (isset($pager)): ?>
+        <div style="margin-top: 14px;">
+            <?= $pager->links('submissions') ?>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

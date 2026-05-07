@@ -248,6 +248,16 @@ class Reports extends BaseController
         );
     }
 
+    public function tesKinerja($linkId = null)
+    {
+        return $this->genericPengisianReport(
+            (int) $linkId,
+            'tes_kinerja',
+            'Laporan Tes Kinerja',
+            'admin/reports/tes_kinerja'
+        );
+    }
+
     private function genericPengisianReport(int $linkId, string $mode, string $title, string $view)
     {
         $linkRow = $this->linkModel->find($linkId);
@@ -262,15 +272,17 @@ class Reports extends BaseController
         $responses = $this->responseModel->getWithRespondentByLink($linkId);
         $summary = $this->getGenericSummary($linkId);
         $items = $this->getGenericItemSummary($linkId);
+        $textAnswers = $this->getGenericTextAnswers($linkId);
         $comments = $this->getItemComments($linkId);
 
         $data = [
-            'title'     => $title,
-            'link'      => $link,
-            'responses' => $responses,
-            'summary'   => $summary,
-            'items'     => $items,
-            'comments'  => $comments,
+            'title'       => $title,
+            'link'        => $link,
+            'responses'   => $responses,
+            'summary'     => $summary,
+            'items'       => $items,
+            'textAnswers' => $textAnswers,
+            'comments'    => $comments,
         ];
 
         return view($view, $data);
@@ -326,7 +338,11 @@ class Reports extends BaseController
         }
 
         $answers = $this->answerModel
-            ->whereIn('response_id', $responseIds)
+            ->select('response_answers.skor')
+            ->join('instrument_items', 'instrument_items.id = response_answers.instrument_item_id')
+            ->whereIn('response_answers.response_id', $responseIds)
+            ->where('instrument_items.tipe_butir', 'skala')
+            ->where('response_answers.skor IS NOT NULL', null, false)
             ->findAll();
 
         $totalSkor = 0;
@@ -352,8 +368,9 @@ class Reports extends BaseController
             ->select(
                 'instrument_items.nomor,
                  instrument_items.pernyataan,
+                 instrument_items.tipe_butir,
                  instrument_aspects.nama_aspek,
-                 COUNT(response_answers.id) AS jumlah_jawaban,
+                 COUNT(response_answers.skor) AS jumlah_jawaban,
                  SUM(response_answers.skor) AS total_skor,
                  AVG(response_answers.skor) AS rata_rata'
             )
@@ -361,9 +378,36 @@ class Reports extends BaseController
             ->join('instrument_items', 'instrument_items.id = response_answers.instrument_item_id')
             ->join('instrument_aspects', 'instrument_aspects.id = instrument_items.aspect_id')
             ->where('responses.instrument_link_id', $instrumentLinkId)
+            ->where('instrument_items.tipe_butir', 'skala')
+            ->where('response_answers.skor IS NOT NULL', null, false)
             ->groupBy('instrument_items.id')
             ->orderBy('instrument_items.urutan', 'ASC')
             ->orderBy('instrument_items.nomor', 'ASC')
+            ->findAll();
+    }
+
+    private function getGenericTextAnswers(int $instrumentLinkId): array
+    {
+        return $this->answerModel
+            ->select(
+                'response_answers.*,
+                 instrument_items.nomor,
+                 instrument_items.pernyataan,
+                 instrument_items.tipe_butir,
+                 instrument_aspects.nama_aspek,
+                 respondents.nama,
+                 respondents.jenis_responden'
+            )
+            ->join('responses', 'responses.id = response_answers.response_id')
+            ->join('respondents', 'respondents.id = responses.respondent_id')
+            ->join('instrument_items', 'instrument_items.id = response_answers.instrument_item_id')
+            ->join('instrument_aspects', 'instrument_aspects.id = instrument_items.aspect_id', 'left')
+            ->where('responses.instrument_link_id', $instrumentLinkId)
+            ->where('instrument_items.tipe_butir !=', 'skala')
+            ->where('response_answers.jawaban_teks !=', '')
+            ->orderBy('instrument_items.urutan', 'ASC')
+            ->orderBy('instrument_items.nomor', 'ASC')
+            ->orderBy('responses.id', 'ASC')
             ->findAll();
     }
 }

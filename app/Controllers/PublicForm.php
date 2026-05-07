@@ -339,7 +339,61 @@ class PublicForm extends BaseController
         }
 
         $db = db_connect();
-        $db->transStart();
+        $db->transBegin();
+
+        $lockedLink = $this->lockLinkForSubmit($db, (int) $link['id']);
+
+        if (!$lockedLink) {
+            $db->transRollback();
+
+            return view('public/thanks', [
+                'title'   => 'Link Tidak Ditemukan',
+                'message' => 'Link pengisian tidak ditemukan atau sudah tidak tersedia.',
+            ]);
+        }
+
+        $linkErrorView = $this->linkAvailabilityErrorView($lockedLink);
+
+        if ($linkErrorView !== null) {
+            $db->transRollback();
+
+            return $linkErrorView;
+        }
+
+        if (!empty($lockedLink['maksimal_respon'])) {
+            $totalResponse = $this->responseModel->countByLink((int) $link['id']);
+
+            if ($totalResponse >= (int) $lockedLink['maksimal_respon']) {
+                $db->transRollback();
+
+                return view('public/thanks', [
+                    'title'   => 'Kuota Pengisian Penuh',
+                    'message' => 'Jumlah maksimal respon untuk link ini sudah terpenuhi. Pengisian tidak dapat dilanjutkan.',
+                ]);
+            }
+        }
+
+        if ($email !== '' && $this->respondentModel->hasSubmittedByEmail((int) $link['id'], $email)) {
+            $db->transRollback();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Email ini sudah pernah digunakan untuk mengisi link ini.');
+        }
+
+        if (
+            in_array($link['mode'], ['respon_mahasiswa', 'tes_kinerja'], true)
+            && $nim !== ''
+            && $this->respondentModel->hasSubmittedByNim((int) $link['id'], $nim)
+        ) {
+            $db->transRollback();
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'NIM/Nomor identitas ini sudah pernah digunakan untuk mengisi link ini.');
+        }
 
         $now = date('Y-m-d H:i:s');
 
@@ -401,14 +455,16 @@ class PublicForm extends BaseController
             ]);
         }
 
-        $db->transComplete();
-
         if ($db->transStatus() === false) {
+            $db->transRollback();
+
             return redirect()
                 ->back()
                 ->withInput()
                 ->with('error', 'Data gagal disimpan. Silakan coba lagi.');
         }
+
+        $db->transCommit();
 
         $message = $link['mode'] === 'validasi_produk'
             ? 'Hasil validasi produk berhasil dikirim. Terima kasih atas penilaian dan masukan Bapak/Ibu Validator.'
@@ -473,6 +529,42 @@ class PublicForm extends BaseController
         ];
     }
 
+    private function lockLinkForSubmit($db, int $linkId): ?array
+    {
+        return $db->query(
+            'SELECT id, status, tanggal_mulai, tanggal_selesai, maksimal_respon FROM instrument_links WHERE id = ? FOR UPDATE',
+            [$linkId]
+        )->getRowArray();
+    }
+
+    private function linkAvailabilityErrorView(array $link): ?string
+    {
+        if ($link['status'] !== 'Aktif') {
+            return view('public/thanks', [
+                'title'   => 'Link Tidak Aktif',
+                'message' => 'Link pengisian ini belum aktif atau sudah ditutup oleh admin.',
+            ]);
+        }
+
+        $today = date('Y-m-d');
+
+        if (!empty($link['tanggal_mulai']) && $today < $link['tanggal_mulai']) {
+            return view('public/thanks', [
+                'title'   => 'Link Belum Dibuka',
+                'message' => 'Link pengisian ini baru dapat digunakan mulai tanggal ' . date('d-m-Y', strtotime($link['tanggal_mulai'])) . '.',
+            ]);
+        }
+
+        if (!empty($link['tanggal_selesai']) && $today > $link['tanggal_selesai']) {
+            return view('public/thanks', [
+                'title'   => 'Link Sudah Ditutup',
+                'message' => 'Masa pengisian link ini sudah berakhir pada tanggal ' . date('d-m-Y', strtotime($link['tanggal_selesai'])) . '.',
+            ]);
+        }
+
+        return null;
+    }
+
     private function getValidatedLink(string $token): array
     {
         $link = $this->linkModel->findByToken($token);
@@ -486,32 +578,11 @@ class PublicForm extends BaseController
             ];
         }
 
-        if ($link['status'] !== 'Aktif') {
-            return [
-                'error_view' => view('public/thanks', [
-                    'title'   => 'Link Tidak Aktif',
-                    'message' => 'Link pengisian ini belum aktif atau sudah ditutup oleh admin.',
-                ]),
-            ];
-        }
+        $errorView = $this->linkAvailabilityErrorView($link);
 
-        $today = date('Y-m-d');
-
-        if (!empty($link['tanggal_mulai']) && $today < $link['tanggal_mulai']) {
+        if ($errorView !== null) {
             return [
-                'error_view' => view('public/thanks', [
-                    'title'   => 'Link Belum Dibuka',
-                    'message' => 'Link pengisian ini baru dapat digunakan mulai tanggal ' . date('d-m-Y', strtotime($link['tanggal_mulai'])) . '.',
-                ]),
-            ];
-        }
-
-        if (!empty($link['tanggal_selesai']) && $today > $link['tanggal_selesai']) {
-            return [
-                'error_view' => view('public/thanks', [
-                    'title'   => 'Link Sudah Ditutup',
-                    'message' => 'Masa pengisian link ini sudah berakhir pada tanggal ' . date('d-m-Y', strtotime($link['tanggal_selesai'])) . '.',
-                ]),
+                'error_view' => $errorView,
             ];
         }
 

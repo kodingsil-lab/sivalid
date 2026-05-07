@@ -2,7 +2,18 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Laporan Respon Mahasiswa</h1>
+<?php
+$reportTitle = $title ?? 'Laporan Respon Mahasiswa';
+$respondentSectionTitle = $respondentSectionTitle ?? 'Identitas Responden';
+$scoreSectionTitle = $scoreSectionTitle ?? 'Rekap Skor Butir Skala';
+$textSectionTitle = $textSectionTitle ?? 'Jawaban Teks dan Catatan';
+$commentsSectionTitle = $commentsSectionTitle ?? 'Komentar Responden';
+$itemColumnLabel = $itemColumnLabel ?? 'Pernyataan';
+$respondentColumnLabel = $respondentColumnLabel ?? 'Responden';
+$generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
+?>
+
+<h1 class="page-title"><?= esc($reportTitle) ?></h1>
 
 <div class="card">
     <h3>Identitas Instrumen</h3>
@@ -47,10 +58,10 @@
 </div>
 
 <div class="card">
-    <h3>Identitas Responden</h3>
+    <h3><?= esc($respondentSectionTitle) ?></h3>
 
     <?php if (empty($responses)): ?>
-        <div class="empty-state">Belum ada responden.</div>
+        <div class="empty-state">Belum ada data pengisi.</div>
     <?php else: ?>
         <table>
             <thead>
@@ -58,7 +69,7 @@
                     <th>No</th>
                     <th>Nama</th>
                     <th>Email</th>
-                    <th>Komentar Umum</th>
+                    <th><?= esc($generalCommentColumnLabel) ?></th>
                     <th>Waktu Submit</th>
                 </tr>
             </thead>
@@ -78,17 +89,17 @@
 </div>
 
 <div class="card">
-    <h3>Rekap Per Butir</h3>
+    <h3><?= esc($scoreSectionTitle) ?></h3>
 
     <?php if (empty($items)): ?>
-        <div class="empty-state">Belum ada rekap butir.</div>
+        <div class="empty-state">Belum ada rekap skor butir skala.</div>
     <?php else: ?>
         <table>
             <thead>
                 <tr>
                     <th>No Butir</th>
                     <th>Aspek</th>
-                    <th>Pernyataan</th>
+                    <th><?= esc($itemColumnLabel) ?></th>
                     <th>Jumlah Jawaban</th>
                     <th>Total Skor</th>
                     <th>Rata-Rata</th>
@@ -101,7 +112,7 @@
                         <td><?= esc($item['nama_aspek']) ?></td>
                         <td><?= nl2br(esc($item['pernyataan'])) ?></td>
                         <td><?= esc($item['jumlah_jawaban']) ?></td>
-                        <td><?= esc($item['total_skor']) ?></td>
+                        <td><?= esc($item['total_skor'] ?? 0) ?></td>
                         <td><?= number_format((float) $item['rata_rata'], 2) ?></td>
                     </tr>
                 <?php endforeach; ?>
@@ -111,7 +122,43 @@
 </div>
 
 <div class="card">
-    <h3>Komentar Responden</h3>
+    <h3><?= esc($textSectionTitle) ?></h3>
+
+    <?php if (empty($textAnswers)): ?>
+        <div class="empty-state">Tidak ada jawaban teks dari butir non-skala.</div>
+    <?php else: ?>
+        <table>
+            <thead>
+                <tr>
+                    <th>No Butir</th>
+                    <th>Aspek</th>
+                    <th><?= esc($itemColumnLabel) ?></th>
+                    <th>Tipe Butir</th>
+                    <th><?= esc($respondentColumnLabel) ?></th>
+                    <th>Jawaban Teks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($textAnswers as $answer): ?>
+                    <tr>
+                        <td><?= esc($answer['nomor']) ?></td>
+                        <td><?= esc($answer['nama_aspek'] ?: '-') ?></td>
+                        <td><?= nl2br(esc($answer['pernyataan'])) ?></td>
+                        <td><span class="badge"><?= esc($answer['tipe_butir']) ?></span></td>
+                        <td>
+                            <?= esc($answer['nama']) ?><br>
+                            <small><?= esc($answer['jenis_responden']) ?></small>
+                        </td>
+                        <td><?= nl2br(esc($answer['jawaban_teks'])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
+</div>
+
+<div class="card">
+    <h3><?= esc($commentsSectionTitle) ?></h3>
 
     <?php if (empty($comments)): ?>
         <div class="empty-state">Tidak ada komentar per butir.</div>
@@ -121,7 +168,7 @@
                 <tr>
                     <th>No Butir</th>
                     <th>Butir</th>
-                    <th>Responden</th>
+                    <th><?= esc($respondentColumnLabel) ?></th>
                     <th>Komentar</th>
                 </tr>
             </thead>

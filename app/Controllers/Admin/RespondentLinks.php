@@ -283,7 +283,7 @@ class RespondentLinks extends BaseController
     private function generateUniqueToken(): string
     {
         do {
-            $token = bin2hex(random_bytes(8));
+            $token = bin2hex(random_bytes(16));
             $exists = $this->linkModel->where('token', $token)->first();
         } while ($exists);
 

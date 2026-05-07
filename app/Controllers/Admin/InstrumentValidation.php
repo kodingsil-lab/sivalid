@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\CategorySettingService;
 use App\Libraries\WorkflowStatusService;
 use App\Models\AnalysisAspectModel;
 use App\Models\AnalysisItemModel;
@@ -25,6 +26,7 @@ class InstrumentValidation extends BaseController
     protected AnalysisAspectModel $analysisAspectModel;
     protected AnalysisItemModel $analysisItemModel;
     protected WorkflowStatusService $workflowStatusService;
+    protected CategorySettingService $categorySettingService;
 
     public function __construct()
     {
@@ -37,6 +39,7 @@ class InstrumentValidation extends BaseController
         $this->analysisAspectModel = new AnalysisAspectModel();
         $this->analysisItemModel   = new AnalysisItemModel();
         $this->workflowStatusService = new WorkflowStatusService();
+        $this->categorySettingService = new CategorySettingService();
     }
 
     public function index()
@@ -451,19 +454,12 @@ class InstrumentValidation extends BaseController
 
     private function kategoriValidasiInstrumen(float $persentase): string
     {
-        if ($persentase >= 85) {
-            return 'Layak digunakan tanpa revisi';
-        }
-
-        if ($persentase >= 70) {
-            return 'Layak digunakan dengan revisi kecil';
-        }
-
-        if ($persentase >= 55) {
-            return 'Perlu revisi besar sebelum digunakan';
-        }
-
-        return 'Tidak layak digunakan';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Layak digunakan tanpa revisi',
+            'layak'  => 'Layak digunakan dengan revisi kecil',
+            'kurang' => 'Perlu revisi besar sebelum digunakan',
+            'tidak'  => 'Tidak layak digunakan',
+        ]);
     }
 
     private function kategoriButir(float $rataRata, int $skalaMax = 4): string
@@ -474,19 +470,12 @@ class InstrumentValidation extends BaseController
 
         $persentase = ($rataRata / $skalaMax) * 100;
 
-        if ($persentase >= 85) {
-            return 'Sangat Relevan';
-        }
-
-        if ($persentase >= 70) {
-            return 'Cukup Relevan';
-        }
-
-        if ($persentase >= 55) {
-            return 'Kurang Relevan';
-        }
-
-        return 'Tidak Relevan';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Sangat Relevan',
+            'layak'  => 'Cukup Relevan',
+            'kurang' => 'Kurang Relevan',
+            'tidak'  => 'Tidak Relevan',
+        ]);
     }
 
     private function rekomendasiButir(float $rataRata, int $skalaMax = 4): string
@@ -497,18 +486,11 @@ class InstrumentValidation extends BaseController
 
         $persentase = ($rataRata / $skalaMax) * 100;
 
-        if ($persentase >= 85) {
-            return 'Dipertahankan';
-        }
-
-        if ($persentase >= 70) {
-            return 'Revisi kecil';
-        }
-
-        if ($persentase >= 55) {
-            return 'Revisi besar';
-        }
-
-        return 'Ganti atau hapus';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Dipertahankan',
+            'layak'  => 'Revisi kecil',
+            'kurang' => 'Revisi besar',
+            'tidak'  => 'Ganti atau hapus',
+        ]);
     }
 }

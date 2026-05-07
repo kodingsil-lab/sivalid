@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\CategorySettingService;
 use App\Libraries\WorkflowStatusService;
 use App\Models\AnalysisAspectModel;
 use App\Models\AnalysisItemModel;
@@ -30,6 +31,7 @@ class ProductValidation extends BaseController
     protected AnalysisAspectModel $analysisAspectModel;
     protected AnalysisItemModel $analysisItemModel;
     protected WorkflowStatusService $workflowStatusService;
+    protected CategorySettingService $categorySettingService;
 
     public function __construct()
     {
@@ -45,6 +47,7 @@ class ProductValidation extends BaseController
         $this->analysisAspectModel    = new AnalysisAspectModel();
         $this->analysisItemModel      = new AnalysisItemModel();
         $this->workflowStatusService  = new WorkflowStatusService();
+        $this->categorySettingService = new CategorySettingService();
     }
 
     public function index()
@@ -575,7 +578,7 @@ class ProductValidation extends BaseController
     private function generateUniqueToken(): string
     {
         do {
-            $token = bin2hex(random_bytes(8));
+            $token = bin2hex(random_bytes(16));
             $exists = $this->linkModel->where('token', $token)->first();
         } while ($exists);
 
@@ -618,19 +621,12 @@ class ProductValidation extends BaseController
 
     private function kategoriValidasiProduk(float $persentase): string
     {
-        if ($persentase >= 85) {
-            return 'Sangat Layak';
-        }
-
-        if ($persentase >= 70) {
-            return 'Layak';
-        }
-
-        if ($persentase >= 55) {
-            return 'Kurang Layak';
-        }
-
-        return 'Tidak Layak';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Sangat Layak',
+            'layak'  => 'Layak',
+            'kurang' => 'Kurang Layak',
+            'tidak'  => 'Tidak Layak',
+        ]);
     }
 
     private function kategoriButirProduk(float $rataRata, int $skalaMax = 4): string
@@ -641,19 +637,12 @@ class ProductValidation extends BaseController
 
         $persentase = ($rataRata / $skalaMax) * 100;
 
-        if ($persentase >= 85) {
-            return 'Sangat Sesuai';
-        }
-
-        if ($persentase >= 70) {
-            return 'Sesuai';
-        }
-
-        if ($persentase >= 55) {
-            return 'Kurang Sesuai';
-        }
-
-        return 'Tidak Sesuai';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Sangat Sesuai',
+            'layak'  => 'Sesuai',
+            'kurang' => 'Kurang Sesuai',
+            'tidak'  => 'Tidak Sesuai',
+        ]);
     }
 
     private function rekomendasiButirProduk(float $rataRata, int $skalaMax = 4): string
@@ -664,19 +653,12 @@ class ProductValidation extends BaseController
 
         $persentase = ($rataRata / $skalaMax) * 100;
 
-        if ($persentase >= 85) {
-            return 'Dipertahankan';
-        }
-
-        if ($persentase >= 70) {
-            return 'Revisi kecil';
-        }
-
-        if ($persentase >= 55) {
-            return 'Revisi besar';
-        }
-
-        return 'Ganti atau hapus';
+        return $this->categorySettingService->classify($persentase, [
+            'sangat' => 'Dipertahankan',
+            'layak'  => 'Revisi kecil',
+            'kurang' => 'Revisi besar',
+            'tidak'  => 'Ganti atau hapus',
+        ]);
     }
 
 }
