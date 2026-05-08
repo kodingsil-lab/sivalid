@@ -2,7 +2,23 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Hasil Analisis Validasi Produk</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Hasil Analisis Validasi Produk</h2>
+            <div class="text-muted mt-1">
+                <?= esc($link['product_kode'] ?? '-') ?> - <?= esc($link['nama_produk'] ?? '-') ?>
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id']) ?>" class="btn btn-primary">
+                Buka Laporan
+            </a>
+            <a href="<?= base_url('admin/products/' . $analysis['product_id']) ?>" class="btn btn-light">Detail Produk</a>
+            <a href="<?= base_url('admin/validasi-produk') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -13,7 +29,7 @@
 <div class="card">
     <h3><?= esc($link['nama_produk'] ?? '-') ?></h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 240px;">Kode Produk</th>
             <td><?= esc($link['product_kode'] ?? '-') ?></td>
@@ -24,7 +40,7 @@
         </tr>
         <tr>
             <th>Status Produk</th>
-            <td><span class="badge"><?= esc($link['product_status'] ?? '-') ?></span></td>
+            <td><span class="<?= esc(status_badge_class($link['product_status'] ?? '')) ?>"><?= esc($link['product_status'] ?? '-') ?></span></td>
         </tr>
         <tr>
             <th>Instrumen Penilaian</th>
@@ -96,7 +112,8 @@
     <?php if (empty($responses)): ?>
         <div class="empty-state">Belum ada data validator produk.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -124,6 +141,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -133,7 +151,8 @@
     <?php if (empty($aspectAnalysis)): ?>
         <div class="empty-state">Analisis per aspek belum tersedia.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -159,6 +178,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -168,7 +188,8 @@
     <?php if (empty($itemAnalysis)): ?>
         <div class="empty-state">Analisis per butir belum tersedia.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -194,6 +215,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -203,7 +225,8 @@
     <?php if (empty($comments)): ?>
         <div class="empty-state">Belum ada komentar per butir.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -223,6 +246,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -242,11 +266,5 @@
         <strong>"<?= esc($analysis['kategori']) ?>"</strong>.
     </p>
 </div>
-
-<a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id']) ?>" class="btn btn-primary">
-    Buka Laporan
-</a>
-<a href="<?= base_url('admin/validasi-produk') ?>" class="btn btn-light">Kembali</a>
-<a href="<?= base_url('admin/products/' . $analysis['product_id']) ?>" class="btn btn-primary">Detail Produk</a>
 
 <?= $this->endSection() ?>

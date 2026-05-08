@@ -13,12 +13,24 @@ $respondentColumnLabel = $respondentColumnLabel ?? 'Responden';
 $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
 ?>
 
-<h1 class="page-title"><?= esc($reportTitle) ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($reportTitle) ?></h2>
+            <div class="text-muted mt-1">
+                <?= esc($link['kode']) ?> - <?= esc($link['judul']) ?>
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <div class="card">
     <h3>Identitas Instrumen</h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 240px;">Judul Link</th>
             <td><?= esc($link['judul_link']) ?></td>
@@ -37,7 +49,7 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
 <div class="card">
     <h3>Ringkasan Respon</h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 240px;">Jumlah Responden</th>
             <td><?= esc($summary['jumlah_responden']) ?></td>
@@ -63,7 +75,8 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
     <?php if (empty($responses)): ?>
         <div class="empty-state">Belum ada data pengisi.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th>No</th>
@@ -94,7 +107,8 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
     <?php if (empty($items)): ?>
         <div class="empty-state">Belum ada rekap skor butir skala.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th>No Butir</th>
@@ -118,6 +132,7 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -127,7 +142,8 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
     <?php if (empty($textAnswers)): ?>
         <div class="empty-state">Tidak ada jawaban teks dari butir non-skala.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th>No Butir</th>
@@ -154,6 +170,7 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -163,7 +180,8 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
     <?php if (empty($comments)): ?>
         <div class="empty-state">Tidak ada komentar per butir.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th>No Butir</th>
@@ -183,9 +201,8 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
-
-<a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

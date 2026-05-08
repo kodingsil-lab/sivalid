@@ -30,7 +30,7 @@
 <div class="card">
     <h3>Informasi Butir</h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 220px;">Instrumen</th>
             <td>
@@ -52,7 +52,7 @@
         </tr>
         <tr>
             <th>Status Butir</th>
-            <td><span class="badge"><?= esc($item['status']) ?></span></td>
+            <td><span class="<?= esc(status_badge_class($item['status'] ?? '')) ?>"><?= esc($item['status']) ?></span></td>
         </tr>
 
         <?php if (!empty($analysisItem)): ?>
@@ -80,7 +80,8 @@
             Belum ada komentar validator untuk butir ini.
         </div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -103,6 +104,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -179,7 +181,8 @@
             Belum ada riwayat revisi sebelumnya untuk butir ini.
         </div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -201,6 +204,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 

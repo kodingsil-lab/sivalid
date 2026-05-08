@@ -119,11 +119,8 @@
                 </div>
             </div>
 
-            <div class="mt-1">
-                <button type="submit" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                    Simpan Profil
-                </button>
+            <div class="mt-3 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Simpan Profil</button>
             </div>
         </form>
     </div>
@@ -151,7 +148,7 @@
             <?= csrf_field() ?>
 
             <div class="table-responsive mb-3">
-                <table class="table table-bordered table-vcenter">
+                <table class="table table-bordered table-vcenter table-sm">
                     <thead class="table-light">
                         <tr>
                             <th style="width:40%">Kategori</th>
@@ -236,11 +233,8 @@
                 </table>
             </div>
 
-            <div>
-                <button type="submit" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                    Simpan Kategori
-                </button>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">Simpan Kategori</button>
             </div>
         </form>
     </div>

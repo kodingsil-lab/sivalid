@@ -83,22 +83,9 @@
                             <td class="text-muted col-target"><?= esc((string) (!empty($instrument['sasaran']) ? $instrument['sasaran'] : '-')) ?></td>
                             <td class="text-muted col-scale"><?= esc((string) ($instrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
                             <td class="col-status">
-                                <?php
-                                $status = (string) ($instrument['status'] ?? '');
-                                $statusClass = 'badge';
+                                <?php $status = (string) ($instrument['status'] ?? ''); ?>
 
-                                if ($status === 'Valid') {
-                                    $statusClass .= ' badge-valid';
-                                } elseif (in_array($status, ['Perlu Revisi', 'Dalam Validasi Instrumen'], true)) {
-                                    $statusClass .= ' badge-warning';
-                                } elseif (in_array($status, ['Ditutup', 'Tidak Aktif'], true)) {
-                                    $statusClass .= ' badge-danger';
-                                } else {
-                                    $statusClass .= ' badge-status-draft';
-                                }
-                                ?>
-
-                                <span class="<?= esc($statusClass) ?>">
+                                <span class="<?= esc(status_badge_class($status)) ?>">
                                     <?= esc($status !== '' ? $status : '-') ?>
                                 </span>
                             </td>

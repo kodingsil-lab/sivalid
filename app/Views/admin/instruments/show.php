@@ -6,25 +6,21 @@
 $currentInstrument = isset($instrument) && is_array($instrument) ? $instrument : [];
 $instrumentId = (int) ($currentInstrument['id'] ?? 0);
 $status = (string) ($currentInstrument['status'] ?? '');
-$statusClass = 'badge badge-status-draft';
-
-if ($status === 'Valid') {
-    $statusClass = 'badge badge-status-success';
-} elseif (in_array($status, ['Perlu Revisi', 'Dalam Validasi Instrumen'], true)) {
-    $statusClass = 'badge badge-status-warning';
-} elseif (in_array($status, ['Ditutup', 'Tidak Aktif'], true)) {
-    $statusClass = 'badge badge-status-danger';
-}
+$statusClass = status_badge_class($status);
 ?>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-    <div>
-        <h1 class="page-title mb-1">Detail Instrumen</h1>
-        <div class="text-muted">Informasi lengkap instrumen untuk proses validasi penelitian.</div>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Detail Instrumen</h2>
+            <div class="text-muted mt-1">Informasi lengkap instrumen untuk proses validasi penelitian.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <span class="<?= esc($statusClass) ?>">
+                <?= esc($status !== '' ? $status : '-') ?>
+            </span>
+        </div>
     </div>
-    <span class="<?= esc($statusClass) ?>">
-        <?= esc($status !== '' ? $status : '-') ?>
-    </span>
 </div>
 
 <div class="card mb-3">
@@ -32,7 +28,7 @@ if ($status === 'Valid') {
         <h3 class="card-title mb-3">Identitas Instrumen</h3>
 
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-sm">
                 <tbody>
                     <tr>
                         <th style="width: 240px;">Kode Instrumen</th>
@@ -59,7 +55,7 @@ if ($status === 'Valid') {
                         </td>
                     </tr>
                 </tbody>
-                                <?= esc((string) ($currentInstrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($currentInstrument['skala_max'] ?? '-')) ?>
+            </table>
         </div>
     </div>
 </div>
@@ -69,7 +65,7 @@ if ($status === 'Valid') {
         <h3 class="card-title mb-3">Pengantar, Petunjuk, dan Skala</h3>
 
         <div class="table-responsive mb-3">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-sm">
                 <tbody>
                     <tr>
                         <th style="width: 240px;">Skala Penilaian</th>

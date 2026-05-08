@@ -2,14 +2,20 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Instrumen Valid</h1>
-
-<div class="card">
-    <h3>Daftar Instrumen yang Sudah Valid</h3>
-    <p>
-        Instrumen pada halaman ini sudah melewati proses validasi instrumen dan dapat digunakan
-        untuk validasi produk atau pengisian responden.
-    </p>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Instrumen Valid</h2>
+            <div class="text-muted mt-1">
+                Instrumen yang sudah melewati proses validasi dan siap digunakan untuk validasi produk atau pengisian responden.
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/products') ?>" class="btn btn-light">
+                Data Produk
+            </a>
+        </div>
+    </div>
 </div>
 
 <?php if (empty($instruments)): ?>
@@ -18,7 +24,7 @@
     </div>
 <?php else: ?>
     <div class="table-responsive">
-    <table class="table table-vcenter table-hover">
+    <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -41,7 +47,7 @@
                     <td><?= esc($instrument['sasaran'] ?: '-') ?></td>
                     <td><?= esc($instrument['skala_min']) ?> - <?= esc($instrument['skala_max']) ?></td>
                     <td>
-                        <span class="badge"><?= esc($instrument['status']) ?></span>
+                        <span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc($instrument['status']) ?></span>
                     </td>
                     <td class="table-actions-cell">
                         <div class="table-actions">

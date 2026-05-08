@@ -75,7 +75,7 @@ $modeBadgeClass = static function (?string $mode): string {
     }
     ?>
 
-    <form action="<?= base_url('admin/submissions') ?>" method="get">
+    <form action="<?= base_url('admin/submissions') ?>" method="get" class="filter-form">
         <div class="form-grid">
             <div class="form-row">
                 <label class="form-label" for="mode">Mode</label>
@@ -181,7 +181,7 @@ $modeBadgeClass = static function (?string $mode): string {
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
@@ -225,7 +225,7 @@ $modeBadgeClass = static function (?string $mode): string {
                             <td class="text-muted"><?= esc((string) (!empty($response['submitted_at']) ? $response['submitted_at'] : '-')) ?></td>
                             <td class="table-actions-cell">
                                 <div class="table-actions">
-                                    <a href="<?= base_url('admin/submissions/' . $response['id']) ?>" class="btn btn-sm btn-primary">
+                                    <a href="<?= base_url('admin/submissions/' . $response['id']) ?>" class="btn btn-sm btn-light">
                                         Detail
                                     </a>
 

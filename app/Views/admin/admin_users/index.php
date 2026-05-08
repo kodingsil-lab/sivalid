@@ -6,6 +6,10 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Manajemen User Admin</h2>
+            <div class="text-muted mt-1">Kelola akun admin yang dapat mengakses panel SIVALID.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/admin-users/new') ?>" class="btn btn-primary btn-sm">+ Tambah User</a>
         </div>
     </div>
 </div>
@@ -25,14 +29,13 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title">Daftar User Admin</h3>
-        <a href="<?= base_url('admin/admin-users/new') ?>" class="btn btn-primary btn-sm">+ Tambah User</a>
     </div>
     <div class="card-body p-0">
     <?php if (empty($users)): ?>
         <div class="empty-state">Belum ada user admin.</div>
     <?php else: ?>
         <div class="table-responsive">
-        <table class="table table-vcenter table-hover">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th>#</th>
@@ -52,7 +55,7 @@
                         <td><?= esc($user['email']) ?></td>
                         <td><?= esc($user['role']) ?></td>
                         <td>
-                            <span class="badge badge-<?= $user['status'] === 'aktif' ? 'success' : 'danger' ?>">
+                            <span class="<?= esc(status_badge_class($user['status'] ?? '')) ?>">
                                 <?= esc($user['status']) ?>
                             </span>
                         </td>

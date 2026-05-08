@@ -31,29 +31,14 @@ $modeBadgeClass = static function (?string $mode): string {
     return 'badge-status-draft';
 };
 
-$kategoriBadgeClass = static function (?string $kategori): string {
-    $value = strtolower(trim((string) $kategori));
-
-    if ($value === 'sangat valid' || $value === 'valid') {
-        return 'badge-status-success';
-    }
-
-    if ($value === 'cukup valid') {
-        return 'badge-status-warning';
-    }
-
-    if ($value === 'kurang valid' || $value === 'tidak valid') {
-        return 'badge-status-danger';
-    }
-
-    return 'badge-status-draft';
-};
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h1 class="page-title mb-1">Dashboard SIVALID</h1>
-        <div class="text-muted">Ringkasan validasi instrumen penelitian.</div>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Dashboard SIVALID</h2>
+            <div class="text-muted mt-1">Ringkasan validasi instrumen penelitian.</div>
+        </div>
     </div>
 </div>
 
@@ -151,7 +136,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
             <div class="empty-state">Belum ada respon masuk.</div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-vcenter">
+                <table class="table table-vcenter table-hover table-sm">
                     <thead>
                         <tr>
                             <th style="width: 70px;">No</th>
@@ -186,7 +171,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
             <div class="empty-state">Belum ada respon terbaru.</div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-vcenter">
+                <table class="table table-vcenter table-hover table-sm">
                     <thead>
                         <tr>
                             <th style="width: 70px;">No</th>
@@ -233,7 +218,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
             <div class="empty-state">Belum ada laporan analisis.</div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-vcenter">
+                <table class="table table-vcenter table-hover table-sm">
                     <thead>
                         <tr>
                             <th style="width: 70px;">No</th>
@@ -264,7 +249,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
                                     <span class="fw-semibold"><?= (float) ($analysis['persentase'] ?? 0) ?>%</span>
                                 </td>
                                 <td>
-                                    <span class="badge <?= esc($kategoriBadgeClass($analysis['kategori'] ?? '')) ?>">
+                                    <span class="<?= esc(status_badge_class($analysis['kategori'] ?? '')) ?>">
                                         <?= esc((string) ($analysis['kategori'] ?? '-')) ?>
                                     </span>
                                 </td>

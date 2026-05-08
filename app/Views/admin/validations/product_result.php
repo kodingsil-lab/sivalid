@@ -6,6 +6,16 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title"><?= esc($title ?? 'Analisis Validasi Produk') ?></h2>
+            <div class="text-muted mt-1">Proses analisis validasi produk berdasarkan link yang sudah memiliki respon validator.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/validasi-produk/new') ?>" class="btn btn-primary">
+                + Buat Link Validasi Produk
+            </a>
+
+            <a href="<?= base_url('admin/products') ?>" class="btn btn-light">
+                Data Produk
+            </a>
         </div>
     </div>
 </div>
@@ -21,16 +31,6 @@
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
-
-<div class="toolbar">
-    <a href="<?= base_url('admin/validasi-produk/new') ?>" class="btn btn-primary">
-        + Buat Link Validasi Produk
-    </a>
-
-    <a href="<?= base_url('admin/products') ?>" class="btn btn-light">
-        Data Produk
-    </a>
-</div>
 
 <div class="card mb-3">
     <div class="card-header">
@@ -49,7 +49,7 @@
     <div class="card">
         <div class="card-body p-0">
         <div class="table-responsive">
-        <table class="table table-vcenter">
+        <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -96,7 +96,7 @@
                             <strong><?= esc($link['analysis']['persentase']) ?>%</strong><br>
                             <?= esc($link['analysis']['kategori']) ?>
                         <?php else: ?>
-                            <span class="badge badge-status-draft">Belum dianalisis</span>
+                            <span class="<?= esc(status_badge_class('Belum dianalisis')) ?>">Belum dianalisis</span>
                         <?php endif; ?>
                     </td>
                     <td class="table-actions-cell">

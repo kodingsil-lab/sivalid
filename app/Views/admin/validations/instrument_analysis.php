@@ -2,7 +2,22 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Hasil Analisis Validasi Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Hasil Analisis Validasi Instrumen</h2>
+            <div class="text-muted mt-1">
+                <?= esc($link['kode']) ?> - <?= esc($link['judul']) ?>
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id']) ?>" class="btn btn-primary">
+                Buka Laporan
+            </a>
+            <a href="<?= base_url('admin/validasi-instrumen') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -13,7 +28,7 @@
 <div class="card">
     <h3><?= esc($link['judul']) ?></h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 240px;">Kode Instrumen</th>
             <td><?= esc($link['kode']) ?></td>
@@ -81,7 +96,8 @@
     <?php if (empty($responses)): ?>
         <div class="empty-state">Belum ada data validator.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -107,6 +123,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -116,7 +133,8 @@
     <?php if (empty($aspectAnalysis)): ?>
         <div class="empty-state">Analisis per aspek belum tersedia.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -142,6 +160,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -152,7 +171,7 @@
         <div class="empty-state">Analisis per butir belum tersedia.</div>
     <?php else: ?>
         <div class="table-responsive">
-        <table>
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -187,7 +206,7 @@
                                         Revisi
                                     </a>
                                 <?php else: ?>
-                                    <span class="badge">Tetap</span>
+                                    <span class="<?= esc(status_badge_class('Tetap')) ?>">Tetap</span>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -205,7 +224,8 @@
     <?php if (empty($comments)): ?>
         <div class="empty-state">Belum ada komentar per butir.</div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -225,6 +245,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -270,10 +291,5 @@
         </form>
     <?php endif; ?>
 </div>
-
-<a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id']) ?>" class="btn btn-primary">
-    Buka Laporan
-</a>
-<a href="<?= base_url('admin/validasi-instrumen') ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

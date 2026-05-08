@@ -31,14 +31,18 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
 }));
 ?>
 
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-    <div>
-        <h1 class="page-title mb-1">Detail Hasil Pengisian</h1>
-        <div class="text-muted">Rincian pengisian instrumen oleh responden/validator.</div>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Detail Hasil Pengisian</h2>
+            <div class="text-muted mt-1">Rincian pengisian instrumen oleh responden/validator.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <span class="<?= esc($modeBadgeClass) ?>">
+                <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
+            </span>
+        </div>
     </div>
-    <span class="<?= esc($modeBadgeClass) ?>">
-        <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
-    </span>
 </div>
 
 <div class="card mb-3">
@@ -46,7 +50,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
     <h3 class="card-title mb-3">Identitas Link</h3>
 
     <div class="table-responsive">
-        <table class="table table-vcenter">
+        <table class="table table-vcenter table-sm">
             <tbody>
                 <tr>
                     <th style="width: 240px;">Mode</th>
@@ -98,7 +102,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
     <h3 class="card-title mb-3">Identitas Responden/Validator</h3>
 
     <div class="table-responsive">
-        <table class="table table-vcenter">
+        <table class="table table-vcenter table-sm">
             <tbody>
                 <tr>
                     <th style="width: 240px;">Nama</th>
@@ -150,7 +154,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
         <div class="empty-state">Belum ada jawaban skor.</div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
@@ -185,7 +189,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
         <div class="empty-state">Belum ada jawaban teks.</div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
@@ -218,7 +222,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
         <div class="text-muted mb-3">Tidak ada komentar per butir.</div>
     <?php else: ?>
         <div class="table-responsive mb-3">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>

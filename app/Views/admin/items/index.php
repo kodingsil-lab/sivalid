@@ -6,7 +6,19 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Butir Pernyataan Instrumen</h2>
+            <div class="text-muted mt-1">Kelola butir pernyataan, tipe butir, dan status untuk instrumen terpilih.</div>
         </div>
+        <?php if (!empty($instrumentId)): ?>
+            <div class="col-auto ms-auto">
+                <a href="<?= base_url('admin/instrument-items/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
+                    + Tambah Butir
+                </a>
+
+                <a href="<?= base_url('admin/instrument-aspects?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
+                    Lihat Kisi-Kisi
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -24,7 +36,7 @@
 
 <div class="card mb-3">
     <div class="card-body">
-    <form action="<?= base_url('admin/instrument-items') ?>" method="get" class="search-form">
+    <form action="<?= base_url('admin/instrument-items') ?>" method="get" class="search-form search-form-wide">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Semua Instrumen --</option>
             <?php foreach ($instruments as $instrument): ?>
@@ -35,16 +47,6 @@
         </select>
 
         <button type="submit" class="btn btn-primary">Tampilkan</button>
-
-        <?php if (!empty($instrumentId)): ?>
-            <a href="<?= base_url('admin/instrument-items/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
-                + Tambah Butir
-            </a>
-
-            <a href="<?= base_url('admin/instrument-aspects?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
-                Lihat Kisi-Kisi
-            </a>
-        <?php endif; ?>
     </form>
     </div>
 </div>
@@ -69,7 +71,7 @@
         <div class="card-body p-0">
 
         <div class="table-responsive">
-        <table class="table table-vcenter table-hover">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>

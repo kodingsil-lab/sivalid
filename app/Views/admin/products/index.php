@@ -2,30 +2,6 @@
 
 <?= $this->section('content') ?>
 
-<?php
-$productStatusBadgeClass = static function (?string $status): string {
-    $value = strtolower(trim((string) $status));
-
-    if ($value === 'valid' || $value === 'aktif') {
-        return 'badge badge-status-success';
-    }
-
-    if ($value === 'dalam validasi produk' || $value === 'sedang divalidasi') {
-        return 'badge badge-status-process';
-    }
-
-    if ($value === 'perlu revisi') {
-        return 'badge badge-status-warning';
-    }
-
-    if ($value === 'ditutup' || $value === 'tidak aktif') {
-        return 'badge badge-status-danger';
-    }
-
-    return 'badge badge-status-draft';
-};
-?>
-
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
@@ -78,7 +54,7 @@ $productStatusBadgeClass = static function (?string $status): string {
             </div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-vcenter">
+                <table class="table table-vcenter table-hover table-sm">
                     <thead>
                         <tr>
                             <th style="width: 70px;">No</th>
@@ -100,7 +76,7 @@ $productStatusBadgeClass = static function (?string $status): string {
                                 <td><?= esc((string) ($product['jenis_produk'] ?? '-')) ?></td>
                                 <td>
                                     <?php if (!empty($product['file_produk'])): ?>
-                                        <span class="badge badge-status-success">Ada file</span>
+                                        <span class="<?= esc(status_badge_class('Ada file')) ?>">Ada file</span>
                                     <?php else: ?>
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>
@@ -115,7 +91,7 @@ $productStatusBadgeClass = static function (?string $status): string {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="<?= esc($productStatusBadgeClass($product['status'] ?? '')) ?>">
+                                    <span class="<?= esc(status_badge_class($product['status'] ?? '')) ?>">
                                         <?= esc((string) (!empty($product['status']) ? $product['status'] : '-')) ?>
                                     </span>
                                 </td>

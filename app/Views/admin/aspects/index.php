@@ -6,7 +6,23 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Kisi-Kisi Instrumen</h2>
+            <div class="text-muted mt-1">Kelola aspek, indikator, dan struktur kisi-kisi untuk instrumen terpilih.</div>
         </div>
+        <?php if (!empty($instrumentId)): ?>
+            <div class="col-auto ms-auto">
+                <a href="<?= base_url('admin/instrument-aspects/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
+                    + Tambah Aspek
+                </a>
+
+                <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
+                    + Tambah Indikator
+                </a>
+
+                <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
+                    Kelola Butir
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -24,7 +40,7 @@
 
 <div class="card mb-3">
     <div class="card-body">
-    <form action="<?= base_url('admin/instrument-aspects') ?>" method="get" class="search-form">
+    <form action="<?= base_url('admin/instrument-aspects') ?>" method="get" class="search-form search-form-wide">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Pilih Instrumen --</option>
             <?php foreach ($instruments as $instrument): ?>
@@ -35,20 +51,6 @@
         </select>
 
         <button type="submit" class="btn btn-primary">Tampilkan</button>
-
-        <?php if (!empty($instrumentId)): ?>
-            <a href="<?= base_url('admin/instrument-aspects/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
-                + Tambah Aspek
-            </a>
-
-            <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
-                + Tambah Indikator
-            </a>
-
-            <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
-                Kelola Butir
-            </a>
-        <?php endif; ?>
     </form>
     </div>
 </div>
@@ -71,7 +73,7 @@
             </div>
         <?php else: ?>
             <div class="table-responsive">
-            <table class="table table-vcenter table-hover">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">Urutan</th>
@@ -125,7 +127,7 @@
             </div>
         <?php else: ?>
             <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>

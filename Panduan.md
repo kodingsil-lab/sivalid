@@ -2548,3 +2548,38 @@ Sedang	Standarisasi sistem badge (pilih satu)	settings/index.php vs file lainnya
 Sedang	Tambah class="table table-vcenter" di tabel yang belum	respondent_links, aspects, items, indicators
 Rendah	Standarisasi page-header wrapper	Semua halaman admin
 Rendah	Tambah class="form-label" pada semua label	Semua form admin
+
+______________________
+
+Ada, kak. Menurut saya yang paling worth setelah tombol aksi:
+
+1 Samakan style tabel admin
+Sekarang beberapa halaman sudah Tabler-style, tapi sebagian masih tabel polos. Bagus kalau semua tabel admin pakai pola:
+card → table-responsive → table table-vcenter table-hover table-sm.
+
+2 Bikin kolom aksi lebih “alat kerja”
+Tombol bisa dibuat konsisten:
+
+Detail / Lihat / Buka: light
+Analisis / Proses / Pakai: primary
+Edit: warning
+Hapus: danger
+Bisa juga nanti tambah icon kecil biar lebih cepat dibaca.
+
+3Rapikan header halaman
+Banyak halaman bisa punya format seragam:
+judul besar, deskripsi kecil, tombol utama di kanan. Contoh halaman Master Instrumen sudah cukup bagus, tinggal diterapkan ke halaman lain.
+
+4 Filter/search dibuat lebih compact
+Form filter sekarang beberapa masih terasa tinggi/lebar. Bisa dibuat satu baris rapi dengan tombol kecil, lalu responsif ke bawah di layar kecil.
+
+5 Badge status diseragamkan
+Status seperti Valid, Aktif, Draft, Perlu Revisi, Ditutup, Belum dianalisis sebaiknya punya warna konsisten di semua halaman.
+
+6 Kurangi border tabel yang terlalu penuh
+Tampilan sekarang masih banyak garis kotak. Tabler biasanya lebih clean dengan garis horizontal saja, lebih ringan dilihat.
+
+7 Tambahkan spacing section yang konsisten
+Ada halaman yang card-nya rapat, ada yang longgar. Bisa dibuat jarak antar card dan judul section seragam. Kalau bisa compact saja
+
+Prioritas saya: standardisasi tabel + header halaman + badge status. Itu yang paling cepat bikin aplikasi terasa lebih rapi dan profesiona

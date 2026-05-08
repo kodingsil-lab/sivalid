@@ -6,6 +6,12 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Link Instrumen Responden</h2>
+            <div class="text-muted mt-1">Kelola link pengisian untuk mahasiswa, observasi, FGD, dan tes kinerja.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/respondent-links/new' . (!empty($mode) ? '?mode=' . $mode : '')) ?>" class="btn btn-primary">
+                + Buat Link
+            </a>
         </div>
     </div>
 </div>
@@ -35,10 +41,6 @@
         </select>
 
         <button type="submit" class="btn btn-primary">Tampilkan</button>
-
-        <a href="<?= base_url('admin/respondent-links/new' . (!empty($mode) ? '?mode=' . $mode : '')) ?>" class="btn btn-primary">
-            + Buat Link
-        </a>
     </form>
     </div>
 </div>
@@ -58,7 +60,7 @@
 <div class="card">
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-vcenter table-hover">
+    <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>

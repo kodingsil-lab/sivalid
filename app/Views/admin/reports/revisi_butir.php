@@ -2,7 +2,19 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Laporan Revisi Butir Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Laporan Revisi Butir Instrumen</h2>
+            <div class="text-muted mt-1">
+                Riwayat perubahan redaksi butir berdasarkan hasil validasi, komentar validator, atau keputusan peneliti.
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <div class="card">
     <h3>Riwayat Revisi Butir</h3>
@@ -51,7 +63,5 @@
         </tbody>
     </table>
 <?php endif; ?>
-
-<a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

@@ -6,7 +6,15 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Indikator Kisi-Kisi Instrumen</h2>
+            <div class="text-muted mt-1">Kelola indikator penilaian pada aspek instrumen terpilih.</div>
         </div>
+        <?php if (!empty($instrumentId)): ?>
+            <div class="col-auto ms-auto">
+                <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
+                    + Tambah Indikator
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -24,7 +32,7 @@
 
 <div class="card mb-3">
     <div class="card-body">
-    <form action="<?= base_url('admin/instrument-indicators') ?>" method="get" class="search-form">
+    <form action="<?= base_url('admin/instrument-indicators') ?>" method="get" class="search-form search-form-wide">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Semua Instrumen --</option>
             <?php foreach ($instruments as $instrument): ?>
@@ -35,12 +43,6 @@
         </select>
 
         <button type="submit" class="btn btn-primary">Tampilkan</button>
-
-        <?php if (!empty($instrumentId)): ?>
-            <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
-                + Tambah Indikator
-            </a>
-        <?php endif; ?>
     </form>
     </div>
 </div>
@@ -53,7 +55,7 @@
 <div class="card">
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-vcenter table-hover">
+    <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
                 <th style="width: 60px;">Urutan</th>

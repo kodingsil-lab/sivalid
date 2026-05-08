@@ -29,6 +29,7 @@
         <h3 class="card-title">Data User Admin</h3>
     </div>
     <div class="card-body">
+    <?php if ($user): ?>
         <form method="post" action="<?= base_url('admin/admin-users/' . $user['id']) ?>">
             <?= csrf_field() ?>
             <input type="hidden" name="_method" value="PUT">

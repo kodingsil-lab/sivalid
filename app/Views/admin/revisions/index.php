@@ -6,7 +6,15 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Revisi Butir Instrumen</h2>
+            <div class="text-muted mt-1">Tinjau rekomendasi revisi dan riwayat perubahan butir instrumen.</div>
         </div>
+        <?php if (!empty($instrumentId)): ?>
+            <div class="col-auto ms-auto">
+                <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
+                    Lihat Butir
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -23,7 +31,7 @@
 <?php endif; ?>
 
 <div class="card">
-    <form action="<?= base_url('admin/instrument-revisions') ?>" method="get" class="search-form">
+    <form action="<?= base_url('admin/instrument-revisions') ?>" method="get" class="search-form search-form-wide">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Semua Instrumen --</option>
             <?php foreach ($instruments as $instrument): ?>
@@ -34,12 +42,6 @@
         </select>
 
         <button type="submit" class="btn btn-primary">Tampilkan</button>
-
-        <?php if (!empty($instrumentId)): ?>
-            <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
-                Lihat Butir
-            </a>
-        <?php endif; ?>
     </form>
 </div>
 
@@ -56,7 +58,7 @@
         </div>
     <?php else: ?>
         <div class="table-responsive">
-        <table>
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -86,7 +88,7 @@
                         <td><?= esc($item['rata_rata']) ?></td>
                         <td><?= esc($item['kategori']) ?></td>
                         <td><strong><?= esc($item['rekomendasi']) ?></strong></td>
-                        <td><span class="badge"><?= esc($item['item_status']) ?></span></td>
+                        <td><span class="<?= esc(status_badge_class($item['item_status'] ?? '')) ?>"><?= esc($item['item_status']) ?></span></td>
                         <td class="table-actions-cell">
                             <div class="table-actions">
                                 <a
@@ -114,7 +116,7 @@
         </div>
     <?php else: ?>
         <div class="table-responsive">
-        <table>
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 50px;">No</th>
@@ -137,7 +139,7 @@
                         </td>
                         <td>
                             Butir <?= esc($revision['nomor']) ?><br>
-                            <span class="badge"><?= esc($revision['status']) ?></span>
+                            <span class="<?= esc(status_badge_class($revision['status'] ?? '')) ?>"><?= esc($revision['status']) ?></span>
                         </td>
                         <td><?= nl2br(esc($revision['pernyataan_lama'])) ?></td>
                         <td><?= nl2br(esc($revision['pernyataan_baru'])) ?></td>

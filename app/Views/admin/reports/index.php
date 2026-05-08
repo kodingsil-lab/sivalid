@@ -46,23 +46,6 @@ $modeBadgeClass = static function (?string $mode): string {
     return 'badge badge-status-draft';
 };
 
-$kategoriBadgeClass = static function (?string $kategori): string {
-    $value = strtolower(trim((string) $kategori));
-
-    if ($value === 'sangat valid' || $value === 'valid') {
-        return 'badge badge-status-success';
-    }
-
-    if ($value === 'cukup valid') {
-        return 'badge badge-status-warning';
-    }
-
-    if ($value === 'kurang valid' || $value === 'tidak valid') {
-        return 'badge badge-status-danger';
-    }
-
-    return 'badge badge-status-draft';
-};
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -103,7 +86,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
@@ -138,14 +121,14 @@ $kategoriBadgeClass = static function (?string $kategori): string {
                             <td><?= (int) ($analysis['jumlah_responden'] ?? 0) ?></td>
                             <td><span class="fw-semibold"><?= esc((string) ($analysis['persentase'] ?? 0)) ?>%</span></td>
                             <td>
-                                <span class="<?= esc($kategoriBadgeClass((string) ($analysis['kategori'] ?? ''))) ?>">
+                                <span class="<?= esc(status_badge_class((string) ($analysis['kategori'] ?? ''))) ?>">
                                     <?= esc((string) ($analysis['kategori'] ?? '-')) ?>
                                 </span>
                             </td>
                             <td class="table-actions-cell">
                                 <div class="table-actions">
                                     <?php if ($analysisMode === 'validasi_instrumen'): ?>
-                                        <a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id']) ?>" class="btn btn-sm btn-primary">
+                                        <a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id']) ?>" class="btn btn-sm btn-light">
                                             Buka
                                         </a>
                                         <a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id'] . '/print') ?>" target="_blank" class="btn btn-sm btn-light">
@@ -158,7 +141,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
                                             Unduh PDF
                                         </a>
                                     <?php elseif ($analysisMode === 'validasi_produk'): ?>
-                                        <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id']) ?>" class="btn btn-sm btn-primary">
+                                        <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id']) ?>" class="btn btn-sm btn-light">
                                             Buka
                                         </a>
                                         <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/print') ?>" target="_blank" class="btn btn-sm btn-light">
@@ -201,7 +184,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-vcenter">
+            <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
@@ -247,7 +230,7 @@ $kategoriBadgeClass = static function (?string $kategori): string {
                                             Laporan
                                         </a>
                                     <?php else: ?>
-                                        <span class="badge badge-status-draft">Belum tersedia</span>
+                                        <span class="<?= esc(status_badge_class('Belum tersedia')) ?>">Belum tersedia</span>
                                     <?php endif; ?>
                                 </div>
                             </td>

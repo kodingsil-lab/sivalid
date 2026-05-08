@@ -178,7 +178,7 @@ $checkedInstruments = isset($selectedInstruments) && is_array($selectedInstrumen
                 </div>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table table-vcenter">
+                    <table class="table table-vcenter table-hover table-sm">
                         <thead>
                             <tr>
                                 <th style="width: 70px;">Pilih</th>
@@ -205,7 +205,7 @@ $checkedInstruments = isset($selectedInstruments) && is_array($selectedInstrumen
                                     <td class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?></td>
                                     <td><?= esc((string) ($instrument['judul'] ?? '-')) ?></td>
                                     <td><?= esc((string) ($instrument['jenis'] ?? '-')) ?></td>
-                                    <td><span class="badge"><?= esc((string) ($instrument['status'] ?? '-')) ?></span></td>
+                                    <td><span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc((string) ($instrument['status'] ?? '-')) ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

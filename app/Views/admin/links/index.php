@@ -6,6 +6,18 @@
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title"><?= esc($title ?? 'Link Validasi Instrumen') ?></h2>
+            <div class="text-muted mt-1">Kelola link validasi dan proses analisis berdasarkan respon validator.</div>
+        </div>
+        <div class="col-auto ms-auto">
+            <?php if (service('uri')->getSegment(2) === 'validasi-produk'): ?>
+                <a href="<?= base_url('admin/validasi-produk/new') ?>" class="btn btn-primary">
+                    + Buat Link Validasi Produk
+                </a>
+            <?php else: ?>
+                <a href="<?= base_url('admin/instrument-links/new') ?>" class="btn btn-primary">
+                    + Buat Link Validasi Instrumen
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -22,18 +34,6 @@
     </div>
 <?php endif; ?>
 
-<div class="toolbar">
-    <?php if (service('uri')->getSegment(2) === 'validasi-produk'): ?>
-        <a href="<?= base_url('admin/validasi-produk/new') ?>" class="btn btn-primary">
-            + Buat Link Validasi Produk
-        </a>
-    <?php else: ?>
-        <a href="<?= base_url('admin/instrument-links/new') ?>" class="btn btn-primary">
-            + Buat Link Validasi Instrumen
-        </a>
-    <?php endif; ?>
-</div>
-
 <?php if (empty($links)): ?>
     <div class="empty-state">
         Belum ada <?= strtolower(esc($title ?? 'link validasi instrumen')) ?>.
@@ -42,7 +42,7 @@
 <div class="card">
     <div class="card-body p-0">
     <div class="table-responsive">
-    <table class="table table-vcenter table-hover">
+    <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>

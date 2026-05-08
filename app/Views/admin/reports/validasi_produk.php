@@ -2,7 +2,28 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Laporan Validasi Produk</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Laporan Validasi Produk</h2>
+            <div class="text-muted mt-1">
+                <?= esc($link['product_kode'] ?? '-') ?> - <?= esc($link['nama_produk'] ?? '-') ?>
+            </div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/print') ?>" target="_blank" class="btn btn-light">
+                Cetak HTML
+            </a>
+            <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/pdf-preview') ?>" target="_blank" class="btn btn-light">
+                Preview PDF
+            </a>
+            <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/pdf') ?>" class="btn btn-primary">
+                Unduh PDF
+            </a>
+            <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <div class="card">
     <h3>1. Identitas Produk</h3>
@@ -22,7 +43,7 @@
         </tr>
         <tr>
             <th>Status Produk</th>
-            <td><span class="badge"><?= esc($link['product_status'] ?? '-') ?></span></td>
+            <td><span class="<?= esc(status_badge_class($link['product_status'] ?? '')) ?>"><?= esc($link['product_status'] ?? '-') ?></span></td>
         </tr>
         <tr>
             <th>Deskripsi Produk</th>
@@ -231,19 +252,5 @@
         <strong>"<?= esc($analysis['kategori']) ?>"</strong>.
     </p>
 </div>
-
-<a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/print') ?>" target="_blank" class="btn btn-light">
-    Cetak HTML
-</a>
-
-<a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/pdf-preview') ?>" target="_blank" class="btn btn-light">
-    Preview PDF
-</a>
-
-<a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id'] . '/pdf') ?>" class="btn btn-primary">
-    Unduh PDF
-</a>
-
-<a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

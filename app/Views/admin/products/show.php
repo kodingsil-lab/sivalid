@@ -2,12 +2,26 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Detail Produk Penelitian</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Detail Produk Penelitian</h2>
+            <div class="text-muted mt-1"><?= esc($product['kode']) ?> - <?= esc($product['nama_produk']) ?></div>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/products') ?>" class="btn btn-light">Kembali</a>
+            <a href="<?= base_url('admin/products/' . $product['id'] . '/edit') ?>" class="btn btn-warning">Edit</a>
+            <a href="<?= base_url('admin/validasi-produk/new?product_id=' . $product['id']) ?>" class="btn btn-primary">
+                Buat Link Validasi Produk
+            </a>
+        </div>
+    </div>
+</div>
 
 <div class="card">
     <h3><?= esc($product['nama_produk']) ?></h3>
 
-    <table>
+    <table class="table table-vcenter table-sm">
         <tr>
             <th style="width: 220px;">Kode Produk</th>
             <td><?= esc($product['kode']) ?></td>
@@ -18,7 +32,7 @@
         </tr>
         <tr>
             <th>Status</th>
-            <td><span class="badge"><?= esc($product['status']) ?></span></td>
+            <td><span class="<?= esc(status_badge_class($product['status'] ?? '')) ?>"><?= esc($product['status']) ?></span></td>
         </tr>
         <tr>
             <th>Deskripsi</th>
@@ -61,7 +75,8 @@
             Produk ini belum dihubungkan dengan instrumen validasi.
         </div>
     <?php else: ?>
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -78,11 +93,12 @@
                         <td><?= esc($row['kode']) ?></td>
                         <td><?= esc($row['judul']) ?></td>
                         <td><?= esc($row['jenis']) ?></td>
-                        <td><span class="badge"><?= esc($row['status']) ?></span></td>
+                        <td><span class="<?= esc(status_badge_class($row['status'] ?? '')) ?>"><?= esc($row['status']) ?></span></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -94,11 +110,5 @@
         dapat menilai produk menggunakan instrumen yang sudah disiapkan.
     </p>
 </div>
-
-<a href="<?= base_url('admin/products') ?>" class="btn btn-light">Kembali</a>
-<a href="<?= base_url('admin/products/' . $product['id'] . '/edit') ?>" class="btn btn-warning">Edit</a>
-<a href="<?= base_url('admin/validasi-produk/new?product_id=' . $product['id']) ?>" class="btn btn-primary">
-    Buat Link Validasi Produk
-</a>
 
 <?= $this->endSection() ?>

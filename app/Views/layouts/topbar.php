@@ -1,4 +1,11 @@
-<header class="navbar navbar-expand-md navbar-light d-print-none" style="border-bottom:1px solid #e2e8f0; background:#fff;">
+<?php
+$adminName = (string) (session()->get('user_name') ?? 'Admin SIVALID');
+$adminEmail = (string) (session()->get('user_email') ?? 'Administrator');
+$nameParts = preg_split('/\s+/', trim($adminName));
+$avatarInitials = strtoupper(substr($nameParts[0] ?? 'A', 0, 1) . substr($nameParts[1] ?? 'S', 0, 1));
+?>
+
+<header class="navbar navbar-expand-md navbar-light d-print-none">
     <div class="container-xl">
 
         <!-- Judul halaman -->
@@ -8,20 +15,45 @@
             </span>
         </div>
 
-        <div class="navbar-nav flex-row ms-auto align-items-center gap-3">
+        <div class="navbar-nav flex-row ms-auto align-items-center">
 
-            <!-- Nama admin -->
-            <span class="d-none d-md-inline text-muted" style="font-size:13.5px;">
-                <?= esc(session()->get('user_name') ?? 'Admin') ?>
-            </span>
+            <div class="nav-item dropdown">
+                <a
+                    href="#"
+                    class="nav-link d-flex lh-1 text-reset p-0 topbar-user-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-label="Buka menu profil"
+                    aria-expanded="false"
+                >
+                    <span class="avatar avatar-sm topbar-avatar">
+                        <?= esc($avatarInitials) ?>
+                    </span>
+                    <div class="d-none d-xl-block ps-2 text-start">
+                        <div class="topbar-user-name"><?= esc($adminName) ?></div>
+                        <div class="topbar-user-role">Administrator</div>
+                    </div>
+                </a>
 
-            <!-- Tombol logout -->
-            <a href="<?= base_url('logout') ?>"
-               class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Yakin ingin logout?')"
-               style="font-size:13px; padding:5px 12px;">
-                Logout
-            </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow topbar-user-menu">
+                    <div class="dropdown-header">
+                        <div class="fw-semibold"><?= esc($adminName) ?></div>
+                        <div class="small text-muted"><?= esc($adminEmail) ?></div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a
+                        href="<?= base_url('logout') ?>"
+                        class="dropdown-item text-danger"
+                        onclick="return confirm('Yakin ingin logout?')"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon text-danger" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 8v-2a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-2"/>
+                            <path d="M9 12h12l-3-3"/>
+                            <path d="M18 15l3-3"/>
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </div>
 
         </div>
     </div>
