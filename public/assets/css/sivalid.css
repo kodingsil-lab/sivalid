@@ -9,9 +9,9 @@
    1. VARIABEL & BASE
    ============================================================ */
 :root {
-    --sv-blue:        #1d4ed8;
-    --sv-blue-dark:   #1e40af;
-    --sv-blue-light:  #eff6ff;
+    --sv-blue:        #206bc4;
+    --sv-blue-dark:   #1a5aa0;
+    --sv-blue-light:  #e8f0fb;
     --sv-teal:        #0d9488;
     --sv-teal-light:  #f0fdfa;
     --sv-bg:          #f8fafc;
@@ -106,18 +106,18 @@ body {
 }
 
 .navbar-vertical .nav-link:hover {
-    background: #eff6ff !important;
-    color: #1d4ed8 !important;
+    background: var(--sv-blue-light) !important;
+    color: var(--sv-blue) !important;
 }
 
 .navbar-vertical .nav-link.active {
-    background: #eff6ff !important;
-    color: #1d4ed8 !important;
+    background: var(--sv-blue-light) !important;
+    color: var(--sv-blue) !important;
     font-weight: 600;
 }
 
 .navbar-vertical .nav-link.active .nav-link-icon {
-    color: #1d4ed8 !important;
+    color: var(--sv-blue) !important;
     opacity: 1;
 }
 
@@ -133,11 +133,11 @@ body {
 }
 
 .navbar-vertical .nav-link:hover .nav-link-icon {
-    color: #1d4ed8;
+    color: var(--sv-blue);
 }
 
 .navbar-vertical .nav-link.active .nav-link-icon {
-    color: #1d4ed8 !important;
+    color: var(--sv-blue) !important;
 }
 
 /* Nav link title — pastikan tidak terpotong */
@@ -181,8 +181,8 @@ body {
 
 .navbar-vertical .nav-group-toggle:hover,
 .navbar-vertical .nav-group-details.is-active > .nav-group-toggle {
-    background: #eff6ff;
-    color: #1d4ed8;
+    background: var(--sv-blue-light);
+    color: var(--sv-blue);
 }
 
 .navbar-vertical .nav-group-chevron {
@@ -791,7 +791,7 @@ tbody tr:hover td {
 }
 
 .btn-primary:focus-visible {
-    box-shadow: 0 0 0 3px rgba(29,78,216,.30);
+    box-shadow: 0 0 0 3px rgba(32,107,196,.30);
 }
 
 .btn-warning {
@@ -958,7 +958,7 @@ select.form-control {
    ============================================================ */
 .toolbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: .6rem;
     margin-bottom: var(--sv-section-gap);
