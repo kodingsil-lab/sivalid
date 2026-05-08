@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Revisi Butir Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Revisi Butir Instrumen</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,7 +17,7 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
@@ -49,6 +55,7 @@
             Belum ada butir yang direkomendasikan untuk revisi.
         </div>
     <?php else: ?>
+        <div class="table-responsive">
         <table>
             <thead>
                 <tr>
@@ -60,7 +67,7 @@
                     <th style="width: 140px;">Kategori</th>
                     <th style="width: 140px;">Rekomendasi</th>
                     <th style="width: 120px;">Status Butir</th>
-                    <th style="width: 120px;">Aksi</th>
+                    <th class="table-actions-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,18 +87,21 @@
                         <td><?= esc($item['kategori']) ?></td>
                         <td><strong><?= esc($item['rekomendasi']) ?></strong></td>
                         <td><span class="badge"><?= esc($item['item_status']) ?></span></td>
-                        <td>
-                            <a
-                                href="<?= base_url('admin/instrument-revisions/new?item_id=' . $item['instrument_item_id'] . '&analysis_result_id=' . $item['analysis_result_id']) ?>"
-                                class="btn btn-primary"
-                            >
-                                Revisi
-                            </a>
+                        <td class="table-actions-cell">
+                            <div class="table-actions">
+                                <a
+                                    href="<?= base_url('admin/instrument-revisions/new?item_id=' . $item['instrument_item_id'] . '&analysis_result_id=' . $item['analysis_result_id']) ?>"
+                                    class="btn btn-primary"
+                                >
+                                    Revisi
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 
@@ -103,6 +113,7 @@
             Belum ada riwayat revisi butir.
         </div>
     <?php else: ?>
+        <div class="table-responsive">
         <table>
             <thead>
                 <tr>
@@ -113,7 +124,7 @@
                     <th>Pernyataan Baru</th>
                     <th>Alasan Revisi</th>
                     <th style="width: 130px;">Tanggal</th>
-                    <th style="width: 90px;">Aksi</th>
+                    <th class="table-actions-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -132,24 +143,27 @@
                         <td><?= nl2br(esc($revision['pernyataan_baru'])) ?></td>
                         <td><?= nl2br(esc($revision['alasan_revisi'] ?: '-')) ?></td>
                         <td><?= esc($revision['tanggal_revisi'] ?: '-') ?></td>
-                        <td>
-                            <form
-                                action="<?= base_url('admin/instrument-revisions/' . $revision['id']) ?>"
-                                method="post"
-                                class="action-inline"
-                                onsubmit="return confirm('Yakin ingin menghapus riwayat revisi ini? Redaksi butir saat ini tidak akan dikembalikan otomatis.')"
-                            >
-                                <?= csrf_field() ?>
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="btn btn-danger">
-                                    Hapus
-                                </button>
-                            </form>
+                        <td class="table-actions-cell">
+                            <div class="table-actions">
+                                <form
+                                    action="<?= base_url('admin/instrument-revisions/' . $revision['id']) ?>"
+                                    method="post"
+                                    class="action-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus riwayat revisi ini? Redaksi butir saat ini tidak akan dikembalikan otomatis.')"
+                                >
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="btn btn-danger">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 

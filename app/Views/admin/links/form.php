@@ -1,17 +1,23 @@
-<?= $this->extend('layouts/main') ?>
+﻿<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title) ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title) ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <strong>Periksa kembali input berikut:</strong>
         <ul>
             <?php foreach (session()->getFlashdata('errors') as $error): ?>
@@ -36,7 +42,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
 
         <?php if ($isProductValidation): ?>
             <div class="form-row">
-                <label for="product_id">Produk yang Divalidasi</label>
+                <label class="form-label" for="product_id">Produk yang Divalidasi</label>
                 <select name="product_id" id="product_id" class="form-control" required>
                     <option value="">-- Pilih Produk --</option>
 
@@ -56,7 +62,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
         <?php endif; ?>
 
         <div class="form-row">
-            <label for="instrument_id">
+            <label class="form-label" for="instrument_id">
                 <?= $isProductValidation ? 'Instrumen Validasi Produk' : 'Instrumen yang Divalidasi' ?>
             </label>
             <select name="instrument_id" id="instrument_id" class="form-control" required>
@@ -81,7 +87,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
         </div>
 
         <div class="form-row">
-            <label for="judul_link">Judul Link</label>
+            <label class="form-label" for="judul_link">Judul Link</label>
             <input
                 type="text"
                 name="judul_link"
@@ -95,7 +101,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
 
         <div class="form-grid">
             <div class="form-row">
-                <label for="sasaran">Sasaran</label>
+                <label class="form-label" for="sasaran">Sasaran</label>
                 <input
                     type="text"
                     name="sasaran"
@@ -107,7 +113,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
             </div>
 
             <div class="form-row">
-                <label for="status">Status Link</label>
+                <label class="form-label" for="status">Status Link</label>
                 <?php
                 $statusOptions = ['Aktif', 'Nonaktif', 'Ditutup'];
                 $selectedStatus = old('status', $link['status'] ?? 'Aktif');
@@ -125,7 +131,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
 
         <div class="form-grid">
             <div class="form-row">
-                <label for="tanggal_mulai">Tanggal Mulai</label>
+                <label class="form-label" for="tanggal_mulai">Tanggal Mulai</label>
                 <input
                     type="date"
                     name="tanggal_mulai"
@@ -136,7 +142,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
             </div>
 
             <div class="form-row">
-                <label for="tanggal_selesai">Tanggal Selesai</label>
+                <label class="form-label" for="tanggal_selesai">Tanggal Selesai</label>
                 <input
                     type="date"
                     name="tanggal_selesai"
@@ -148,7 +154,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
         </div>
 
         <div class="form-row">
-            <label for="maksimal_respon">Maksimal Respon</label>
+            <label class="form-label" for="maksimal_respon">Maksimal Respon</label>
             <input
                 type="number"
                 name="maksimal_respon"

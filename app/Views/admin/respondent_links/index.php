@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Link Instrumen Responden</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Link Instrumen Responden</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,12 +17,13 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
-<div class="card">
+<div class="card mb-3">
+    <div class="card-body">
     <form action="<?= base_url('admin/respondent-links') ?>" method="get" class="search-form">
         <select name="mode" class="form-control" style="min-width: 280px;">
             <option value="">-- Semua Mode --</option>
@@ -33,6 +40,7 @@
             + Buat Link
         </a>
     </form>
+    </div>
 </div>
 
 <div class="toolbar">
@@ -47,7 +55,10 @@
         Belum ada link instrumen responden.
     </div>
 <?php else: ?>
-    <table>
+<div class="card">
+    <div class="card-body p-0">
+    <div class="table-responsive">
+    <table class="table table-vcenter table-hover">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -58,7 +69,7 @@
                 <th>Status</th>
                 <th>Respon</th>
                 <th>Link Publik</th>
-                <th style="width: 220px;">Aksi</th>
+                <th class="table-actions-cell">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -69,7 +80,7 @@
                     <td><?= $index + 1 ?></td>
                     <td><?= esc($link['judul_link']) ?></td>
                     <td>
-                        <span class="badge">
+                        <span class="badge badge-status-draft">
                             <?= esc($link['mode']) ?>
                         </span>
                     </td>
@@ -80,7 +91,7 @@
                     </td>
                     <td><?= esc($link['sasaran'] ?: '-') ?></td>
                     <td>
-                        <span class="badge"><?= esc($link['status']) ?></span>
+                        <span class="<?= esc(status_badge_class($link['status'] ?? '')) ?>"><?= esc($link['status']) ?></span>
                     </td>
                     <td>
                         <?= esc($link['jumlah_respon'] ?? 0) ?>
@@ -98,32 +109,37 @@
                         >
                         <small>Klik kotak link lalu salin.</small>
                     </td>
-                    <td>
-                        <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
-                            Buka
-                        </a>
+                    <td class="table-actions-cell">
+                        <div class="table-actions">
+                            <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
+                                Buka
+                            </a>
 
-                        <a href="<?= base_url('admin/respondent-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                            Edit
-                        </a>
+                            <a href="<?= base_url('admin/respondent-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
+                                Edit
+                            </a>
 
-                        <form
-                            action="<?= base_url('admin/respondent-links/' . $link['id']) ?>"
-                            method="post"
-                            class="action-inline"
-                            onsubmit="return confirm('Yakin ingin menghapus link ini?')"
-                        >
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-danger">
-                                Hapus
-                            </button>
-                        </form>
+                            <form
+                                action="<?= base_url('admin/respondent-links/' . $link['id']) ?>"
+                                method="post"
+                                class="action-inline"
+                                onsubmit="return confirm('Yakin ingin menghapus link ini?')"
+                            >
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

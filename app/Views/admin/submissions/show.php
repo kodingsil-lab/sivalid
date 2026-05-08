@@ -2,143 +2,259 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Detail Hasil Pengisian</h1>
+<?php
+$currentResponse = isset($response) && is_array($response) ? $response : [];
+$safeAnswers = isset($answers) && is_array($answers) ? $answers : [];
 
-<div class="card">
-    <h3>Identitas Pengisian</h3>
+$modeValue = (string) ($currentResponse['mode'] ?? '');
+$modeLabel = ucwords(str_replace('_', ' ', $modeValue));
+$modeBadgeClass = 'badge badge-status-draft';
 
-    <table>
-        <tr>
-            <th style="width: 240px;">Mode</th>
-            <td><span class="badge"><?= esc($response['mode']) ?></span></td>
-        </tr>
-        <tr>
-            <th>Judul Link</th>
-            <td><?= esc($response['judul_link']) ?></td>
-        </tr>
-        <tr>
-            <th>Instrumen</th>
-            <td>
-                <strong><?= esc($response['kode']) ?></strong><br>
-                <?= esc($response['judul']) ?><br>
-                <small><?= esc($response['jenis']) ?></small>
-            </td>
-        </tr>
-        <tr>
-            <th>Produk</th>
-            <td>
-                <?php if (!empty($response['nama_produk'])): ?>
-                    <?= esc($response['product_kode']) ?> - <?= esc($response['nama_produk']) ?><br>
-                    <small><?= esc($response['jenis_produk']) ?></small>
-                <?php else: ?>
-                    -
-                <?php endif; ?>
-            </td>
-        </tr>
-        <tr>
-            <th>Status</th>
-            <td><?= esc($response['status']) ?></td>
-        </tr>
-        <tr>
-            <th>Waktu Submit</th>
-            <td><?= esc($response['submitted_at'] ?: '-') ?></td>
-        </tr>
-    </table>
+if ($modeValue === 'validasi_instrumen') {
+    $modeBadgeClass = 'badge badge-status-process';
+} elseif ($modeValue === 'validasi_produk') {
+    $modeBadgeClass = 'badge badge-status-warning';
+} elseif (in_array($modeValue, ['respon_mahasiswa', 'observasi', 'fgd', 'tes_kinerja'], true)) {
+    $modeBadgeClass = 'badge badge-status-success';
+}
+
+$scoreAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
+    return isset($answer['skor']) && $answer['skor'] !== null && $answer['skor'] !== '';
+}));
+
+$textAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
+    return !empty($answer['jawaban_teks']);
+}));
+
+$commentAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
+    return !empty($answer['komentar']);
+}));
+?>
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+    <div>
+        <h1 class="page-title mb-1">Detail Hasil Pengisian</h1>
+        <div class="text-muted">Rincian pengisian instrumen oleh responden/validator.</div>
+    </div>
+    <span class="<?= esc($modeBadgeClass) ?>">
+        <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
+    </span>
 </div>
 
-<div class="card">
-    <h3>Identitas Responden/Validator</h3>
+<div class="card mb-3">
+    <div class="card-body">
+    <h3 class="card-title mb-3">Identitas Link</h3>
 
-    <table>
-        <tr>
-            <th style="width: 240px;">Nama</th>
-            <td><?= esc($response['nama']) ?></td>
-        </tr>
-        <tr>
-            <th>Jenis Responden</th>
-            <td><?= esc($response['jenis_responden']) ?></td>
-        </tr>
-        <tr>
-            <th>Email</th>
-            <td><?= esc($response['email'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>NIM</th>
-            <td><?= esc($response['nim'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>Program Studi</th>
-            <td><?= esc($response['program_studi'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>Kelas</th>
-            <td><?= esc($response['kelas'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>Semester/Pertemuan</th>
-            <td><?= esc($response['semester'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>Instansi</th>
-            <td><?= esc($response['instansi'] ?: '-') ?></td>
-        </tr>
-        <tr>
-            <th>Bidang/Jabatan</th>
-            <td><?= esc($response['bidang_keahlian'] ?: '-') ?></td>
-        </tr>
-    </table>
-</div>
-
-<div class="card">
-    <h3>Jawaban</h3>
-
-    <?php if (empty($answers)): ?>
-        <div class="empty-state">Belum ada jawaban.</div>
-    <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 60px;">No</th>
-                    <th>Aspek</th>
-                    <th>Butir</th>
-                    <th style="width: 110px;">Tipe</th>
-                    <th style="width: 100px;">Skor</th>
-                    <th>Jawaban Teks</th>
-                    <th>Komentar</th>
-                </tr>
-            </thead>
+    <div class="table-responsive">
+        <table class="table table-vcenter">
             <tbody>
-                <?php foreach ($answers as $answer): ?>
-                    <tr>
-                        <td><?= esc($answer['nomor']) ?></td>
-                        <td><?= esc($answer['nama_aspek'] ?: '-') ?></td>
-                        <td><?= nl2br(esc($answer['pernyataan'])) ?></td>
-                        <td><?= esc($answer['tipe_butir']) ?></td>
-                        <td><?= esc($answer['skor'] ?? '-') ?></td>
-                        <td><?= nl2br(esc($answer['jawaban_teks'] ?: '-')) ?></td>
-                        <td><?= nl2br(esc($answer['komentar'] ?: '-')) ?></td>
-                    </tr>
-                <?php endforeach; ?>
+                <tr>
+                    <th style="width: 240px;">Mode</th>
+                    <td>
+                        <span class="<?= esc($modeBadgeClass) ?>">
+                            <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Judul Link</th>
+                    <td><?= esc((string) ($currentResponse['judul_link'] ?? '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Instrumen</th>
+                    <td>
+                        <div class="fw-semibold"><?= esc((string) ($currentResponse['kode'] ?? '-')) ?></div>
+                        <div><?= esc((string) ($currentResponse['judul'] ?? '-')) ?></div>
+                        <div class="small text-muted"><?= esc((string) ($currentResponse['jenis'] ?? '-')) ?></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Produk</th>
+                    <td>
+                        <?php if (!empty($currentResponse['nama_produk'])): ?>
+                            <div class="fw-semibold"><?= esc((string) ($currentResponse['product_kode'] ?? '-')) ?> - <?= esc((string) $currentResponse['nama_produk']) ?></div>
+                            <div class="small text-muted"><?= esc((string) ($currentResponse['jenis_produk'] ?? '-')) ?></div>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Status Link</th>
+                    <td><?= esc((string) (!empty($currentResponse['status']) ? $currentResponse['status'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Waktu Submit</th>
+                    <td><?= esc((string) (!empty($currentResponse['submitted_at']) ? $currentResponse['submitted_at'] : '-')) ?></td>
+                </tr>
             </tbody>
         </table>
+    </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+    <h3 class="card-title mb-3">Identitas Responden/Validator</h3>
+
+    <div class="table-responsive">
+        <table class="table table-vcenter">
+            <tbody>
+                <tr>
+                    <th style="width: 240px;">Nama</th>
+                    <td class="fw-semibold"><?= esc((string) ($currentResponse['nama'] ?? '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Jenis Responden</th>
+                    <td><?= esc((string) ($currentResponse['jenis_responden'] ?? '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td><?= esc((string) (!empty($currentResponse['email']) ? $currentResponse['email'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>NIM</th>
+                    <td><?= esc((string) (!empty($currentResponse['nim']) ? $currentResponse['nim'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Program Studi</th>
+                    <td><?= esc((string) (!empty($currentResponse['program_studi']) ? $currentResponse['program_studi'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Kelas</th>
+                    <td><?= esc((string) (!empty($currentResponse['kelas']) ? $currentResponse['kelas'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Semester/Pertemuan</th>
+                    <td><?= esc((string) (!empty($currentResponse['semester']) ? $currentResponse['semester'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Instansi</th>
+                    <td><?= esc((string) (!empty($currentResponse['instansi']) ? $currentResponse['instansi'] : '-')) ?></td>
+                </tr>
+                <tr>
+                    <th>Bidang/Jabatan</th>
+                    <td><?= esc((string) (!empty($currentResponse['bidang_keahlian']) ? $currentResponse['bidang_keahlian'] : '-')) ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+    <h3 class="card-title mb-3">Jawaban Skor</h3>
+
+    <?php if (empty($scoreAnswers)): ?>
+        <div class="empty-state">Belum ada jawaban skor.</div>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">No</th>
+                        <th style="width: 180px;">Aspek</th>
+                        <th>Butir</th>
+                        <th style="width: 120px;">Tipe</th>
+                        <th style="width: 100px;">Skor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($scoreAnswers as $answer): ?>
+                        <tr>
+                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
+                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
+                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
+                            <td><?= esc((string) ($answer['tipe_butir'] ?? '-')) ?></td>
+                            <td><span class="fw-semibold"><?= esc((string) ($answer['skor'] ?? '-')) ?></span></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     <?php endif; ?>
+    </div>
 </div>
 
-<div class="card">
-    <h3>Komentar Umum dan Kesimpulan</h3>
+<div class="card mb-3">
+    <div class="card-body">
+    <h3 class="card-title mb-3">Jawaban Teks</h3>
 
-    <table>
-        <tr>
-            <th style="width: 240px;">Komentar Umum</th>
-            <td><?= nl2br(esc($response['komentar_umum'] ?: '-')) ?></td>
-        </tr>
-        <tr>
-            <th>Kesimpulan</th>
-            <td><?= esc($response['kesimpulan'] ?: '-') ?></td>
-        </tr>
-    </table>
+    <?php if (empty($textAnswers)): ?>
+        <div class="empty-state">Belum ada jawaban teks.</div>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">No</th>
+                        <th style="width: 180px;">Aspek</th>
+                        <th>Butir</th>
+                        <th>Jawaban Teks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($textAnswers as $answer): ?>
+                        <tr>
+                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
+                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
+                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
+                            <td><?= nl2br(esc((string) (!empty($answer['jawaban_teks']) ? $answer['jawaban_teks'] : '-'))) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+    </div>
 </div>
 
-<a href="<?= base_url('admin/submissions?mode=' . $response['mode']) ?>" class="btn btn-light">Kembali</a>
+<div class="card mb-3">
+    <div class="card-body">
+    <h3 class="card-title mb-3">Komentar</h3>
+
+    <?php if (empty($commentAnswers)): ?>
+        <div class="text-muted mb-3">Tidak ada komentar per butir.</div>
+    <?php else: ?>
+        <div class="table-responsive mb-3">
+            <table class="table table-vcenter">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">No</th>
+                        <th style="width: 180px;">Aspek</th>
+                        <th>Butir</th>
+                        <th>Komentar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($commentAnswers as $answer): ?>
+                        <tr>
+                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
+                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
+                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
+                            <td><?= nl2br(esc((string) (!empty($answer['komentar']) ? $answer['komentar'] : '-'))) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+
+    <div>
+        <div class="fw-semibold mb-1">Komentar Umum</div>
+        <div class="text-muted"><?= nl2br(esc((string) (!empty($currentResponse['komentar_umum']) ? $currentResponse['komentar_umum'] : '-'))) ?></div>
+    </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h3 class="card-title mb-2">Kesimpulan</h3>
+        <div class="fw-semibold"><?= esc((string) (!empty($currentResponse['kesimpulan']) ? $currentResponse['kesimpulan'] : '-')) ?></div>
+    </div>
+</div>
+
+<a href="<?= base_url('admin/submissions?mode=' . ($currentResponse['mode'] ?? '')) ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

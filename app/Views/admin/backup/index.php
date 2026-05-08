@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Backup &amp; Restore</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Backup &amp; Restore</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,7 +17,7 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>

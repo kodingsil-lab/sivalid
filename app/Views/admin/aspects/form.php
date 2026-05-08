@@ -1,11 +1,17 @@
-<?= $this->extend('layouts/main') ?>
+﻿<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title) ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title) ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <strong>Periksa kembali input berikut:</strong>
         <ul>
             <?php foreach (session()->getFlashdata('errors') as $error): ?>
@@ -15,7 +21,11 @@
     </div>
 <?php endif; ?>
 
-<div class="card">
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Form Aspek Instrumen</h3>
+    </div>
+    <div class="card-body">
     <form action="<?= esc($action) ?>" method="post">
         <?= csrf_field() ?>
 
@@ -24,7 +34,7 @@
         <?php endif; ?>
 
         <div class="form-row">
-            <label for="instrument_id">Instrumen</label>
+            <label class="form-label" for="instrument_id">Instrumen</label>
             <select name="instrument_id" id="instrument_id" class="form-control" required>
                 <option value="">-- Pilih Instrumen --</option>
                 <?php foreach ($instruments as $instrument): ?>
@@ -40,7 +50,7 @@
 
         <div class="form-grid">
             <div class="form-row">
-                <label for="nama_aspek">Nama Aspek</label>
+                <label class="form-label" for="nama_aspek">Nama Aspek</label>
                 <input
                     type="text"
                     name="nama_aspek"
@@ -53,7 +63,7 @@
             </div>
 
             <div class="form-row">
-                <label for="urutan">Urutan</label>
+                <label class="form-label" for="urutan">Urutan</label>
                 <input
                     type="number"
                     name="urutan"
@@ -67,7 +77,7 @@
         </div>
 
         <div class="form-row">
-            <label for="deskripsi">Deskripsi Aspek</label>
+            <label class="form-label" for="deskripsi">Deskripsi Aspek</label>
             <textarea
                 name="deskripsi"
                 id="deskripsi"
@@ -81,6 +91,7 @@
             Kembali
         </a>
     </form>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

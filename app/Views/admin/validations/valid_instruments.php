@@ -17,7 +17,8 @@
         Belum ada instrumen yang berstatus Valid.
     </div>
 <?php else: ?>
-    <table>
+    <div class="table-responsive">
+    <table class="table table-vcenter table-hover">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -27,7 +28,7 @@
                 <th>Sasaran</th>
                 <th>Skala</th>
                 <th>Status</th>
-                <th style="width: 220px;">Aksi</th>
+                <th class="table-actions-cell">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -42,23 +43,26 @@
                     <td>
                         <span class="badge"><?= esc($instrument['status']) ?></span>
                     </td>
-                    <td>
-                        <a href="<?= base_url('admin/instruments/' . $instrument['id']) ?>" class="btn btn-light">
-                            Detail
-                        </a>
+                    <td class="table-actions-cell">
+                        <div class="table-actions">
+                            <a href="<?= base_url('admin/instruments/' . $instrument['id']) ?>" class="btn btn-light">
+                                Detail
+                            </a>
 
-                        <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrument['id']) ?>" class="btn btn-light">
-                            Butir
-                        </a>
+                            <a href="<?= base_url('admin/instrument-items?instrument_id=' . $instrument['id']) ?>" class="btn btn-light">
+                                Butir
+                            </a>
 
-                        <a href="<?= base_url('admin/products') ?>" class="btn btn-primary">
-                            Pakai untuk Produk
-                        </a>
+                            <a href="<?= base_url('admin/products') ?>" class="btn btn-primary">
+                                Pakai untuk Produk
+                            </a>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

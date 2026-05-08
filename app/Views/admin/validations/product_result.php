@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title ?? 'Analisis Validasi Produk') ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title ?? 'Analisis Validasi Produk') ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,7 +17,7 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
@@ -26,11 +32,13 @@
     </a>
 </div>
 
-<div class="card">
-    <h3>Daftar Link Validasi Produk</h3>
-    <p>
-        Pilih link validasi produk yang sudah memiliki respon validator, lalu proses analisis.
-    </p>
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Daftar Link Validasi Produk</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-0">Pilih link validasi produk yang sudah memiliki respon validator, lalu proses analisis.</p>
+    </div>
 </div>
 
 <?php if (empty($links)): ?>
@@ -38,7 +46,10 @@
         Belum ada link validasi produk.
     </div>
 <?php else: ?>
-    <table>
+    <div class="card">
+        <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table table-vcenter">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -48,7 +59,7 @@
                 <th>Status Link</th>
                 <th style="width: 90px;">Respon</th>
                 <th>Analisis Terakhir</th>
-                <th style="width: 280px;">Aksi</th>
+                <th class="table-actions-cell">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -72,7 +83,7 @@
                         <?= esc($link['judul']) ?>
                     </td>
                     <td>
-                        <span class="badge"><?= esc($link['status']) ?></span>
+                        <span class="<?= esc(status_badge_class($link['status'] ?? '')) ?>"><?= esc($link['status']) ?></span>
                     </td>
                     <td>
                         <?= esc($link['jumlah_respon'] ?? 0) ?>
@@ -85,39 +96,44 @@
                             <strong><?= esc($link['analysis']['persentase']) ?>%</strong><br>
                             <?= esc($link['analysis']['kategori']) ?>
                         <?php else: ?>
-                            <span class="badge">Belum dianalisis</span>
+                            <span class="badge badge-status-draft">Belum dianalisis</span>
                         <?php endif; ?>
                     </td>
-                    <td>
-                        <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
-                            Buka Link
-                        </a>
-
-                        <form
-                            action="<?= base_url('admin/validasi-produk/proses/' . $link['id']) ?>"
-                            method="post"
-                            class="action-inline"
-                        >
-                            <?= csrf_field() ?>
-                            <button type="submit" class="btn btn-primary">
-                                Analisis
-                            </button>
-                        </form>
-
-                        <?php if (!empty($link['analysis'])): ?>
-                            <a href="<?= base_url('admin/validasi-produk/analisis/' . $link['analysis']['id']) ?>" class="btn btn-light">
-                                Lihat
+                    <td class="table-actions-cell">
+                        <div class="table-actions">
+                            <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
+                                Buka Link
                             </a>
-                        <?php endif; ?>
 
-                        <a href="<?= base_url('admin/validasi-produk/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                            Edit
-                        </a>
+                            <form
+                                action="<?= base_url('admin/validasi-produk/proses/' . $link['id']) ?>"
+                                method="post"
+                                class="action-inline"
+                            >
+                                <?= csrf_field() ?>
+                                <button type="submit" class="btn btn-primary">
+                                    Analisis
+                                </button>
+                            </form>
+
+                            <?php if (!empty($link['analysis'])): ?>
+                                <a href="<?= base_url('admin/validasi-produk/analisis/' . $link['analysis']['id']) ?>" class="btn btn-light">
+                                    Lihat
+                                </a>
+                            <?php endif; ?>
+
+                            <a href="<?= base_url('admin/validasi-produk/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
+                                Edit
+                            </a>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
-    </table>
+        </table>
+        </div>
+        </div>
+    </div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

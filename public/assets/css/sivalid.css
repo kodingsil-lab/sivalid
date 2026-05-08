@@ -1,0 +1,943 @@
+/*
+ * SIVALID — Custom Stylesheet
+ * Dibangun di atas Tabler UI. Gaya: clean, akademik, tidak ramai.
+ * Warna utama: biru akademik (#1d4ed8). Aksen: teal (#0d9488).
+ * ================================================================
+ */
+
+/* ============================================================
+   1. VARIABEL & BASE
+   ============================================================ */
+:root {
+    --sv-blue:        #1d4ed8;
+    --sv-blue-dark:   #1e40af;
+    --sv-blue-light:  #eff6ff;
+    --sv-teal:        #0d9488;
+    --sv-teal-light:  #f0fdfa;
+    --sv-bg:          #f8fafc;
+    --sv-surface:     #ffffff;
+    --sv-border:      #e2e8f0;
+    --sv-text:        #1e293b;
+    --sv-text-muted:  #64748b;
+    --sv-radius:      6px;
+    --sv-shadow:      0 1px 4px rgba(0,0,0,.07);
+    --sv-shadow-md:   0 4px 16px rgba(0,0,0,.10);
+    --sv-focus-ring:  0 0 0 3px rgba(29,78,216,.14);
+    --sv-transition:  180ms ease;
+    --sv-transition-fast: 120ms ease;
+}
+
+body {
+    background: var(--sv-bg) !important;
+    color: var(--sv-text) !important;
+    font-size: 14px;
+}
+
+/* ============================================================
+   2. SIDEBAR — override Tabler navbar-vertical (light theme)
+   ============================================================ */
+.navbar-vertical.navbar-expand-lg {
+    width: 240px;
+    min-width: 240px;
+    background: #ffffff !important;
+    border-right: 1px solid #e2e8f0 !important;
+    box-shadow: 2px 0 12px rgba(0,0,0,.05);
+    overflow: visible;
+}
+
+.navbar-vertical.navbar-expand-lg .navbar-collapse {
+    background: #ffffff !important;
+}
+
+/* Brand area — gradien biru */
+.navbar-vertical.navbar-expand-lg .navbar-brand {
+    padding: 1.15rem 1.45rem 1.05rem !important;
+    border-bottom: 1px solid #e2e8f0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #0ea5e9 100%);
+    text-decoration: none !important;
+}
+
+.navbar-vertical .navbar-brand .brand-name {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: .04em;
+    line-height: 1.2;
+}
+
+.navbar-vertical .navbar-brand .brand-sub {
+    font-size: 12.5px;
+    color: rgba(255,255,255,.75);
+    line-height: 1.45;
+    margin-top: 5px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Nav list wrapper */
+.navbar-vertical .navbar-nav {
+    padding: .5rem 0 1rem !important;
+}
+
+/* Nav link */
+.navbar-vertical .nav-link {
+    color: #374151 !important;
+    padding: .5rem 1rem !important;
+    margin: 1px .5rem !important;
+    border-left: 3px solid transparent;
+    border-radius: 7px !important;
+    font-size: 13.5px;
+    display: flex;
+    align-items: flex-start !important;
+    gap: .55rem;
+    line-height: 1.45;
+    white-space: normal !important;
+    word-break: break-word;
+    overflow: visible !important;
+    transition: background var(--sv-transition), border-color var(--sv-transition),
+                color var(--sv-transition);
+}
+
+.navbar-vertical .nav-link:hover {
+    background: #eff6ff !important;
+    border-left-color: #93c5fd !important;
+    color: #1d4ed8 !important;
+}
+
+.navbar-vertical .nav-link.active {
+    background: #eff6ff !important;
+    border-left-color: #1d4ed8 !important;
+    color: #1d4ed8 !important;
+    font-weight: 600;
+}
+
+.navbar-vertical .nav-link.active .nav-link-icon {
+    color: #1d4ed8 !important;
+    opacity: 1;
+}
+
+/* Nav link icon */
+.navbar-vertical .nav-link-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #6b7280;
+    opacity: 1;
+    transition: color var(--sv-transition);
+}
+
+.navbar-vertical .nav-link:hover .nav-link-icon {
+    color: #1d4ed8;
+}
+
+.navbar-vertical .nav-link.active .nav-link-icon {
+    color: #1d4ed8 !important;
+}
+
+/* Nav link title — pastikan tidak terpotong */
+.navbar-vertical .nav-link-title {
+    white-space: normal !important;
+    word-break: break-word;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.4;
+    flex: 1;
+    min-width: 0;
+}
+
+/* Section labels */
+.nav-section-label {
+    padding: .9rem 1.5rem .25rem;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #9ca3af;
+    pointer-events: none;
+    display: block;
+}
+
+/* ============================================================
+   3. TOPBAR — override Tabler navbar-expand-md
+   ============================================================ */
+.navbar-expand-md.navbar-light {
+    background: var(--sv-surface) !important;
+    border-bottom: 1px solid var(--sv-border) !important;
+    min-height: 56px;
+    box-shadow: none;
+}
+
+/* ============================================================
+   4. PAGE BODY
+   ============================================================ */
+.page-body {
+    padding-top: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
+    background: var(--sv-bg) !important;
+}
+
+.container-xl {
+    max-width: 1280px;
+}
+
+/* ============================================================
+   5. PAGE TITLE
+   ============================================================ */
+.page-title {
+    margin: 0 0 1.25rem;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--sv-text);
+    line-height: 1.3;
+}
+
+/* ============================================================
+   6. CARD
+   ============================================================ */
+.card {
+    background: var(--sv-surface);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--sv-shadow);
+    box-sizing: border-box;
+    transition: box-shadow var(--sv-transition);
+}
+
+.card:hover {
+    box-shadow: 0 2px 10px rgba(0,0,0,.09);
+}
+
+/* Opt-out for cards that shouldn't lift on hover (tables, dashboards) */
+.card-no-hover:hover {
+    box-shadow: var(--sv-shadow);
+}
+
+.card h3 {
+    margin-top: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sv-text);
+}
+
+/* ============================================================
+   7. STAT CARD
+   ============================================================ */
+.stat-card {
+    background: var(--sv-surface);
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius);
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--sv-shadow);
+    box-sizing: border-box;
+    transition: box-shadow var(--sv-transition), border-color var(--sv-transition);
+}
+
+.stat-card:hover {
+    box-shadow: 0 3px 12px rgba(29,78,216,.10);
+    border-color: #bfdbfe;
+}
+
+.stat-card .number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--sv-blue);
+    line-height: 1.1;
+}
+
+.stat-card .label {
+    font-size: 13px;
+    color: var(--sv-text-muted);
+}
+
+/* Grid stat */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ============================================================
+   8. TABEL
+   ============================================================ */
+table,
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--sv-surface);
+    font-size: 14px;
+}
+
+th,
+td {
+    border: 1px solid var(--sv-border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background: #f1f5f9;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+}
+
+tbody tr {
+    transition: background var(--sv-transition-fast);
+}
+
+tbody tr:hover {
+    background: #f0f6ff;
+}
+
+tbody tr:hover td {
+    color: var(--sv-text);
+}
+
+/* Tombol aksi tabel: satu baris, tabel boleh scroll horizontal */
+.table-actions-cell {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.table-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    flex-wrap: nowrap;
+    min-width: max-content;
+    white-space: nowrap;
+}
+
+.table-actions .btn {
+    flex: 0 0 auto;
+    min-height: 0;
+}
+
+.table-actions .btn:not(.btn-sm) {
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.table-actions .action-inline {
+    display: inline-flex;
+    margin: 0;
+}
+
+.table-actions .btn + .btn {
+    margin-left: 0;
+    margin-top: 0;
+}
+
+/* Compact table trial: Master Instrumen */
+.instrument-table-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.instrument-table-card .instruments-table-wrap {
+    margin: -1px;
+}
+
+.instruments-table {
+    min-width: 980px;
+    font-size: 13px;
+}
+
+.instruments-table.table-sm > :not(caption) > * > * {
+    padding: .42rem .55rem;
+}
+
+.instruments-table.card-table tr td:first-child,
+.instruments-table.card-table tr th:first-child {
+    padding-left: .85rem;
+}
+
+.instruments-table.card-table tr td:last-child,
+.instruments-table.card-table tr th:last-child {
+    padding-right: .85rem;
+}
+
+.instruments-table th,
+.instruments-table td {
+    border-left: 0;
+    border-right: 0;
+    line-height: 1.35;
+}
+
+.instruments-table thead th {
+    padding-top: .52rem;
+    padding-bottom: .46rem;
+    font-size: 10.5px;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+    color: var(--sv-text-muted);
+    background: #f8fafc;
+}
+
+.instruments-table .col-no {
+    width: 52px;
+}
+
+.instruments-table .col-code {
+    width: 108px;
+}
+
+.instruments-table .col-title {
+    min-width: 280px;
+    white-space: normal !important;
+}
+
+.instruments-table .instrument-title {
+    display: block;
+    max-width: 440px;
+    white-space: normal;
+}
+
+.instruments-table .col-type {
+    width: 128px;
+}
+
+.instruments-table .col-target {
+    width: 144px;
+}
+
+.instruments-table .col-scale {
+    width: 96px;
+}
+
+.instruments-table .col-status {
+    width: 150px;
+}
+
+.instruments-table .col-actions {
+    width: 1%;
+}
+
+.instruments-table .badge {
+    padding: 1px 7px;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.instruments-table .btn-sm {
+    min-height: 0;
+    padding: 3px 7px;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+/* ============================================================
+   9. BADGE
+   ============================================================ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+    border-radius: 4px;
+    border: 1px solid var(--sv-border);
+    background: #f8fafc;
+    color: var(--sv-text);
+    line-height: 1.5;
+    white-space: nowrap;
+    letter-spacing: .01em;
+}
+
+.badge-valid,
+.badge-success {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.badge-warning {
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+}
+
+.badge-danger {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+.badge-status-draft {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.badge-status-process {
+    background: var(--sv-blue-light);
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+
+.badge-status-warning {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #9a3412;
+}
+
+.badge-status-success {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+
+.badge-status-danger {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #991b1b;
+}
+
+/* ============================================================
+   10. TOMBOL
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: 8px 14px;
+    border: 1px solid var(--sv-border);
+    border-radius: var(--sv-radius);
+    background: var(--sv-surface);
+    color: var(--sv-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1.4;
+    white-space: nowrap;
+    transition: background var(--sv-transition), border-color var(--sv-transition),
+                color var(--sv-transition), box-shadow var(--sv-transition);
+}
+
+.btn:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    text-decoration: none;
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: var(--sv-focus-ring);
+}
+
+.btn:focus {
+    outline: none;
+}
+
+.btn:active {
+    transform: scale(.985);
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 13px;
+}
+
+.btn-primary {
+    background: var(--sv-blue);
+    border-color: var(--sv-blue);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--sv-blue-dark);
+    border-color: var(--sv-blue-dark);
+    color: #fff;
+}
+
+.btn-primary:focus-visible {
+    box-shadow: 0 0 0 3px rgba(29,78,216,.30);
+}
+
+.btn-warning {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #fff;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+    border-color: #d97706;
+    color: #fff;
+}
+
+.btn-danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #fff;
+}
+
+.btn-success {
+    background: #16a34a;
+    border-color: #16a34a;
+    color: #fff;
+}
+
+.btn-success:hover {
+    background: #15803d;
+    border-color: #15803d;
+    color: #fff;
+}
+
+.btn-light {
+    background: #f8fafc;
+    border-color: var(--sv-border);
+    color: var(--sv-text);
+}
+
+.btn-light:hover {
+    background: #f1f5f9;
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.btn-outline-danger:hover {
+    background: #fef2f2;
+    border-color: #b91c1c;
+    color: #b91c1c;
+}
+
+/* ============================================================
+   11. FORM
+   ============================================================ */
+.form-row {
+    margin-bottom: 1rem;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #374151;
+}
+
+.form-control {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--sv-radius);
+    box-sizing: border-box;
+    font-size: 14px;
+    color: var(--sv-text);
+    background: var(--sv-surface);
+    transition: border-color var(--sv-transition), box-shadow var(--sv-transition),
+                background var(--sv-transition-fast);
+}
+
+.form-control:hover:not(:focus):not(:disabled) {
+    border-color: #94a3b8;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--sv-blue);
+    box-shadow: var(--sv-focus-ring);
+    background: #fff;
+}
+
+.form-control:disabled,
+.form-control[disabled] {
+    background: #f1f5f9;
+    color: var(--sv-text-muted);
+    cursor: not-allowed;
+    opacity: .75;
+}
+
+/* Tabler native inputs inherit the same states */
+.form-select:hover:not(:focus):not(:disabled) {
+    border-color: #94a3b8;
+}
+
+.form-select:focus {
+    box-shadow: var(--sv-focus-ring);
+}
+
+.form-check-input:focus {
+    box-shadow: var(--sv-focus-ring);
+}
+
+textarea.form-control {
+    min-height: 90px;
+    resize: vertical;
+}
+
+select.form-control {
+    appearance: auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* ============================================================
+   12. TOOLBAR & SEARCH
+   ============================================================ */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.search-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.search-form input {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--sv-radius);
+    min-width: 220px;
+    font-size: 14px;
+    color: var(--sv-text);
+    transition: border-color var(--sv-transition), box-shadow var(--sv-transition);
+}
+
+.search-form input:focus {
+    outline: none;
+    border-color: var(--sv-blue);
+    box-shadow: 0 0 0 3px rgba(29,78,216,.12);
+}
+
+/* ============================================================
+   13. ALERT
+   ============================================================ */
+.alert {
+    padding: 10px 14px;
+    margin-bottom: 1rem;
+    font-size: 14px;
+    border: 1px solid transparent;
+    border-radius: var(--sv-radius);
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border-color: #86efac;
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+
+/* ============================================================
+   14. EMPTY STATE
+   ============================================================ */
+.empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--sv-text-muted);
+    background: var(--sv-surface);
+    border: 1px dashed #cbd5e1;
+    border-radius: var(--sv-radius);
+    font-size: 14px;
+}
+
+.empty-state .empty-icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: .9rem;
+    opacity: .35;
+}
+
+.empty-state .empty-title {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 .35rem;
+}
+
+.empty-state .empty-subtitle {
+    font-size: .85rem;
+    color: var(--sv-text-muted);
+    margin: 0 0 1.25rem;
+}
+
+/* Tabler empty element */
+.empty {
+    border-radius: var(--sv-radius);
+}
+
+.empty .empty-img {
+    opacity: .5;
+}
+
+/* ============================================================
+   15. UTILITAS
+   ============================================================ */
+.action-inline {
+    display: inline;
+}
+
+.text-muted {
+    color: var(--sv-text-muted) !important;
+}
+
+.text-danger {
+    color: #dc2626 !important;
+}
+
+/* ============================================================
+   16. RESPONSIVE
+   ============================================================ */
+@media (max-width: 991px) {
+    .navbar-vertical.navbar-expand-lg {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: .6rem;
+    }
+
+    .toolbar .btn,
+    .toolbar a.btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Make action buttons in table rows stacked */
+    td .btn + .btn {
+        margin-left: 0;
+        margin-top: .25rem;
+    }
+
+    td .table-actions .btn + .btn {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .container-xl {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* Horizontally scrollable tables on mobile */
+    .table-responsive-sm {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Touch-friendly min tap size */
+    .btn {
+        min-height: 40px;
+    }
+
+    .form-control {
+        font-size: 16px; /* prevent iOS zoom */
+    }
+
+    .card {
+        padding: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.2rem;
+    }
+}
+
+/* ============================================================
+   17. PRINT — sidebar & topbar tidak ikut tercetak
+   ============================================================ */
+@media print {
+    .navbar-vertical,
+    .navbar-expand-md,
+    header.navbar {
+        display: none !important;
+    }
+
+    .page-wrapper {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    .page-body {
+        padding: 0 !important;
+    }
+
+    .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+    }
+
+    .btn,
+    .toolbar,
+    .search-form,
+    .alert-dismissible .btn-close {
+        display: none !important;
+    }
+
+    body {
+        background: #fff !important;
+        font-size: 12px;
+    }
+
+    table th {
+        background: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    tbody tr:hover {
+        background: transparent !important;
+    }
+
+    a {
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+}
+

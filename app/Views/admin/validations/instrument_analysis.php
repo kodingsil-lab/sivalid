@@ -151,6 +151,7 @@
     <?php if (empty($itemAnalysis)): ?>
         <div class="empty-state">Analisis per butir belum tersedia.</div>
     <?php else: ?>
+        <div class="table-responsive">
         <table>
             <thead>
                 <tr>
@@ -161,7 +162,7 @@
                     <th style="width: 110px;">Rata-Rata</th>
                     <th style="width: 150px;">Kategori</th>
                     <th style="width: 150px;">Rekomendasi</th>
-                    <th style="width: 110px;">Aksi</th>
+                    <th class="table-actions-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -176,22 +177,25 @@
                         <td>
                             <strong><?= esc($item['rekomendasi']) ?></strong>
                         </td>
-                        <td>
-                            <?php if (in_array($item['rekomendasi'], ['Revisi kecil', 'Revisi besar', 'Ganti atau hapus'], true)): ?>
-                                <a
-                                    href="<?= base_url('admin/instrument-revisions/new?item_id=' . $item['instrument_item_id'] . '&analysis_result_id=' . $analysis['id']) ?>"
-                                    class="btn btn-warning"
-                                >
-                                    Revisi
-                                </a>
-                            <?php else: ?>
-                                <span class="badge">Tetap</span>
-                            <?php endif; ?>
+                        <td class="table-actions-cell">
+                            <div class="table-actions">
+                                <?php if (in_array($item['rekomendasi'], ['Revisi kecil', 'Revisi besar', 'Ganti atau hapus'], true)): ?>
+                                    <a
+                                        href="<?= base_url('admin/instrument-revisions/new?item_id=' . $item['instrument_item_id'] . '&analysis_result_id=' . $analysis['id']) ?>"
+                                        class="btn btn-warning"
+                                    >
+                                        Revisi
+                                    </a>
+                                <?php else: ?>
+                                    <span class="badge">Tetap</span>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
 </div>
 

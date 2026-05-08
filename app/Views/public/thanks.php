@@ -2,51 +2,31 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Informasi') ?></title>
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/sivalid.css') ?>">
     <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #222;
-        }
-
-        .container {
-            width: 720px;
-            max-width: calc(100% - 30px);
-            margin: 60px auto;
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 28px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-
-        h1 {
-            margin-top: 0;
-            color: #1f4e79;
-        }
-
-        p {
-            line-height: 1.6;
-        }
-
-        .muted {
-            color: #666;
-            font-size: 14px;
-        }
+        body { background: var(--sv-bg, #f4f6f8); }
+        .public-wrap { max-width: 560px; margin: 4rem auto; padding: 0 1rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1><?= esc($title ?? 'Informasi') ?></h1>
-    <p><?= esc($message ?? 'Terima kasih.') ?></p>
-
-    <p class="muted">
-        Silakan hubungi admin/peneliti jika Bapak/Ibu merasa pesan ini muncul karena kesalahan.
-    </p>
+<div class="public-wrap">
+    <div class="card text-center">
+        <div class="card-body py-5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-lg text-success mb-3" width="48" height="48" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M5 12l5 5l10 -10" />
+            </svg>
+            <h2 class="card-title"><?= esc($title ?? 'Informasi') ?></h2>
+            <p class="text-muted"><?= esc($message ?? 'Terima kasih.') ?></p>
+            <p class="text-muted small">Silakan hubungi admin/peneliti jika Bapak/Ibu merasa pesan ini muncul karena kesalahan.</p>
+        </div>
+    </div>
 </div>
 
+<script src="<?= base_url('assets/vendor/tabler/js/tabler.min.js') ?>"></script>
 </body>
 </html>

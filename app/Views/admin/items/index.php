@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Butir Pernyataan Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Butir Pernyataan Instrumen</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,12 +17,13 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
-<div class="card">
+<div class="card mb-3">
+    <div class="card-body">
     <form action="<?= base_url('admin/instrument-items') ?>" method="get" class="search-form">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Semua Instrumen --</option>
@@ -39,6 +46,7 @@
             </a>
         <?php endif; ?>
     </form>
+    </div>
 </div>
 
 <?php if (empty($instrumentId)): ?>
@@ -54,10 +62,14 @@
         </a>
     </div>
 <?php else: ?>
-    <div class="card">
-        <h3>Daftar Butir Pernyataan</h3>
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Butir Pernyataan</h3>
+        </div>
+        <div class="card-body p-0">
 
-        <table>
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover">
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
@@ -66,7 +78,7 @@
                     <th>Butir Pernyataan</th>
                     <th style="width: 110px;">Tipe</th>
                     <th style="width: 90px;">Status</th>
-                    <th style="width: 190px;">Aksi</th>
+                    <th class="table-actions-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -93,30 +105,34 @@
                             <?= esc($item['tipe_butir']) ?>
                         </td>
                         <td>
-                            <span class="badge"><?= esc($item['status']) ?></span>
+                            <span class="<?= esc(status_badge_class($item['status'] ?? '')) ?>"><?= esc($item['status']) ?></span>
                         </td>
-                        <td>
-                            <a href="<?= base_url('admin/instrument-items/' . $item['id'] . '/edit') ?>" class="btn btn-warning">
-                                Edit
-                            </a>
+                        <td class="table-actions-cell">
+                            <div class="table-actions">
+                                <a href="<?= base_url('admin/instrument-items/' . $item['id'] . '/edit') ?>" class="btn btn-warning">
+                                    Edit
+                                </a>
 
-                            <form
-                                action="<?= base_url('admin/instrument-items/' . $item['id']) ?>"
-                                method="post"
-                                class="action-inline"
-                                onsubmit="return confirm('Yakin ingin menghapus butir ini?')"
-                            >
-                                <?= csrf_field() ?>
-                                <input type="hidden" name="_method" value="DELETE">
-                                <button type="submit" class="btn btn-danger">
-                                    Hapus
-                                </button>
-                            </form>
+                                <form
+                                    action="<?= base_url('admin/instrument-items/' . $item['id']) ?>"
+                                    method="post"
+                                    class="action-inline"
+                                    onsubmit="return confirm('Yakin ingin menghapus butir ini?')"
+                                >
+                                    <?= csrf_field() ?>
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <button type="submit" class="btn btn-danger">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
+        </div>
     </div>
 <?php endif; ?>
 

@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Manajemen User Admin</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Manajemen User Admin</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,21 +17,22 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
 <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h3 style="margin:0;">Daftar User Admin</h3>
-        <a href="<?= base_url('admin/admin-users/new') ?>" class="btn btn-primary">+ Tambah User</a>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="card-title">Daftar User Admin</h3>
+        <a href="<?= base_url('admin/admin-users/new') ?>" class="btn btn-primary btn-sm">+ Tambah User</a>
     </div>
-
+    <div class="card-body p-0">
     <?php if (empty($users)): ?>
-        <p class="text-muted">Belum ada user admin.</p>
+        <div class="empty-state">Belum ada user admin.</div>
     <?php else: ?>
-        <table class="table">
+        <div class="table-responsive">
+        <table class="table table-vcenter table-hover">
             <thead>
                 <tr>
                     <th>#</th>
@@ -34,7 +41,7 @@
                     <th>Role</th>
                     <th>Status</th>
                     <th>Dibuat</th>
-                    <th>Aksi</th>
+                    <th class="table-actions-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -50,21 +57,25 @@
                             </span>
                         </td>
                         <td><?= esc($user['created_at'] ?? '-') ?></td>
-                        <td>
-                            <a href="<?= base_url('admin/admin-users/' . $user['id'] . '/edit') ?>" class="btn btn-sm btn-light">Edit</a>
+                        <td class="table-actions-cell">
+                            <div class="table-actions">
+                                <a href="<?= base_url('admin/admin-users/' . $user['id'] . '/edit') ?>" class="btn btn-sm btn-light">Edit</a>
 
-                            <form method="post" action="<?= base_url('admin/admin-users/' . $user['id'] . '/toggle-status') ?>" style="display:inline;" onsubmit="return confirm('Ubah status user ini?')">
-                                <?= csrf_field() ?>
-                                <button type="submit" class="btn btn-sm <?= $user['status'] === 'aktif' ? 'btn-warning' : 'btn-success' ?>">
-                                    <?= $user['status'] === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' ?>
-                                </button>
-                            </form>
+                                <form method="post" action="<?= base_url('admin/admin-users/' . $user['id'] . '/toggle-status') ?>" class="action-inline" onsubmit="return confirm('Ubah status user ini?')">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="btn btn-sm <?= $user['status'] === 'aktif' ? 'btn-warning' : 'btn-success' ?>">
+                                        <?= $user['status'] === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' ?>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+        </div>
     <?php endif; ?>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

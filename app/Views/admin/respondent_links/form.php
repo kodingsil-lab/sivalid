@@ -1,17 +1,23 @@
-<?= $this->extend('layouts/main') ?>
+﻿<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title) ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title) ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <strong>Periksa kembali input berikut:</strong>
         <ul>
             <?php foreach (session()->getFlashdata('errors') as $error): ?>
@@ -21,7 +27,11 @@
     </div>
 <?php endif; ?>
 
-<div class="card">
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Form Link Instrumen Responden</h3>
+    </div>
+    <div class="card-body">
     <form action="<?= esc($action) ?>" method="post">
         <?= csrf_field() ?>
 
@@ -30,7 +40,7 @@
         <?php endif; ?>
 
         <div class="form-row">
-            <label for="mode">Mode Pengisian</label>
+            <label class="form-label" for="mode">Mode Pengisian</label>
             <?php $selectedMode = old('mode', $link['mode'] ?? 'respon_mahasiswa'); ?>
 
             <select name="mode" id="mode" class="form-control" required>
@@ -43,7 +53,7 @@
         </div>
 
         <div class="form-row">
-            <label for="instrument_id">Instrumen Valid</label>
+            <label class="form-label" for="instrument_id">Instrumen Valid</label>
             <select name="instrument_id" id="instrument_id" class="form-control" required>
                 <option value="">-- Pilih Instrumen Valid --</option>
 
@@ -60,7 +70,7 @@
         </div>
 
         <div class="form-row">
-            <label for="judul_link">Judul Link</label>
+            <label class="form-label" for="judul_link">Judul Link</label>
             <input
                 type="text"
                 name="judul_link"
@@ -74,7 +84,7 @@
 
         <div class="form-grid">
             <div class="form-row">
-                <label for="sasaran">Sasaran</label>
+                <label class="form-label" for="sasaran">Sasaran</label>
                 <input
                     type="text"
                     name="sasaran"
@@ -86,7 +96,7 @@
             </div>
 
             <div class="form-row">
-                <label for="status">Status Link</label>
+                <label class="form-label" for="status">Status Link</label>
                 <?php
                 $statusOptions = ['Aktif', 'Nonaktif', 'Ditutup'];
                 $selectedStatus = old('status', $link['status'] ?? 'Aktif');
@@ -104,7 +114,7 @@
 
         <div class="form-grid">
             <div class="form-row">
-                <label for="tanggal_mulai">Tanggal Mulai</label>
+                <label class="form-label" for="tanggal_mulai">Tanggal Mulai</label>
                 <input
                     type="date"
                     name="tanggal_mulai"
@@ -115,7 +125,7 @@
             </div>
 
             <div class="form-row">
-                <label for="tanggal_selesai">Tanggal Selesai</label>
+                <label class="form-label" for="tanggal_selesai">Tanggal Selesai</label>
                 <input
                     type="date"
                     name="tanggal_selesai"
@@ -127,7 +137,7 @@
         </div>
 
         <div class="form-row">
-            <label for="maksimal_respon">Maksimal Respon</label>
+            <label class="form-label" for="maksimal_respon">Maksimal Respon</label>
             <input
                 type="number"
                 name="maksimal_respon"
@@ -156,6 +166,7 @@
             Kembali
         </a>
     </form>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

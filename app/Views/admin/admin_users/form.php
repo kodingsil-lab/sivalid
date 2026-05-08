@@ -1,11 +1,20 @@
-<?= $this->extend('layouts/main') ?>
+﻿<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title) ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title) ?></h2>
+        </div>
+        <div class="col-auto ms-auto">
+            <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-light">Kembali</a>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <strong>Periksa kembali input berikut:</strong>
         <ul>
             <?php foreach (session()->getFlashdata('errors') as $error): ?>
@@ -15,8 +24,11 @@
     </div>
 <?php endif; ?>
 
-<div class="card">
-    <?php if ($user): ?>
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Data User Admin</h3>
+    </div>
+    <div class="card-body">
         <form method="post" action="<?= base_url('admin/admin-users/' . $user['id']) ?>">
             <?= csrf_field() ?>
             <input type="hidden" name="_method" value="PUT">
@@ -26,7 +38,7 @@
     <?php endif; ?>
 
         <div class="form-row">
-            <label for="name">Nama Lengkap <span class="text-danger">*</span></label>
+            <label class="form-label" for="name">Nama Lengkap <span class="text-danger">*</span></label>
             <input
                 type="text"
                 name="name"
@@ -39,7 +51,7 @@
 
         <?php if (!$user): ?>
         <div class="form-row">
-            <label for="email">Email <span class="text-danger">*</span></label>
+            <label class="form-label" for="email">Email <span class="text-danger">*</span></label>
             <input
                 type="email"
                 name="email"
@@ -57,7 +69,7 @@
         <?php endif; ?>
 
         <div class="form-row">
-            <label for="password">
+            <label class="form-label" for="password">
                 Password <?= $user ? '<span class="text-muted">(kosongkan jika tidak diubah)</span>' : '<span class="text-danger">*</span>' ?>
             </label>
             <input
@@ -71,7 +83,7 @@
         </div>
 
         <div class="form-row">
-            <label for="password_confirm">Konfirmasi Password <?= !$user ? '<span class="text-danger">*</span>' : '' ?></label>
+            <label class="form-label" for="password_confirm">Konfirmasi Password <?= !$user ? '<span class="text-danger">*</span>' : '' ?></label>
             <input
                 type="password"
                 name="password_confirm"
@@ -82,11 +94,12 @@
             >
         </div>
 
-        <div style="display:flex; gap:1rem; margin-top:1rem;">
+        <div class="d-flex gap-2 mt-3">
             <button type="submit" class="btn btn-primary">Simpan</button>
             <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-light">Batal</a>
         </div>
     </form>
+    </div>
 </div>
 
 <?= $this->endSection() ?>

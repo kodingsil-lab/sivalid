@@ -2,116 +2,136 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Master Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Master Instrumen</h2>
+            <div class="text-muted mt-1">Kelola data instrumen penelitian dan status validasinya.</div>
+        </div>
+        <div class="col-auto ms-auto d-flex gap-2">
+            <a href="<?= base_url('admin/instruments/new') ?>" class="btn btn-primary">
+                + Tambah Instrumen
+            </a>
+            <a href="<?= base_url('admin/instrumen-valid') ?>" class="btn btn-light">
+                Instrumen Valid
+            </a>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
-        <?= esc(session()->getFlashdata('success')) ?>
+        <?= esc((string) session()->getFlashdata('success')) ?>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
-        <?= esc(session()->getFlashdata('error')) ?>
+    <div class="alert alert-danger">
+        <?= esc((string) session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
-<div class="toolbar">
-    <div>
-        <a href="<?= base_url('admin/instruments/new') ?>" class="btn btn-primary">
-            + Tambah Instrumen
-        </a>
+<div class="card mb-3">
+    <div class="card-body">
+        <form action="<?= base_url('admin/instruments') ?>" method="get" class="search-form">
+            <input
+                type="text"
+                name="keyword"
+                value="<?= esc((string) ($keyword ?? '')) ?>"
+                placeholder="Cari kode, judul, jenis, sasaran, status..."
+            >
+            <button type="submit" class="btn btn-light btn-sm">Cari</button>
 
-        <a href="<?= base_url('admin/instrumen-valid') ?>" class="btn btn-light">
-            Instrumen Valid
-        </a>
+            <?php if (!empty($keyword)): ?>
+                <a href="<?= base_url('admin/instruments') ?>" class="btn btn-light btn-sm">Reset</a>
+            <?php endif; ?>
+        </form>
     </div>
-
-    <form action="<?= base_url('admin/instruments') ?>" method="get" class="search-form">
-        <input
-            type="text"
-            name="keyword"
-            value="<?= esc($keyword ?? '') ?>"
-            placeholder="Cari kode, judul, jenis, sasaran, status..."
-        >
-        <button type="submit" class="btn btn-light">Cari</button>
-
-        <?php if (!empty($keyword)): ?>
-            <a href="<?= base_url('admin/instruments') ?>" class="btn btn-light">Reset</a>
-        <?php endif; ?>
-    </form>
 </div>
 
-<?php if (empty($instruments)): ?>
-    <div class="empty-state">
-        Belum ada data instrumen.
-    </div>
-<?php else: ?>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 50px;">No</th>
-                <th>Kode</th>
-                <th>Judul Instrumen</th>
-                <th>Jenis</th>
-                <th>Sasaran</th>
-                <th>Skala</th>
-                <th>Status</th>
-                <th style="width: 220px;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($instruments as $index => $instrument): ?>
-                <tr>
-                    <td><?= $index + 1 ?></td>
-                    <td><?= esc($instrument['kode']) ?></td>
-                    <td><?= esc($instrument['judul']) ?></td>
-                    <td><?= esc($instrument['jenis']) ?></td>
-                    <td><?= esc($instrument['sasaran'] ?: '-') ?></td>
-                    <td><?= esc($instrument['skala_min']) ?> - <?= esc($instrument['skala_max']) ?></td>
-                    <td>
-                        <?php
-                        $statusClass = 'badge';
+<div class="card card-no-hover instrument-table-card">
+    <?php if (empty($instruments)): ?>
+        <div class="card-body">
+            <div class="empty-state">
+                Belum ada data instrumen.
+            </div>
+        </div>
+    <?php else: ?>
+        <div class="table-responsive instruments-table-wrap">
+            <table class="table table-vcenter table-hover table-sm table-nowrap card-table instruments-table">
+                <thead>
+                    <tr>
+                        <th class="col-no" scope="col">No</th>
+                        <th class="col-code" scope="col">Kode</th>
+                        <th class="col-title" scope="col">Judul Instrumen</th>
+                        <th class="col-type" scope="col">Jenis</th>
+                        <th class="col-target" scope="col">Sasaran</th>
+                        <th class="col-scale" scope="col">Skala</th>
+                        <th class="col-status" scope="col">Status</th>
+                        <th class="col-actions table-actions-cell" scope="col">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($instruments as $index => $instrument): ?>
+                        <tr>
+                            <td class="text-muted col-no"><?= $index + 1 ?></td>
+                            <td class="col-code"><span class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?></span></td>
+                            <td class="col-title">
+                                <span class="instrument-title"><?= esc((string) ($instrument['judul'] ?? '-')) ?></span>
+                            </td>
+                            <td class="text-muted col-type"><?= esc((string) ($instrument['jenis'] ?? '-')) ?></td>
+                            <td class="text-muted col-target"><?= esc((string) (!empty($instrument['sasaran']) ? $instrument['sasaran'] : '-')) ?></td>
+                            <td class="text-muted col-scale"><?= esc((string) ($instrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
+                            <td class="col-status">
+                                <?php
+                                $status = (string) ($instrument['status'] ?? '');
+                                $statusClass = 'badge';
 
-                        if ($instrument['status'] === 'Valid') {
-                            $statusClass .= ' badge-valid';
-                        } elseif (in_array($instrument['status'], ['Perlu Revisi', 'Dalam Validasi Instrumen'], true)) {
-                            $statusClass .= ' badge-warning';
-                        } elseif (in_array($instrument['status'], ['Ditutup', 'Tidak Aktif'], true)) {
-                            $statusClass .= ' badge-danger';
-                        }
-                        ?>
+                                if ($status === 'Valid') {
+                                    $statusClass .= ' badge-valid';
+                                } elseif (in_array($status, ['Perlu Revisi', 'Dalam Validasi Instrumen'], true)) {
+                                    $statusClass .= ' badge-warning';
+                                } elseif (in_array($status, ['Ditutup', 'Tidak Aktif'], true)) {
+                                    $statusClass .= ' badge-danger';
+                                } else {
+                                    $statusClass .= ' badge-status-draft';
+                                }
+                                ?>
 
-                        <span class="<?= esc($statusClass) ?>">
-                            <?= esc($instrument['status']) ?>
-                        </span>
-                    </td>
-                    <td>
-                        <a href="<?= base_url('admin/instruments/' . $instrument['id']) ?>" class="btn btn-light">
-                            Detail
-                        </a>
+                                <span class="<?= esc($statusClass) ?>">
+                                    <?= esc($status !== '' ? $status : '-') ?>
+                                </span>
+                            </td>
+                            <td class="col-actions table-actions-cell">
+                                <div class="table-actions">
+                                    <a href="<?= base_url('admin/instruments/' . $instrument['id']) ?>" class="btn btn-sm btn-light">
+                                        Detail
+                                    </a>
 
-                        <a href="<?= base_url('admin/instruments/' . $instrument['id'] . '/edit') ?>" class="btn btn-warning">
-                            Edit
-                        </a>
+                                    <a href="<?= base_url('admin/instruments/' . $instrument['id'] . '/edit') ?>" class="btn btn-sm btn-warning">
+                                        Edit
+                                    </a>
 
-                        <form
-                            action="<?= base_url('admin/instruments/' . $instrument['id']) ?>"
-                            method="post"
-                            class="action-inline"
-                            onsubmit="return confirm('Yakin ingin menghapus instrumen ini?')"
-                        >
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-danger">
-                                Hapus
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-<?php endif; ?>
+                                    <form
+                                        action="<?= base_url('admin/instruments/' . $instrument['id']) ?>"
+                                        method="post"
+                                        class="action-inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus instrumen ini?')"
+                                    >
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
+</div>
 
 <?= $this->endSection() ?>

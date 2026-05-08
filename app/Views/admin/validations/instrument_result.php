@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title ?? 'Analisis Validasi Instrumen') ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title ?? 'Analisis Validasi Instrumen') ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,16 +17,18 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
-<div class="card">
-    <h3>Daftar Link Validasi Instrumen</h3>
-    <p>
-        Pilih link validasi instrumen yang sudah memiliki respon validator, lalu proses analisis.
-    </p>
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">Daftar Link Validasi Instrumen</h3>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-0">Pilih link validasi instrumen yang sudah memiliki respon validator, lalu proses analisis.</p>
+    </div>
 </div>
 
 <div class="toolbar">
@@ -38,7 +46,10 @@
         Belum ada link validasi instrumen.
     </div>
 <?php else: ?>
-    <table>
+    <div class="card">
+        <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table table-vcenter">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -47,7 +58,7 @@
                 <th>Status Link</th>
                 <th style="width: 90px;">Respon</th>
                 <th>Analisis Terakhir</th>
-                <th style="width: 260px;">Aksi</th>
+                <th class="table-actions-cell">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -60,7 +71,7 @@
                         <?= esc($link['judul']) ?>
                     </td>
                     <td>
-                        <span class="badge"><?= esc($link['status']) ?></span>
+                        <span class="<?= esc(status_badge_class($link['status'] ?? '')) ?>"><?= esc($link['status']) ?></span>
                     </td>
                     <td><?= esc($link['jumlah_respon'] ?? 0) ?></td>
                     <td>
@@ -68,45 +79,50 @@
                             <strong><?= esc($link['analysis']['persentase']) ?>%</strong><br>
                             <?= esc($link['analysis']['kategori']) ?>
                         <?php else: ?>
-                            <span class="badge">Belum dianalisis</span>
+                            <span class="badge badge-status-draft">Belum dianalisis</span>
                         <?php endif; ?>
                     </td>
-                    <td>
-                        <form
-                            action="<?= base_url('admin/validasi-instrumen/proses/' . $link['id']) ?>"
-                            method="post"
-                            class="action-inline"
-                        >
-                            <?= csrf_field() ?>
-                            <button type="submit" class="btn btn-primary">
-                                Proses Analisis
-                            </button>
-                        </form>
+                    <td class="table-actions-cell">
+                        <div class="table-actions">
+                            <form
+                                action="<?= base_url('admin/validasi-instrumen/proses/' . $link['id']) ?>"
+                                method="post"
+                                class="action-inline"
+                            >
+                                <?= csrf_field() ?>
+                                <button type="submit" class="btn btn-primary">
+                                    Proses Analisis
+                                </button>
+                            </form>
 
-                        <?php if (!empty($link['analysis'])): ?>
-                            <a href="<?= base_url('admin/validasi-instrumen/analisis/' . $link['analysis']['id']) ?>" class="btn btn-light">
-                                Lihat
-                            </a>
+                            <?php if (!empty($link['analysis'])): ?>
+                                <a href="<?= base_url('admin/validasi-instrumen/analisis/' . $link['analysis']['id']) ?>" class="btn btn-light">
+                                    Lihat
+                                </a>
 
-                            <?php if (($link['instrument_status'] ?? '') !== 'Valid'): ?>
-                                <form
-                                    action="<?= base_url('admin/validasi-instrumen/tetapkan-valid/' . $link['id']) ?>"
-                                    method="post"
-                                    class="action-inline"
-                                    onsubmit="return confirm('Tetapkan instrumen ini sebagai Valid dan tutup link validasi?')"
-                                >
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="btn btn-warning">
-                                        Tetapkan Valid
-                                    </button>
-                                </form>
+                                <?php if (($link['instrument_status'] ?? '') !== 'Valid'): ?>
+                                    <form
+                                        action="<?= base_url('admin/validasi-instrumen/tetapkan-valid/' . $link['id']) ?>"
+                                        method="post"
+                                        class="action-inline"
+                                        onsubmit="return confirm('Tetapkan instrumen ini sebagai Valid dan tutup link validasi?')"
+                                    >
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="btn btn-warning">
+                                            Tetapkan Valid
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             <?php endif; ?>
-                        <?php endif; ?>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
-    </table>
+        </table>
+        </div>
+        </div>
+    </div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

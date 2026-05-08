@@ -1,17 +1,23 @@
-<?= $this->extend('layouts/main') ?>
+﻿<?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Revisi Butir Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Revisi Butir Instrumen</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('errors')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <strong>Periksa kembali input berikut:</strong>
         <ul>
             <?php foreach (session()->getFlashdata('errors') as $error): ?>
@@ -115,7 +121,7 @@
         </div>
 
         <div class="form-row">
-            <label for="pernyataan_baru">Butir Hasil Revisi</label>
+            <label class="form-label" for="pernyataan_baru">Butir Hasil Revisi</label>
             <textarea
                 name="pernyataan_baru"
                 id="pernyataan_baru"
@@ -126,7 +132,7 @@
         </div>
 
         <div class="form-row">
-            <label for="alasan_revisi">Alasan / Dasar Revisi</label>
+            <label class="form-label" for="alasan_revisi">Alasan / Dasar Revisi</label>
             <textarea
                 name="alasan_revisi"
                 id="alasan_revisi"
@@ -136,7 +142,7 @@
         </div>
 
         <div class="form-row">
-            <label for="sumber_revisi">Sumber Revisi</label>
+            <label class="form-label" for="sumber_revisi">Sumber Revisi</label>
             <?php
             $selectedSumber = old('sumber_revisi', 'Komentar validator dan hasil analisis');
             $sumberOptions = [

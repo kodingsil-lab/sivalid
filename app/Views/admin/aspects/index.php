@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title">Kisi-Kisi Instrumen</h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Kisi-Kisi Instrumen</h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,12 +17,13 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
 
-<div class="card">
+<div class="card mb-3">
+    <div class="card-body">
     <form action="<?= base_url('admin/instrument-aspects') ?>" method="get" class="search-form">
         <select name="instrument_id" class="form-control" style="min-width: 420px;">
             <option value="">-- Pilih Instrumen --</option>
@@ -43,6 +50,7 @@
             </a>
         <?php endif; ?>
     </form>
+    </div>
 </div>
 
 <?php if (empty($instrumentId)): ?>
@@ -51,21 +59,25 @@
     </div>
 <?php else: ?>
 
-    <div class="card">
-        <h3>Daftar Aspek Instrumen</h3>
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Aspek Instrumen</h3>
+        </div>
+        <div class="card-body p-0">
 
         <?php if (empty($aspects)): ?>
             <div class="empty-state">
                 Belum ada aspek pada instrumen ini.
             </div>
         <?php else: ?>
-            <table>
+            <div class="table-responsive">
+            <table class="table table-vcenter table-hover">
                 <thead>
                     <tr>
                         <th style="width: 70px;">Urutan</th>
                         <th>Aspek</th>
                         <th>Deskripsi</th>
-                        <th style="width: 180px;">Aksi</th>
+                        <th class="table-actions-cell">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,44 +86,52 @@
                             <td><?= esc($aspect['urutan']) ?></td>
                             <td><?= esc($aspect['nama_aspek']) ?></td>
                             <td><?= nl2br(esc($aspect['deskripsi'] ?: '-')) ?></td>
-                            <td>
-                                <a href="<?= base_url('admin/instrument-aspects/' . $aspect['id'] . '/edit') ?>" class="btn btn-warning">
-                                    Edit
-                                </a>
+                            <td class="table-actions-cell">
+                                <div class="table-actions">
+                                    <a href="<?= base_url('admin/instrument-aspects/' . $aspect['id'] . '/edit') ?>" class="btn btn-warning">
+                                        Edit
+                                    </a>
 
-                                <form
-                                    action="<?= base_url('admin/instrument-aspects/' . $aspect['id']) ?>"
-                                    method="post"
-                                    class="action-inline"
-                                    onsubmit="return confirm('Yakin ingin menghapus aspek ini? Semua indikator di bawah aspek ini juga akan terhapus.')"
-                                >
-                                    <?= csrf_field() ?>
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <button type="submit" class="btn btn-danger">Hapus</button>
-                                </form>
+                                    <form
+                                        action="<?= base_url('admin/instrument-aspects/' . $aspect['id']) ?>"
+                                        method="post"
+                                        class="action-inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus aspek ini? Semua indikator di bawah aspek ini juga akan terhapus.')"
+                                    >
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <button type="submit" class="btn btn-danger">Hapus</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         <?php endif; ?>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Tampilan Kisi-Kisi Instrumen</h3>
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Tampilan Kisi-Kisi Instrumen</h3>
+        </div>
+        <div class="card-body p-0">
 
         <?php if (empty($aspects)): ?>
             <div class="empty-state">
                 Kisi-kisi belum dapat ditampilkan karena aspek belum dibuat.
             </div>
         <?php else: ?>
-            <table>
+            <div class="table-responsive">
+            <table class="table table-vcenter">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
                         <th style="width: 240px;">Aspek</th>
                         <th>Indikator</th>
-                        <th style="width: 160px;">Aksi Indikator</th>
+                        <th class="table-actions-cell">Aksi Indikator</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -127,10 +147,12 @@
                                 <td><?= $aspectIndex + 1 ?></td>
                                 <td><?= esc($aspect['nama_aspek']) ?></td>
                                 <td><em>Belum ada indikator.</em></td>
-                                <td>
-                                    <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
-                                        Tambah
-                                    </a>
+                                <td class="table-actions-cell">
+                                    <div class="table-actions">
+                                        <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
+                                            Tambah
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php else: ?>
@@ -145,21 +167,23 @@
                                         <?= esc($indicator['urutan']) ?>.
                                         <?= nl2br(esc($indicator['indikator'])) ?>
                                     </td>
-                                    <td>
-                                        <a href="<?= base_url('admin/instrument-indicators/' . $indicator['id'] . '/edit') ?>" class="btn btn-warning">
-                                            Edit
-                                        </a>
+                                    <td class="table-actions-cell">
+                                        <div class="table-actions">
+                                            <a href="<?= base_url('admin/instrument-indicators/' . $indicator['id'] . '/edit') ?>" class="btn btn-warning">
+                                                Edit
+                                            </a>
 
-                                        <form
-                                            action="<?= base_url('admin/instrument-indicators/' . $indicator['id']) ?>"
-                                            method="post"
-                                            class="action-inline"
-                                            onsubmit="return confirm('Yakin ingin menghapus indikator ini?')"
-                                        >
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="btn btn-danger">Hapus</button>
-                                        </form>
+                                            <form
+                                                action="<?= base_url('admin/instrument-indicators/' . $indicator['id']) ?>"
+                                                method="post"
+                                                class="action-inline"
+                                                onsubmit="return confirm('Yakin ingin menghapus indikator ini?')"
+                                            >
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="_method" value="DELETE">
+                                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -167,7 +191,9 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         <?php endif; ?>
+        </div>
     </div>
 
 <?php endif; ?>

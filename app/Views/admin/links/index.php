@@ -2,7 +2,13 @@
 
 <?= $this->section('content') ?>
 
-<h1 class="page-title"><?= esc($title ?? 'Link Validasi Instrumen') ?></h1>
+<div class="page-header d-print-none mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title"><?= esc($title ?? 'Link Validasi Instrumen') ?></h2>
+        </div>
+    </div>
+</div>
 
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
@@ -11,7 +17,7 @@
 <?php endif; ?>
 
 <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-error">
+    <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
     </div>
 <?php endif; ?>
@@ -33,7 +39,10 @@
         Belum ada <?= strtolower(esc($title ?? 'link validasi instrumen')) ?>.
     </div>
 <?php else: ?>
-    <table>
+<div class="card">
+    <div class="card-body p-0">
+    <div class="table-responsive">
+    <table class="table table-vcenter table-hover">
         <thead>
             <tr>
                 <th style="width: 50px;">No</th>
@@ -44,7 +53,7 @@
                 <th>Status</th>
                 <th>Respon</th>
                 <th>Link Publik</th>
-                <th style="width: 210px;">Aksi</th>
+                <th class="table-actions-cell">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -67,7 +76,7 @@
                     </td>
                     <td><?= esc($link['sasaran'] ?: '-') ?></td>
                     <td><?= esc($link['mode']) ?></td>
-                    <td><span class="badge"><?= esc($link['status']) ?></span></td>
+                    <td><span class="<?= esc(status_badge_class($link['status'] ?? '')) ?>"><?= esc($link['status']) ?></span></td>
                     <td>
                         <?= esc($link['jumlah_respon'] ?? 0) ?>
                         <?php if (!empty($link['maksimal_respon'])): ?>
@@ -84,51 +93,56 @@
                         >
                         <small>Klik kotak link lalu salin.</small>
                     </td>
-                    <td>
-                        <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
-                            Buka
-                        </a>
+                    <td class="table-actions-cell">
+                        <div class="table-actions">
+                            <a href="<?= $publicUrl ?>" target="_blank" class="btn btn-light">
+                                Buka
+                            </a>
 
-                        <?php if ($link['mode'] === 'validasi_instrumen'): ?>
+                            <?php if ($link['mode'] === 'validasi_instrumen'): ?>
+                                <form
+                                    action="<?= base_url('admin/validasi-instrumen/proses/' . $link['id']) ?>"
+                                    method="post"
+                                    class="action-inline"
+                                >
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="btn btn-primary">
+                                        Analisis
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+
+                            <?php if ($link['mode'] === 'validasi_produk'): ?>
+                                <a href="<?= base_url('admin/validasi-produk/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
+                                    Edit
+                                </a>
+                            <?php else: ?>
+                                <a href="<?= base_url('admin/instrument-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
+                                    Edit
+                                </a>
+                            <?php endif; ?>
+
                             <form
-                                action="<?= base_url('admin/validasi-instrumen/proses/' . $link['id']) ?>"
+                                action="<?= $link['mode'] === 'validasi_produk' ? base_url('admin/validasi-produk/' . $link['id']) : base_url('admin/instrument-links/' . $link['id']) ?>"
                                 method="post"
                                 class="action-inline"
+                                onsubmit="return confirm('Yakin ingin menghapus link ini?')"
                             >
                                 <?= csrf_field() ?>
-                                <button type="submit" class="btn btn-primary">
-                                    Analisis
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn btn-danger">
+                                    Hapus
                                 </button>
                             </form>
-                        <?php endif; ?>
-
-                        <?php if ($link['mode'] === 'validasi_produk'): ?>
-                            <a href="<?= base_url('admin/validasi-produk/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                                Edit
-                            </a>
-                        <?php else: ?>
-                            <a href="<?= base_url('admin/instrument-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                                Edit
-                            </a>
-                        <?php endif; ?>
-
-                        <form
-                            action="<?= $link['mode'] === 'validasi_produk' ? base_url('admin/validasi-produk/' . $link['id']) : base_url('admin/instrument-links/' . $link['id']) ?>"
-                            method="post"
-                            class="action-inline"
-                            onsubmit="return confirm('Yakin ingin menghapus link ini?')"
-                        >
-                            <?= csrf_field() ?>
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-danger">
-                                Hapus
-                            </button>
-                        </form>
+                        </div>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+    </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <?= $this->endSection() ?>

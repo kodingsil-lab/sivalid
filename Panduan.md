@@ -2376,10 +2376,10 @@ Referensi PHP:
 
 Checklist 26.10:
 
-[ ] Migration normalisasi status produk dibuat.  
-[ ] Default status produk baru menjadi `Draft`.  
-[ ] Status legacy pada data lama diperbarui.  
-[ ] Workflow status tetap aman untuk data lama.  
+[x] Migration normalisasi status produk dibuat.  
+[x] Default status produk baru menjadi `Draft`.  
+[x] Status legacy pada data lama diperbarui.  
+[x] Workflow status tetap aman untuk data lama.  
 
 ---
 
@@ -2414,9 +2414,9 @@ Referensi PHP:
 
 Checklist 26.11:
 
-[ ] Modul user admin dirancang.  
-[ ] Audit log database dirancang.  
-[ ] Backup data dirancang.  
+[x] Modul user admin dirancang.  
+[x] Audit log database dirancang.  
+[x] Backup data dirancang.  
 
 ---
 
@@ -2450,3 +2450,101 @@ Prioritas teknis terdekat:
 Kesimpulan:
 
 SIVALID sudah melewati tahap fondasi utama dan beberapa penguatan tahap 26 sudah selesai diterapkan. Bagian berikutnya lebih banyak berupa uji manual PDF, normalisasi data lama, dan penguatan operasional sebelum aplikasi dipakai lebih luas.
+
+
+⚠️ Temuan & Rekomendasi
+1. CLASS ALERT — Tidak Konsisten
+Masalah: Mayoritas view admin masih memakai alert-error (bukan nama class Tabler). Hanya settings/index.php yang sudah pakai alert-danger.
+
+File	Class yang dipakai	Seharusnya
+instruments/form.php	alert-error	alert-danger
+admin_users/form.php	alert-error	alert-danger
+aspects/index.php, aspects/form.php	alert-error	alert-danger
+respondent_links/index.php, form.php	alert-error	alert-danger
+links/index.php, form.php	alert-error	alert-danger
+items/index.php	alert-error	alert-danger
+indicators/index.php	alert-error	alert-danger
+submissions/index.php	alert-error	alert-danger
+validations/product_result.php, instrument_result.php	alert-error	alert-danger
+Dampak: alert-error tidak ada di Tabler, hanya ada di sivalid.css. Warna muncul tapi tidak dismissible dan tidak pakai ikon Tabler.
+
+Rekomendasi: Ganti semua alert-error → alert-danger di file-file di atas.
+
+2. PAGE HEADER — Tidak Konsisten
+Masalah: settings/index.php sudah pakai struktur Tabler <div class="page-header d-print-none"> lengkap dengan subtitle. Semua halaman lain masih pakai <h1 class="page-title"> mentah tanpa wrapper.
+
+File	Pola saat ini
+settings/index.php	<div class="page-header"> + subtitle ✅
+instruments/form.php, products/form.php	<h1 class="page-title"> + breadcrumb manual
+instruments/index.php, products/index.php, submissions/index.php	<h1 class="page-title mb-1"> dalam wrapper sendiri
+admin_users/index.php, links/index.php, dll.	<h1 class="page-title"> mentah tanpa wrapper
+Rekomendasi: Standarisasi semua menggunakan pola:
+
+
+<div class="page-header d-print-none mb-3">  <div class="row align-items-center">    <div class="col">      <h2 class="page-title">Judul</h2>    </div>  </div></div>
+3. CARD — Tidak Konsisten
+Masalah: File yang sudah di-redesign (settings, instruments, products, submissions, reports) menggunakan <div class="card"> <div class="card-header"> <div class="card-body"> (Tabler native). File yang belum di-redesign hanya menggunakan <div class="card"> tanpa card-header/card-body.
+
+File	Pola card
+settings/index.php	card + card-header + card-body ✅
+instruments/form.php, products/form.php	card + judul inline <h3>
+admin_users/form.php, aspects/form.php	<div class="card"> polos
+respondent_links/index.php, form.php	<div class="card"> polos
+items/form.php, aspects/index.php, indicators/index.php	<div class="card"> polos
+validations/*.php	<div class="card"> polos
+Rekomendasi: Tambah card-header + card-body pada file-file di atas.
+
+4. FORM LABEL — Tidak Konsisten
+Masalah: settings/index.php sudah menggunakan class="form-label" (Tabler). Semua file form lain memakai class kosong atau label via .form-row label dari sivalid.css.
+
+File	Label pattern
+settings/index.php	<label class="form-label"> ✅
+instruments/form.php, products/form.php	<label> tanpa class (via .form-row label)
+admin_users/form.php, links/form.php, items/form.php	<label> tanpa class
+respondent_links/form.php	<label> tanpa class
+Dampak: Secara visual aman karena sivalid.css menangani .form-row label. Namun tidak konsisten jika Tabler utilities di-override.
+
+Rekomendasi: Tambahkan class="form-label" pada semua <label> dalam form untuk konsistensi.
+
+5. BADGE STATUS — Dua Sistem Berdampingan
+Masalah: Dua sistem badge berbeda dipakai secara bersamaan:
+
+Sistem A (sivalid.css): badge badge-status-success, badge-valid, badge-warning, badge-danger — dipakai di dashboard.php, instruments/index.php, instruments/show.php, submissions/index.php
+Sistem B (Tabler native): badge bg-success-lt text-success — hanya dipakai di settings/index.php
+Dampak: Tidak ada masalah fungsional, tapi inkonsisten visual. Sistem A sudah ter-define di sivalid.css dan bekerja dengan baik.
+
+Rekomendasi: Pilih satu sistem. Sistem A sudah lebih matang — gunakan konsisten. Ubah settings/index.php agar pakai badge-status-* alih-alih Tabler native, atau sebaliknya standarisasi semua ke Tabler native.
+
+6. PUBLIC FORM — Dua Halaman Belum Di-redesign
+Masalah: Dua public form masih menggunakan CSS inline lama (bukan token pub-*):
+
+File	Status
+validasi_instrumen.php	✅ Sudah redesign
+observasi.php	✅ Sudah redesign
+fgd.php	✅ Sudah redesign
+tes_kinerja.php	✅ Sudah redesign
+validasi_produk.php	⚠️ Masih CSS inline lama (Arial, .container, .muted)
+respon_mahasiswa.php	⚠️ Masih CSS inline lama (minified CSS, .btn custom tanpa Tabler)
+thanks.php	⚠️ Masih CSS inline lama (Arial, tanpa Tabler)
+Dampak pada submit: Form validasi_produk.php dan respon_mahasiswa.php masih bisa submit karena csrf_field() dan honeypot hadir. Tidak ada breaking change fungsional.
+
+7. TABEL — Tidak Konsisten
+Masalah:
+
+respondent_links/index.php menggunakan <table> mentah tanpa class
+aspects/index.php, items/index.php, indicators/index.php menggunakan <table> mentah
+File yang sudah redesign (instruments/index.php, products/index.php, submissions/index.php) sudah pakai <table class="table table-vcenter"> Tabler
+Rekomendasi: Tambah class="table table-vcenter table-hover" pada semua tabel di file-file yang belum.
+
+8. TOMBOL — Satu Inkonsistensi Minor
+Masalah: Hanya settings/index.php yang memakai btn-outline-secondary (Tabler native). Semua file lain pakai btn-light untuk tombol sekunder. Ini bukan masalah kritis karena btn-light sudah di-define di sivalid.css, tapi inkonsisten.
+
+Prioritas Perbaikan
+Prioritas	Item	File yang Terdampak
+Tinggi	alert-error → alert-danger	10+ file admin
+Tinggi	Public form validasi_produk.php + respon_mahasiswa.php + thanks.php	3 file
+Sedang	Standarisasi card dengan card-header/card-body	8+ file admin
+Sedang	Standarisasi sistem badge (pilih satu)	settings/index.php vs file lainnya
+Sedang	Tambah class="table table-vcenter" di tabel yang belum	respondent_links, aspects, items, indicators
+Rendah	Standarisasi page-header wrapper	Semua halaman admin
+Rendah	Tambah class="form-label" pada semua label	Semua form admin

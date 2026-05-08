@@ -2,127 +2,177 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title ?? 'Validasi Instrumen') ?></title>
+    <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <style>
+        :root {
+            --pub-bg: #f8fafc;
+            --pub-surface: #ffffff;
+            --pub-border: #e2e8f0;
+            --pub-text: #1e293b;
+            --pub-muted: #64748b;
+            --pub-blue: #1d4ed8;
+            --pub-blue-soft: #eff6ff;
+            --pub-radius: 8px;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #222;
+            background: linear-gradient(180deg, #eef2ff 0%, var(--pub-bg) 28%);
+            color: var(--pub-text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .container {
-            width: 960px;
-            max-width: calc(100% - 30px);
-            margin: 24px auto;
-            background: #fff;
-            border: 1px solid #ddd;
-            padding: 24px;
-            box-sizing: border-box;
+        .public-shell {
+            width: min(1080px, calc(100% - 24px));
+            margin: 20px auto 36px;
         }
 
-        h1, h2, h3 {
-            margin-top: 0;
+        .public-card {
+            background: var(--pub-surface);
+            border: 1px solid var(--pub-border);
+            border-radius: var(--pub-radius);
+            box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
+            padding: 1rem 1.1rem;
+            margin-bottom: 0.9rem;
         }
 
-        .muted {
-            color: #666;
-            font-size: 14px;
+        .public-title {
+            margin: 0 0 .25rem;
+            font-size: 1.65rem;
+            font-weight: 700;
         }
 
-        .section {
-            margin-top: 24px;
-            padding-top: 18px;
-            border-top: 1px solid #ddd;
+        .public-muted {
+            color: var(--pub-muted);
+            font-size: .92rem;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
+        .public-heading {
+            margin: 0 0 .75rem;
+            font-size: 1.06rem;
+            font-weight: 700;
+            color: var(--pub-text);
         }
 
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 9px;
-            vertical-align: top;
-            font-size: 14px;
+        .public-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .8rem;
         }
 
-        th {
-            background: #f1f5f9;
+        .public-form-row {
+            margin-bottom: .8rem;
         }
 
-        .form-row {
-            margin-bottom: 14px;
-        }
-
-        label {
+        .public-label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-            font-size: 14px;
+            margin-bottom: .32rem;
+            font-size: .9rem;
+            font-weight: 600;
+            color: #334155;
         }
 
-        input[type="text"],
-        input[type="email"],
-        textarea,
-        select {
+        .public-input,
+        .public-textarea,
+        .public-select {
             width: 100%;
-            padding: 9px;
-            border: 1px solid #bbb;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: .5rem .62rem;
+            font-size: .92rem;
+            color: var(--pub-text);
+            background: #fff;
             box-sizing: border-box;
-            font-size: 14px;
         }
 
-        textarea {
-            min-height: 80px;
+        .public-input:focus,
+        .public-textarea:focus,
+        .public-select:focus {
+            outline: none;
+            border-color: var(--pub-blue);
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+        }
+
+        .public-textarea {
+            min-height: 88px;
             resize: vertical;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
+        .public-table-wrap {
+            overflow-x: auto;
         }
 
-        .radio-center {
-            text-align: center;
+        .public-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .9rem;
+            background: #fff;
         }
 
-        .btn {
-            padding: 10px 16px;
-            border: 0;
-            background: #1f4e79;
+        .public-table th,
+        .public-table td {
+            border: 1px solid var(--pub-border);
+            padding: .55rem .6rem;
+            vertical-align: top;
+        }
+
+        .public-table th {
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .public-score-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin: 0 8px 6px 0;
+            font-size: .86rem;
+            font-weight: 500;
+            color: #334155;
+            border: 1px solid #dbeafe;
+            background: var(--pub-blue-soft);
+            border-radius: 999px;
+            padding: 2px 9px;
+        }
+
+        .public-required-note {
+            color: #334155;
+            font-size: .78rem;
+        }
+
+        .public-alert {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+            padding: .72rem .85rem;
+            border-radius: 6px;
+            margin-bottom: .9rem;
+            font-size: .9rem;
+        }
+
+        .public-btn {
+            display: inline-block;
+            border: 1px solid var(--pub-blue);
+            background: var(--pub-blue);
             color: #fff;
+            padding: .6rem 1.05rem;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: .92rem;
+            font-weight: 600;
         }
 
-        .info-box {
-            background: #f8fafc;
-            border: 1px solid #ddd;
-            padding: 12px;
-            margin-top: 10px;
-        }
-
-        @media (max-width: 700px) {
-            .grid {
+        @media (max-width: 900px) {
+            .public-grid {
                 grid-template-columns: 1fr;
             }
 
-            .container {
-                margin: 0;
-                max-width: 100%;
-                width: 100%;
-                border: 0;
-            }
-
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
+            .public-shell {
+                width: min(1080px, calc(100% - 14px));
+                margin-top: 10px;
             }
         }
     </style>
@@ -130,41 +180,77 @@
 <body>
 
 <?php
-$scaleMin = $scale['min'] ?? (int) ($link['skala_min'] ?? 1);
-$scaleMax = $scale['max'] ?? (int) ($link['skala_max'] ?? 4);
-$scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
+$link = isset($link) && is_array($link) ? $link : [];
+$aspects = isset($aspects) && is_array($aspects) ? $aspects : [];
+$indicators = isset($indicators) && is_array($indicators) ? $indicators : [];
+$items = isset($items) && is_array($items) ? $items : [];
+$scale = isset($scale) && is_array($scale) ? $scale : [];
+
+$text = static function (array $row, string $key, string $default = '-'): string {
+    $value = $row[$key] ?? $default;
+
+    if (is_scalar($value)) {
+        $value = (string) $value;
+        return $value !== '' ? $value : $default;
+    }
+
+    return $default;
+};
+
+$scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min'] ?? 1);
+$scaleMax = isset($scale['max']) ? (int) $scale['max'] : (int) ($link['skala_max'] ?? 4);
+$rawScaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
+$scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawScaleRange) ? $rawScaleRange : []);
+$linkToken = $text($link, 'token', '');
 ?>
 
-<div class="container">
-    <h1>Validasi Instrumen</h1>
-    <p class="muted">
-        <?= esc($link['judul_link']) ?>
-    </p>
-
-    <div class="info-box">
-        <strong>Instrumen yang Divalidasi:</strong><br>
-        <?= esc($link['kode']) ?> - <?= esc($link['judul']) ?><br>
-        <span class="muted">
-            Jenis: <?= esc($link['jenis']) ?> |
-            Sasaran: <?= esc($link['instrument_sasaran'] ?: $link['sasaran'] ?: '-') ?>
-        </span>
+<div class="public-shell">
+    <div class="public-card">
+        <h1 class="public-title">Validasi Instrumen</h1>
+        <div class="public-muted"><?= esc($text($link, 'judul_link', '')) ?></div>
     </div>
 
-    <div class="info-box">
-        <strong>Informasi Pengisian:</strong><br>
-        Status Link: <?= esc($link['status']) ?><br>
-        Periode:
-        <?= !empty($link['tanggal_mulai']) ? esc(date('d-m-Y', strtotime($link['tanggal_mulai']))) : 'Tidak dibatasi' ?>
-        s.d.
-        <?= !empty($link['tanggal_selesai']) ? esc(date('d-m-Y', strtotime($link['tanggal_selesai']))) : 'Tidak dibatasi' ?><br>
-        Kuota:
-        <?= !empty($link['maksimal_respon']) ? esc($link['maksimal_respon']) . ' respon' : 'Tidak dibatasi' ?>
+    <div class="public-card">
+        <h2 class="public-heading">Identitas Instrumen yang Divalidasi</h2>
+        <div class="public-table-wrap">
+            <table class="public-table">
+                <tbody>
+                    <tr>
+                        <th style="width: 220px;">Kode dan Judul</th>
+                        <td><strong><?= esc($text($link, 'kode')) ?></strong> - <?= esc($text($link, 'judul')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Jenis</th>
+                        <td><?= esc($text($link, 'jenis')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Sasaran</th>
+                        <td><?= esc($text($link, 'instrument_sasaran', $text($link, 'sasaran'))) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Status Link</th>
+                        <td><?= esc($text($link, 'status')) ?></td>
+                    </tr>
+                    <tr>
+                        <th>Periode</th>
+                        <td>
+                            <?= !empty($link['tanggal_mulai']) ? esc(date('d-m-Y', strtotime($link['tanggal_mulai']))) : 'Tidak dibatasi' ?>
+                            s.d.
+                            <?= !empty($link['tanggal_selesai']) ? esc(date('d-m-Y', strtotime($link['tanggal_selesai']))) : 'Tidak dibatasi' ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Kuota</th>
+                        <td><?= !empty($link['maksimal_respon']) ? esc($text($link, 'maksimal_respon')) . ' respon' : 'Tidak dibatasi' ?></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>A. Identitas Validator</h2>
-
-        <form action="<?= base_url('isi/' . $link['token']) ?>" method="post">
+    <form action="<?= base_url('isi/' . $linkToken) ?>" method="post">
+        <div class="public-card">
+            <h2 class="public-heading">A. Identitas Validator</h2>
             <?= csrf_field() ?>
 
             <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
@@ -173,58 +259,58 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
             </div>
 
             <?php if (session()->getFlashdata('error')): ?>
-                <div style="background:#fdecea;color:#9f1c1c;border:1px solid #f5c2c0;padding:10px;margin-bottom:14px;">
-                    <?= esc(session()->getFlashdata('error')) ?>
+                <div class="public-alert">
+                    <?= esc((string) session()->getFlashdata('error')) ?>
                 </div>
             <?php endif; ?>
 
             <?php if (session()->getFlashdata('errors')): ?>
-                <div style="background:#fdecea;color:#9f1c1c;border:1px solid #f5c2c0;padding:10px;margin-bottom:14px;">
+                <div class="public-alert">
                     <strong>Periksa kembali input berikut:</strong>
                     <ul>
                         <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                            <li><?= esc($error) ?></li>
+                            <li><?= esc((string) $error) ?></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
             <?php endif; ?>
 
-            <div class="grid">
-                <div class="form-row">
-                    <label for="nama">Nama Validator</label>
-                    <input type="text" name="nama" id="nama" value="<?= old('nama') ?>" required>
+            <div class="public-grid">
+                <div class="public-form-row">
+                    <label for="nama" class="public-label">Nama Validator</label>
+                    <input type="text" name="nama" id="nama" class="public-input" value="<?= old('nama') ?>" required>
                 </div>
 
-                <div class="form-row">
-                    <label for="email">Email</label>
-                    <input type="email" name="email" id="email" value="<?= old('email') ?>">
+                <div class="public-form-row">
+                    <label for="email" class="public-label">Email</label>
+                    <input type="email" name="email" id="email" class="public-input" value="<?= old('email') ?>">
                 </div>
 
-                <div class="form-row">
-                    <label for="bidang_keahlian">Bidang Keahlian</label>
-                    <input type="text" name="bidang_keahlian" id="bidang_keahlian" value="<?= old('bidang_keahlian') ?>">
+                <div class="public-form-row">
+                    <label for="bidang_keahlian" class="public-label">Bidang Keahlian</label>
+                    <input type="text" name="bidang_keahlian" id="bidang_keahlian" class="public-input" value="<?= old('bidang_keahlian') ?>">
                 </div>
 
-                <div class="form-row">
-                    <label for="instansi">Instansi</label>
-                    <input type="text" name="instansi" id="instansi" value="<?= old('instansi') ?>">
+                <div class="public-form-row">
+                    <label for="instansi" class="public-label">Instansi</label>
+                    <input type="text" name="instansi" id="instansi" class="public-input" value="<?= old('instansi') ?>">
                 </div>
             </div>
+        </div>
 
-            <div class="section">
-                <h2>B. Pengantar</h2>
-                <p>
-                    <?= nl2br(esc($link['pengantar'] ?: 'Pengantar instrumen belum diisi.')) ?>
-                </p>
+        <div class="public-card">
+            <h2 class="public-heading">B. Pengantar</h2>
+            <div class="public-muted"><?= nl2br(esc($text($link, 'pengantar', 'Pengantar instrumen belum diisi.'))) ?></div>
+        </div>
+
+        <div class="public-card">
+            <h2 class="public-heading">C. Petunjuk Pengisian</h2>
+            <div class="public-muted" style="margin-bottom: .7rem;">
+                <?= nl2br(esc($text($link, 'petunjuk', 'Petunjuk pengisian belum diisi.'))) ?>
             </div>
 
-            <div class="section">
-                <h2>C. Petunjuk Pengisian</h2>
-                <p>
-                    <?= nl2br(esc($link['petunjuk'] ?: 'Petunjuk pengisian belum diisi.')) ?>
-                </p>
-
-                <table>
+            <div class="public-table-wrap">
+                <table class="public-table">
                     <thead>
                         <tr>
                             <th style="width: 120px;">Skor</th>
@@ -234,14 +320,14 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                     <tbody>
                         <?php foreach ($scaleRange as $score): ?>
                             <tr>
-                                <td><?= esc($score) ?></td>
+                                <td><?= esc((string) $score) ?></td>
                                 <td>
                                     <?php if ($score === $scaleMin): ?>
                                         Tidak Relevan / Sangat Tidak Sesuai
                                     <?php elseif ($score === $scaleMax): ?>
                                         Sangat Relevan / Sangat Sesuai
                                     <?php else: ?>
-                                        Tingkat penilaian <?= esc($score) ?>
+                                        Tingkat penilaian <?= esc((string) $score) ?>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -249,14 +335,16 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <div class="section">
-                <h2>D. Kisi-Kisi Instrumen</h2>
+        <div class="public-card">
+            <h2 class="public-heading">D. Kisi-Kisi Instrumen</h2>
 
-                <?php if (empty($aspects)): ?>
-                    <p class="muted">Kisi-kisi belum tersedia.</p>
-                <?php else: ?>
-                    <table>
+            <?php if (empty($aspects)): ?>
+                <p class="public-muted">Kisi-kisi belum tersedia.</p>
+            <?php else: ?>
+                <div class="public-table-wrap">
+                    <table class="public-table">
                         <thead>
                             <tr>
                                 <th style="width: 60px;">No</th>
@@ -275,7 +363,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                 <?php if (empty($aspectIndicators)): ?>
                                     <tr>
                                         <td><?= $aspectIndex + 1 ?></td>
-                                        <td><?= esc($aspect['nama_aspek']) ?></td>
+                                        <td><?= esc((string) ($aspect['nama_aspek'] ?? '-')) ?></td>
                                         <td><em>Belum ada indikator.</em></td>
                                     </tr>
                                 <?php else: ?>
@@ -283,26 +371,28 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                         <tr>
                                             <?php if ($indicatorIndex === 0): ?>
                                                 <td rowspan="<?= count($aspectIndicators) ?>"><?= $aspectIndex + 1 ?></td>
-                                                <td rowspan="<?= count($aspectIndicators) ?>"><?= esc($aspect['nama_aspek']) ?></td>
+                                                <td rowspan="<?= count($aspectIndicators) ?>"><?= esc((string) ($aspect['nama_aspek'] ?? '-')) ?></td>
                                             <?php endif; ?>
 
-                                            <td><?= nl2br(esc($indicator['indikator'])) ?></td>
+                                            <td><?= nl2br(esc((string) ($indicator['indikator'] ?? '-'))) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
+        </div>
 
-            <div class="section">
-                <h2>E. Instrumen yang Divalidasi</h2>
+        <div class="public-card">
+            <h2 class="public-heading">E. Instrumen yang Divalidasi</h2>
 
-                <?php if (empty($items)): ?>
-                    <p class="muted">Butir instrumen belum tersedia.</p>
-                <?php else: ?>
-                    <table>
+            <?php if (empty($items)): ?>
+                <p class="public-muted">Butir instrumen belum tersedia.</p>
+            <?php else: ?>
+                <div class="public-table-wrap">
+                    <table class="public-table">
                         <thead>
                             <tr>
                                 <th style="width: 60px;">No</th>
@@ -323,26 +413,26 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                 }
                                 ?>
                                 <tr>
-                                    <td><?= esc($item['nomor']) ?></td>
-                                    <td><?= esc($aspectName) ?></td>
-                                    <td><?= nl2br(esc($item['pernyataan'])) ?></td>
+                                    <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td><?= esc((string) $aspectName) ?></td>
+                                    <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
+        </div>
 
-            <div class="section">
-                <h2>F. Lembar Validasi Instrumen</h2>
-                <p class="muted">
-                    Berikan penilaian terhadap relevansi setiap butir instrumen.
-                </p>
+        <div class="public-card">
+            <h2 class="public-heading">F. Lembar Validasi Instrumen</h2>
+            <p class="public-muted">Berikan penilaian terhadap relevansi setiap butir instrumen.</p>
 
-                <?php if (empty($items)): ?>
-                    <p class="muted">Belum ada butir yang dapat divalidasi.</p>
-                <?php else: ?>
-                    <table>
+            <?php if (empty($items)): ?>
+                <p class="public-muted">Belum ada butir yang dapat divalidasi.</p>
+            <?php else: ?>
+                <div class="public-table-wrap">
+                    <table class="public-table">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">No</th>
@@ -365,15 +455,15 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                 }
                                 ?>
                                 <tr>
-                                    <td><?= esc($item['nomor']) ?></td>
-                                    <td><?= esc($aspectName) ?></td>
+                                    <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td><?= esc((string) $aspectName) ?></td>
                                     <td>
-                                        <?= nl2br(esc($item['pernyataan'])) ?>
+                                        <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
 
                                         <?php if ((int) ($item['wajib'] ?? 1) === 1): ?>
-                                            <br><small class="muted">Wajib diisi</small>
+                                            <br><small class="public-required-note">Wajib diisi</small>
                                         <?php else: ?>
-                                            <br><small class="muted">Opsional</small>
+                                            <br><small class="public-required-note">Opsional</small>
                                         <?php endif; ?>
                                     </td>
 
@@ -385,20 +475,21 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 
                                         <?php if ($tipeButir === 'skala'): ?>
                                             <?php foreach ($scaleRange as $score): ?>
-                                                <label style="display:inline-block; margin-right:8px; font-weight:normal;">
+                                                <label class="public-score-option">
                                                     <input
                                                         type="radio"
                                                         name="answers[<?= $item['id'] ?>][skor]"
-                                                        value="<?= esc($score) ?>"
+                                                        value="<?= esc((string) $score) ?>"
                                                         <?= $isRequired ?>
                                                     >
-                                                    <?= esc($score) ?>
+                                                    <?= esc((string) $score) ?>
                                                 </label>
                                             <?php endforeach; ?>
 
                                         <?php elseif ($tipeButir === 'isian'): ?>
                                             <textarea
                                                 name="answers[<?= $item['id'] ?>][jawaban_teks]"
+                                                class="public-textarea"
                                                 placeholder="Tuliskan jawaban"
                                                 <?= $isRequired ?>
                                             ><?= old('answers.' . $item['id'] . '.jawaban_teks') ?></textarea>
@@ -406,6 +497,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                         <?php elseif ($tipeButir === 'komentar'): ?>
                                             <textarea
                                                 name="answers[<?= $item['id'] ?>][jawaban_teks]"
+                                                class="public-textarea"
                                                 placeholder="Tuliskan komentar"
                                                 <?= $isRequired ?>
                                             ><?= old('answers.' . $item['id'] . '.jawaban_teks') ?></textarea>
@@ -413,6 +505,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                         <?php elseif ($tipeButir === 'catatan'): ?>
                                             <textarea
                                                 name="answers[<?= $item['id'] ?>][jawaban_teks]"
+                                                class="public-textarea"
                                                 placeholder="Tuliskan catatan"
                                                 <?= $isRequired ?>
                                             ><?= old('answers.' . $item['id'] . '.jawaban_teks') ?></textarea>
@@ -421,18 +514,20 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                             <input
                                                 type="text"
                                                 name="answers[<?= $item['id'] ?>][jawaban_teks]"
+                                                class="public-input"
                                                 placeholder="Tuliskan pilihan/jawaban"
                                                 value="<?= old('answers.' . $item['id'] . '.jawaban_teks') ?>"
                                                 <?= $isRequired ?>
                                             >
 
-                                            <small class="muted">
+                                            <small class="public-muted">
                                                 Catatan: opsi pilihan khusus dapat ditambahkan pada tahap lanjutan.
                                             </small>
 
                                         <?php else: ?>
                                             <textarea
                                                 name="answers[<?= $item['id'] ?>][jawaban_teks]"
+                                                class="public-textarea"
                                                 placeholder="Tuliskan jawaban"
                                                 <?= $isRequired ?>
                                             ><?= old('answers.' . $item['id'] . '.jawaban_teks') ?></textarea>
@@ -442,6 +537,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                     <td>
                                         <textarea
                                             name="answers[<?= $item['id'] ?>][komentar]"
+                                            class="public-textarea"
                                             placeholder="Komentar/saran perbaikan"
                                         ><?= old('answers.' . $item['id'] . '.komentar') ?></textarea>
                                     </td>
@@ -449,53 +545,51 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                <?php endif; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div class="public-card">
+            <h2 class="public-heading">G. Komentar Umum Validator</h2>
+            <textarea class="public-textarea" name="komentar_umum" placeholder="Tuliskan komentar umum terhadap instrumen."><?= old('komentar_umum') ?></textarea>
+        </div>
+
+        <div class="public-card">
+            <h2 class="public-heading">H. Kesimpulan Validasi</h2>
+
+            <div class="public-form-row">
+                <label class="public-label">
+                    <input type="radio" name="kesimpulan" value="Layak digunakan tanpa revisi" required>
+                    Layak digunakan tanpa revisi
+                </label>
             </div>
 
-            <div class="section">
-                <h2>G. Komentar Umum Validator</h2>
-                <textarea name="komentar_umum" placeholder="Tuliskan komentar umum terhadap instrumen."><?= old('komentar_umum') ?></textarea>
+            <div class="public-form-row">
+                <label class="public-label">
+                    <input type="radio" name="kesimpulan" value="Layak digunakan dengan revisi kecil" required>
+                    Layak digunakan dengan revisi kecil
+                </label>
             </div>
 
-            <div class="section">
-                <h2>H. Kesimpulan Validasi</h2>
-
-                <div class="form-row">
-                    <label>
-                        <input type="radio" name="kesimpulan" value="Layak digunakan tanpa revisi" required>
-                        Layak digunakan tanpa revisi
-                    </label>
-                </div>
-
-                <div class="form-row">
-                    <label>
-                        <input type="radio" name="kesimpulan" value="Layak digunakan dengan revisi kecil" required>
-                        Layak digunakan dengan revisi kecil
-                    </label>
-                </div>
-
-                <div class="form-row">
-                    <label>
-                        <input type="radio" name="kesimpulan" value="Perlu revisi besar sebelum digunakan" required>
-                        Perlu revisi besar sebelum digunakan
-                    </label>
-                </div>
-
-                <div class="form-row">
-                    <label>
-                        <input type="radio" name="kesimpulan" value="Tidak layak digunakan" required>
-                        Tidak layak digunakan
-                    </label>
-                </div>
+            <div class="public-form-row">
+                <label class="public-label">
+                    <input type="radio" name="kesimpulan" value="Perlu revisi besar sebelum digunakan" required>
+                    Perlu revisi besar sebelum digunakan
+                </label>
             </div>
 
-            <div class="section">
-                <button type="submit" class="btn">
-                    Kirim Validasi
-                </button>
+            <div class="public-form-row">
+                <label class="public-label">
+                    <input type="radio" name="kesimpulan" value="Tidak layak digunakan" required>
+                    Tidak layak digunakan
+                </label>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="public-card" style="text-align: right;">
+            <button type="submit" class="public-btn">Kirim Validasi</button>
+        </div>
+    </form>
 </div>
 
 </body>
