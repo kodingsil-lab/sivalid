@@ -68,18 +68,14 @@ $checkedInstruments = isset($selectedInstruments) && is_array($selectedInstrumen
                 <div class="form-row">
                     <label class="form-label" for="jenis_produk">Jenis Produk</label>
                     <?php
-                    $jenisOptions = [
-                        'Buku Model',
-                        'Buku Ajar',
-                        'Materi Ajar',
-                        'Panduan Pembelajaran',
-                        'E-Learning',
-                        'Rubrik',
-                        'Template Artikel',
-                        'Produk Lainnya',
-                    ];
-
+                    $jenisOptions = isset($jenisOptions) && is_array($jenisOptions)
+                        ? $jenisOptions
+                        : [];
                     $selectedJenis = old('jenis_produk', $product['jenis_produk'] ?? '');
+
+                    if ($selectedJenis !== '' && !in_array($selectedJenis, $jenisOptions, true)) {
+                        array_unshift($jenisOptions, $selectedJenis);
+                    }
                     ?>
 
                     <select name="jenis_produk" id="jenis_produk" class="form-control" required>

@@ -2,6 +2,8 @@
 
 <?= $this->section('content') ?>
 
+<?php $activeTab = isset($activeTab) ? (string) $activeTab : 'profile'; ?>
+
 <div class="page-header d-print-none mb-3">
     <div class="container-xl">
         <div class="row align-items-center">
@@ -44,223 +46,363 @@
     </div>
 <?php endif; ?>
 
-<!-- 1. Profil Penelitian -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-primary" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="4" /><path d="M6.523 6.523a7 7 0 1 0 10.95 0" /></svg>
-            Profil Penelitian
-        </h3>
-    </div>
-    <div class="card-body">
-        <form action="<?= base_url('admin/settings/profile') ?>" method="post">
-            <?= csrf_field() ?>
-
-            <div class="mb-3">
-                <label for="nama_penelitian" class="form-label">Nama / Judul Penelitian <span class="text-danger">*</span></label>
-                <input
-                    type="text"
-                    name="nama_penelitian"
-                    id="nama_penelitian"
-                    class="form-control"
-                    placeholder="Contoh: Pengembangan Bahan Ajar IPA Berbasis PBL"
-                    value="<?= old('nama_penelitian', esc($profile['nama_penelitian'] ?? '')) ?>"
-                    required
-                >
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="nama_peneliti" class="form-label">Nama Peneliti</label>
-                    <input
-                        type="text"
-                        name="nama_peneliti"
-                        id="nama_peneliti"
-                        class="form-control"
-                        placeholder="Nama lengkap peneliti"
-                        value="<?= old('nama_peneliti', esc($profile['nama_peneliti'] ?? '')) ?>"
-                    >
+<div class="card settings-layout-card">
+    <div class="row g-0">
+        <div class="col-lg-3 col-xl-3">
+            <aside class="settings-sidebar">
+                <div class="settings-nav-group">
+                    <div class="settings-nav-label">Konfigurasi Penelitian</div>
+                    <a href="<?= base_url('admin/settings?tab=profile') ?>" class="settings-nav-link <?= $activeTab === 'profile' ? 'active' : '' ?>">Profil Penelitian</a>
+                    <a href="<?= base_url('admin/settings?tab=category') ?>" class="settings-nav-link <?= $activeTab === 'category' ? 'active' : '' ?>">Kategori Kelayakan</a>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="institusi" class="form-label">Institusi</label>
-                    <input
-                        type="text"
-                        name="institusi"
-                        id="institusi"
-                        class="form-control"
-                        placeholder="Nama universitas / lembaga"
-                        value="<?= old('institusi', esc($profile['institusi'] ?? '')) ?>"
-                    >
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="program_studi" class="form-label">Program Studi</label>
-                    <input
-                        type="text"
-                        name="program_studi"
-                        id="program_studi"
-                        class="form-control"
-                        placeholder="Contoh: Pendidikan Matematika"
-                        value="<?= old('program_studi', esc($profile['program_studi'] ?? '')) ?>"
-                    >
+                <div class="settings-nav-group">
+                    <div class="settings-nav-label">Data Referensi</div>
+                    <a href="<?= base_url('admin/settings?tab=instrument-types') ?>" class="settings-nav-link <?= $activeTab === 'instrument-types' ? 'active' : '' ?>">Jenis Instrumen</a>
+                    <a href="<?= base_url('admin/settings?tab=product-types') ?>" class="settings-nav-link <?= $activeTab === 'product-types' ? 'active' : '' ?>">Jenis Produk</a>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="tahun_penelitian" class="form-label">Tahun Penelitian</label>
-                    <input
-                        type="text"
-                        name="tahun_penelitian"
-                        id="tahun_penelitian"
-                        class="form-control"
-                        placeholder="<?= date('Y') ?>"
-                        value="<?= old('tahun_penelitian', esc($profile['tahun_penelitian'] ?? date('Y'))) ?>"
-                    >
-                </div>
-            </div>
 
-            <div class="mt-3 d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">Simpan Profil</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- 2. Kategori Kelayakan -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-warning" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 7v5l3 3" /></svg>
-            Kategori Kelayakan
-        </h3>
-    </div>
-    <div class="card-body">
-        <div class="alert alert-info mb-4" role="alert">
-            <div class="d-flex gap-2 align-items-start">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon mt-1" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><path d="M12 8h.01" /><path d="M11 12h1v4h1" /></svg>
-                <div>
-                    <strong>Catatan:</strong> Nilai ambang batas ini digunakan sebagai <strong>dasar perhitungan kategori kelayakan</strong> pada analisis validasi instrumen dan produk. Pastikan setiap batas lebih besar dari kategori di bawahnya.
+                <div class="settings-nav-group">
+                    <div class="settings-nav-label">Sistem</div>
+                    <a href="<?= base_url('admin/settings?tab=system') ?>" class="settings-nav-link <?= $activeTab === 'system' ? 'active' : '' ?>">User Admin &amp; Backup</a>
                 </div>
-            </div>
+            </aside>
         </div>
 
-        <form action="<?= base_url('admin/settings/category') ?>" method="post">
-            <?= csrf_field() ?>
+        <div class="col-lg-9 col-xl-9">
+            <div class="settings-content">
+                <?php if ($activeTab === 'profile'): ?>
+                <section id="section-profile" class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>Profil Penelitian</h3>
+                        <p>Informasi dasar penelitian yang dipakai di berbagai halaman dan laporan.</p>
+                    </div>
 
-            <div class="table-responsive mb-3">
-                <table class="table table-bordered table-vcenter table-sm">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width:40%">Kategori</th>
-                            <th style="width:30%">Nilai Minimal (%)</th>
-                            <th class="text-muted" style="width:30%">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <span class="badge badge-status-success">Sangat Layak</span>
-                            </td>
-                            <td>
+                    <form action="<?= base_url('admin/settings/profile?tab=profile') ?>" method="post">
+                        <?= csrf_field() ?>
+
+                        <div class="mb-3">
+                            <label for="nama_penelitian" class="form-label">Nama / Judul Penelitian <span class="text-danger">*</span></label>
+                            <input
+                                type="text"
+                                name="nama_penelitian"
+                                id="nama_penelitian"
+                                class="form-control"
+                                placeholder="Contoh: Pengembangan Bahan Ajar IPA Berbasis PBL"
+                                value="<?= old('nama_penelitian', esc($profile['nama_penelitian'] ?? '')) ?>"
+                                required
+                            >
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nama_peneliti" class="form-label">Nama Peneliti</label>
                                 <input
-                                    type="number"
-                                    name="kategori_sangat_layak_min"
-                                    id="kategori_sangat_layak_min"
-                                    class="form-control form-control-sm"
-                                    style="width:100px"
-                                    value="<?= old('kategori_sangat_layak_min', esc((string) ($category['kategori_sangat_layak_min'] ?? 85))) ?>"
-                                    min="0"
-                                    max="100"
+                                    type="text"
+                                    name="nama_peneliti"
+                                    id="nama_peneliti"
+                                    class="form-control"
+                                    placeholder="Nama lengkap peneliti"
+                                    value="<?= old('nama_peneliti', esc($profile['nama_peneliti'] ?? '')) ?>"
                                 >
-                            </td>
-                            <td class="text-muted small">Skor ≥ nilai ini dikategorikan Sangat Layak</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="badge badge-status-process">Layak</span>
-                            </td>
-                            <td>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="institusi" class="form-label">Institusi</label>
                                 <input
-                                    type="number"
-                                    name="kategori_layak_min"
-                                    id="kategori_layak_min"
-                                    class="form-control form-control-sm"
-                                    style="width:100px"
-                                    value="<?= old('kategori_layak_min', esc((string) ($category['kategori_layak_min'] ?? 70))) ?>"
-                                    min="0"
-                                    max="100"
+                                    type="text"
+                                    name="institusi"
+                                    id="institusi"
+                                    class="form-control"
+                                    placeholder="Nama universitas / lembaga"
+                                    value="<?= old('institusi', esc($profile['institusi'] ?? '')) ?>"
                                 >
-                            </td>
-                            <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Sangat Layak) dikategorikan Layak</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="badge badge-status-warning">Kurang Layak</span>
-                            </td>
-                            <td>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="program_studi" class="form-label">Program Studi</label>
                                 <input
-                                    type="number"
-                                    name="kategori_kurang_layak_min"
-                                    id="kategori_kurang_layak_min"
-                                    class="form-control form-control-sm"
-                                    style="width:100px"
-                                    value="<?= old('kategori_kurang_layak_min', esc((string) ($category['kategori_kurang_layak_min'] ?? 55))) ?>"
-                                    min="0"
-                                    max="100"
+                                    type="text"
+                                    name="program_studi"
+                                    id="program_studi"
+                                    class="form-control"
+                                    placeholder="Contoh: Pendidikan Matematika"
+                                    value="<?= old('program_studi', esc($profile['program_studi'] ?? '')) ?>"
                                 >
-                            </td>
-                            <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Layak) dikategorikan Kurang Layak</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="badge badge-status-danger">Tidak Layak</span>
-                            </td>
-                            <td>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="tahun_penelitian" class="form-label">Tahun Penelitian</label>
                                 <input
-                                    type="number"
-                                    name="kategori_tidak_layak_min"
-                                    id="kategori_tidak_layak_min"
-                                    class="form-control form-control-sm"
-                                    style="width:100px"
-                                    value="<?= old('kategori_tidak_layak_min', esc((string) ($category['kategori_tidak_layak_min'] ?? 0))) ?>"
-                                    min="0"
-                                    max="100"
+                                    type="text"
+                                    name="tahun_penelitian"
+                                    id="tahun_penelitian"
+                                    class="form-control"
+                                    placeholder="<?= date('Y') ?>"
+                                    value="<?= old('tahun_penelitian', esc($profile['tahun_penelitian'] ?? date('Y'))) ?>"
                                 >
-                            </td>
-                            <td class="text-muted small">Skor di bawah ambang Kurang Layak dikategorikan Tidak Layak</td>
-                        </tr>
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">Simpan Profil</button>
+                        </div>
+                    </form>
+                </section>
+                <?php elseif ($activeTab === 'category'): ?>
+
+                <section id="section-category" class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>Kategori Kelayakan</h3>
+                        <p>Ambang batas kategori yang dipakai pada analisis validasi instrumen dan produk.</p>
+                    </div>
+
+                    <div class="alert alert-info mb-4" role="alert">
+                        <div class="d-flex gap-2 align-items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon mt-1" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><path d="M12 8h.01" /><path d="M11 12h1v4h1" /></svg>
+                            <div>
+                                <strong>Catatan:</strong> Nilai ambang batas ini digunakan sebagai <strong>dasar perhitungan kategori kelayakan</strong> pada analisis validasi instrumen dan produk. Pastikan setiap batas lebih besar dari kategori di bawahnya.
+                            </div>
+                        </div>
+                    </div>
+
+                    <form action="<?= base_url('admin/settings/category?tab=category') ?>" method="post">
+                        <?= csrf_field() ?>
+
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered table-vcenter table-sm">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width:40%">Kategori</th>
+                                        <th style="width:30%">Nilai Minimal (%)</th>
+                                        <th class="text-muted" style="width:30%">Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-status-success">Sangat Layak</span></td>
+                                        <td>
+                                            <input type="number" name="kategori_sangat_layak_min" id="kategori_sangat_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_sangat_layak_min', esc((string) ($category['kategori_sangat_layak_min'] ?? 85))) ?>" min="0" max="100">
+                                        </td>
+                                        <td class="text-muted small">Skor ≥ nilai ini dikategorikan Sangat Layak</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-status-process">Layak</span></td>
+                                        <td>
+                                            <input type="number" name="kategori_layak_min" id="kategori_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_layak_min', esc((string) ($category['kategori_layak_min'] ?? 70))) ?>" min="0" max="100">
+                                        </td>
+                                        <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Sangat Layak) dikategorikan Layak</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-status-warning">Kurang Layak</span></td>
+                                        <td>
+                                            <input type="number" name="kategori_kurang_layak_min" id="kategori_kurang_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_kurang_layak_min', esc((string) ($category['kategori_kurang_layak_min'] ?? 55))) ?>" min="0" max="100">
+                                        </td>
+                                        <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Layak) dikategorikan Kurang Layak</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-status-danger">Tidak Layak</span></td>
+                                        <td>
+                                            <input type="number" name="kategori_tidak_layak_min" id="kategori_tidak_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_tidak_layak_min', esc((string) ($category['kategori_tidak_layak_min'] ?? 0))) ?>" min="0" max="100">
+                                        </td>
+                                        <td class="text-muted small">Skor di bawah ambang Kurang Layak dikategorikan Tidak Layak</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">Simpan Kategori</button>
+                        </div>
+                    </form>
+                </section>
+                <?php elseif ($activeTab === 'instrument-types'): ?>
+
+                <section id="section-instrument-types" class="settings-section settings-section-last">
+                    <div class="settings-section-header">
+                        <h3>Jenis Instrumen</h3>
+                        <p>Kelola daftar jenis yang muncul pada dropdown Jenis Instrumen di Master Instrumen.</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title">Tambah Jenis Baru</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="<?= base_url('admin/instrument-types') ?>" method="post" class="search-form">
+                                <?= csrf_field() ?>
+                                <input
+                                    type="text"
+                                    name="jenis"
+                                    class="form-control"
+                                    placeholder="Contoh: Self Assessment Guru"
+                                    value="<?= old('jenis') ?>"
+                                    maxlength="100"
+                                    required
+                                >
+                                <button type="submit" class="btn btn-primary">Tambah</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mb-0">
+                        <div class="card-header">
+                            <h3 class="card-title">Daftar Jenis Instrumen</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-vcenter table-hover table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px;">No</th>
+                                            <th>Nama Jenis</th>
+                                            <th style="width: 200px;">Dipakai di Master</th>
+                                            <th class="table-actions-cell">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($instrumentTypes)): ?>
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">Belum ada jenis instrumen.</td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <?php foreach ($instrumentTypes as $index => $type): ?>
+                                                <?php
+                                                $label = (string) ($type['setting_value'] ?? '');
+                                                $usedCount = (int) ($instrumentTypeUsage[$label] ?? 0);
+                                                ?>
+                                                <tr>
+                                                    <td><?= $index + 1 ?></td>
+                                                    <td><?= esc($label) ?></td>
+                                                    <td>
+                                                        <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                                    </td>
+                                                    <td class="table-actions-cell">
+                                                        <?php if ($usedCount === 0): ?>
+                                                            <form action="<?= base_url('admin/instrument-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis instrumen ini?');">
+                                                                <?= csrf_field() ?>
+                                                                <input type="hidden" name="_method" value="DELETE">
+                                                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                            </form>
+                                                        <?php else: ?>
+                                                            <span class="text-muted small">Tidak bisa dihapus</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <?php elseif ($activeTab === 'product-types'): ?>
+
+                <section id="section-product-types" class="settings-section settings-section-last">
+                    <div class="settings-section-header">
+                        <h3>Jenis Produk</h3>
+                        <p>Kelola daftar jenis yang muncul pada dropdown Jenis Produk di form Produk Penelitian.</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h3 class="card-title">Tambah Jenis Baru</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="<?= base_url('admin/product-types') ?>" method="post" class="search-form">
+                                <?= csrf_field() ?>
+                                <input
+                                    type="text"
+                                    name="jenis"
+                                    class="form-control"
+                                    placeholder="Contoh: Modul Interaktif"
+                                    value="<?= old('jenis') ?>"
+                                    maxlength="100"
+                                    required
+                                >
+                                <button type="submit" class="btn btn-primary">Tambah</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mb-0">
+                        <div class="card-header">
+                            <h3 class="card-title">Daftar Jenis Produk</h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-vcenter table-hover table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px;">No</th>
+                                            <th>Nama Jenis</th>
+                                            <th style="width: 200px;">Dipakai di Produk</th>
+                                            <th class="table-actions-cell">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (empty($productTypes)): ?>
+                                            <tr>
+                                                <td colspan="4" class="text-center text-muted py-4">Belum ada jenis produk.</td>
+                                            </tr>
+                                        <?php else: ?>
+                                            <?php foreach ($productTypes as $index => $type): ?>
+                                                <?php
+                                                $label = (string) ($type['setting_value'] ?? '');
+                                                $usedCount = (int) ($productTypeUsage[$label] ?? 0);
+                                                ?>
+                                                <tr>
+                                                    <td><?= $index + 1 ?></td>
+                                                    <td><?= esc($label) ?></td>
+                                                    <td>
+                                                        <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                                    </td>
+                                                    <td class="table-actions-cell">
+                                                        <?php if ($usedCount === 0): ?>
+                                                            <form action="<?= base_url('admin/product-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis produk ini?');">
+                                                                <?= csrf_field() ?>
+                                                                <input type="hidden" name="_method" value="DELETE">
+                                                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                            </form>
+                                                        <?php else: ?>
+                                                            <span class="text-muted small">Tidak bisa dihapus</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <?php elseif ($activeTab === 'system'): ?>
+
+                <section id="section-admin" class="settings-section settings-section-last">
+                    <div class="settings-section-header">
+                        <h3>User Admin &amp; Backup</h3>
+                        <p>Kelola akun admin dan utilitas backup dari satu area yang lebih ringkas.</p>
+                    </div>
+
+                    <p class="text-muted mb-3">
+                        Kelola akun yang dapat mengakses panel admin SIVALID. Tambah admin baru, perbarui nama atau kata sandi, atau nonaktifkan akun yang tidak lagi digunakan.
+                    </p>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 11h6m-3 -3v6" /></svg>
+                            Manajemen User Admin
+                        </a>
+                        <a href="<?= base_url('admin/backup') ?>" class="btn btn-light">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
+                            Backup &amp; Restore
+                        </a>
+                    </div>
+                </section>
+                <?php endif; ?>
             </div>
-
-            <div class="d-flex justify-content-end">
-                <button type="submit" class="btn btn-primary">Simpan Kategori</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- 3. User Admin -->
-<div class="card mb-4">
-    <div class="card-header">
-        <h3 class="card-title">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2 text-secondary" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
-            User Admin
-        </h3>
-    </div>
-    <div class="card-body">
-        <p class="text-muted mb-3">
-            Kelola akun yang dapat mengakses panel admin SIVALID. Tambah admin baru, perbarui nama atau kata sandi, atau nonaktifkan akun yang tidak lagi digunakan.
-        </p>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 11h6m-3 -3v6" /></svg>
-                Manajemen User Admin
-            </a>
-            <a href="<?= base_url('admin/backup') ?>" class="btn btn-light">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
-                Backup &amp; Restore
-            </a>
         </div>
     </div>
 </div>

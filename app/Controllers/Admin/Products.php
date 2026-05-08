@@ -6,18 +6,21 @@ use App\Controllers\BaseController;
 use App\Models\InstrumentModel;
 use App\Models\ProductInstrumentModel;
 use App\Models\ResearchProductModel;
+use App\Models\SettingModel;
 
 class Products extends BaseController
 {
     protected ResearchProductModel $productModel;
     protected InstrumentModel $instrumentModel;
     protected ProductInstrumentModel $productInstrumentModel;
+    protected SettingModel $settingModel;
 
     public function __construct()
     {
         $this->productModel           = new ResearchProductModel();
         $this->instrumentModel        = new InstrumentModel();
         $this->productInstrumentModel = new ProductInstrumentModel();
+        $this->settingModel           = new SettingModel();
     }
 
     public function index()
@@ -50,6 +53,7 @@ class Products extends BaseController
         $data = [
             'title'       => 'Tambah Produk Penelitian',
             'product'     => null,
+            'jenisOptions' => $this->getJenisProdukOptions(),
             'instruments' => $this->getAvailableInstruments(),
             'selectedInstruments' => [],
             'action'      => base_url('admin/products'),
@@ -156,6 +160,7 @@ class Products extends BaseController
         $data = [
             'title'       => 'Edit Produk Penelitian',
             'product'     => $product,
+            'jenisOptions' => $this->getJenisProdukOptions(),
             'instruments' => $this->getAvailableInstruments(),
             'selectedInstruments' => $selectedIds,
             'action'      => base_url('admin/products/' . $id),
@@ -190,7 +195,8 @@ class Products extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $fileName = $this->uploadProductFile($product['file_produk'] ?? null);
+        $existingFile = isset($product['file_produk']) ? (string) $product['file_produk'] : null;
+        $fileName = $this->uploadProductFile($existingFile);
 
         $this->productModel->update($id, [
             'kode'         => trim((string) $this->request->getPost('kode')),
@@ -295,5 +301,19 @@ class Products extends BaseController
             ->whereIn('jenis', ['Validasi Produk', 'Validasi Instrumen'])
             ->orderBy('judul', 'ASC')
             ->findAll();
+    }
+
+    private function getJenisProdukOptions(): array
+    {
+        return $this->settingModel->getProductTypes([
+            'Buku Model',
+            'Buku Ajar',
+            'Materi Ajar',
+            'Panduan Pembelajaran',
+            'E-Learning',
+            'Rubrik',
+            'Template Artikel',
+            'Produk Lainnya',
+        ]);
     }
 }

@@ -60,12 +60,12 @@ if (! function_exists('sivalid_sidebar_link')) {
     {
         ?>
         <li class="nav-item">
-            <a class="nav-link <?= is_active_menu($item['path'], $currentUri) ?>"
-               href="<?= base_url($item['path']) ?>">
+            <a class="nav-link <?= is_active_menu((string) $item['path'], $currentUri) ?>"
+               href="<?= base_url((string) $item['path']) ?>">
                 <span class="nav-link-icon">
-                    <?= sivalid_sidebar_icon($item['icon']) ?>
+                    <?= sivalid_sidebar_icon((string) $item['icon']) ?>
                 </span>
-                <span class="nav-link-title"><?= esc($item['label']) ?></span>
+                <span class="nav-link-title"><?= esc((string) $item['label']) ?></span>
             </a>
         </li>
         <?php

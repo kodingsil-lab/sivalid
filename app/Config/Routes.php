@@ -14,12 +14,18 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
 
     $routes->resource('instruments', ['controller' => 'Admin\Instruments']);
+    $routes->get('instrument-types', 'Admin\InstrumentTypes::index');
+    $routes->post('instrument-types', 'Admin\InstrumentTypes::create');
+    $routes->delete('instrument-types/(:num)', 'Admin\InstrumentTypes::delete/$1');
     $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects']);
     $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators']);
     $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems']);
     $routes->resource('instrument-revisions', ['controller' => 'Admin\InstrumentRevisions']);
     $routes->get('products/download/(:num)', 'Admin\Products::download/$1');
     $routes->resource('products', ['controller' => 'Admin\Products']);
+    $routes->get('product-types', 'Admin\ProductTypes::index');
+    $routes->post('product-types', 'Admin\ProductTypes::create');
+    $routes->delete('product-types/(:num)', 'Admin\ProductTypes::delete/$1');
     $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks']);
 
     $routes->get('validasi-instrumen', 'Admin\InstrumentValidation::index');

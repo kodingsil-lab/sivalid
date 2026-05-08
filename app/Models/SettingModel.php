@@ -58,4 +58,55 @@ class SettingModel extends Model
 
         return $settings;
     }
+
+    public function getGroupRows(string $group): array
+    {
+        return $this->where('setting_group', $group)
+            ->orderBy('setting_value', 'ASC')
+            ->findAll();
+    }
+
+    public function getInstrumentTypes(array $fallback = []): array
+    {
+        $rows = $this->getGroupRows('instrument_type');
+        $types = [];
+
+        foreach ($rows as $row) {
+            $value = trim((string) ($row['setting_value'] ?? ''));
+            if ($value !== '') {
+                $types[] = $value;
+            }
+        }
+
+        if ($types === []) {
+            $types = $fallback;
+        }
+
+        $types = array_values(array_unique(array_filter(array_map(static fn ($item) => trim((string) $item), $types))));
+        sort($types, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $types;
+    }
+
+    public function getProductTypes(array $fallback = []): array
+    {
+        $rows = $this->getGroupRows('product_type');
+        $types = [];
+
+        foreach ($rows as $row) {
+            $value = trim((string) ($row['setting_value'] ?? ''));
+            if ($value !== '') {
+                $types[] = $value;
+            }
+        }
+
+        if ($types === []) {
+            $types = $fallback;
+        }
+
+        $types = array_values(array_unique(array_filter(array_map(static fn ($item) => trim((string) $item), $types))));
+        sort($types, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return $types;
+    }
 }

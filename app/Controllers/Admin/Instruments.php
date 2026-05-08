@@ -4,14 +4,17 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Models\InstrumentModel;
+use App\Models\SettingModel;
 
 class Instruments extends BaseController
 {
     protected InstrumentModel $instrumentModel;
+    protected SettingModel $settingModel;
 
     public function __construct()
     {
         $this->instrumentModel = new InstrumentModel();
+        $this->settingModel = new SettingModel();
     }
 
     public function index()
@@ -45,6 +48,7 @@ class Instruments extends BaseController
         $data = [
             'title'      => 'Tambah Instrumen',
             'instrument' => null,
+            'jenisOptions' => $this->getJenisOptions(),
             'action'     => base_url('admin/instruments'),
             'method'     => 'post',
         ];
@@ -129,6 +133,7 @@ class Instruments extends BaseController
         $data = [
             'title'      => 'Edit Instrumen',
             'instrument' => $instrument,
+            'jenisOptions' => $this->getJenisOptions(),
             'action'     => base_url('admin/instruments/' . $id),
             'method'     => 'put',
         ];
@@ -205,5 +210,17 @@ class Instruments extends BaseController
         return redirect()
             ->to(base_url('admin/instruments'))
             ->with('success', 'Data instrumen berhasil dihapus.');
+    }
+
+    private function getJenisOptions(): array
+    {
+        return $this->settingModel->getInstrumentTypes([
+            'Validasi Instrumen',
+            'Validasi Produk',
+            'Angket Respon',
+            'Observasi',
+            'FGD',
+            'Tes Kinerja',
+        ]);
     }
 }

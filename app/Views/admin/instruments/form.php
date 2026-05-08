@@ -68,16 +68,14 @@ $formMethod = isset($method) ? (string) $method : 'post';
                     <label class="form-label" for="jenis">Jenis Instrumen</label>
                     <select name="jenis" id="jenis" class="form-control" required>
                         <?php
-                        $jenisOptions = [
-                            'Validasi Instrumen',
-                            'Validasi Produk',
-                            'Angket Respon',
-                            'Observasi',
-                            'FGD',
-                            'Tes Kinerja',
-                        ];
-
+                        $jenisOptions = isset($jenisOptions) && is_array($jenisOptions)
+                            ? $jenisOptions
+                            : [];
                         $selectedJenis = old('jenis', $instrument['jenis'] ?? '');
+
+                        if ($selectedJenis !== '' && !in_array($selectedJenis, $jenisOptions, true)) {
+                            array_unshift($jenisOptions, $selectedJenis);
+                        }
                         ?>
 
                         <option value="">-- Pilih Jenis --</option>
