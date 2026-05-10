@@ -78,11 +78,11 @@
                         <p>Informasi dasar penelitian yang dipakai di berbagai halaman dan laporan.</p>
                     </div>
 
-                    <form action="<?= base_url('admin/settings/profile?tab=profile') ?>" method="post">
+                    <form action="<?= base_url('admin/settings/profile?tab=profile') ?>" method="post" enctype="multipart/form-data">
                         <?= csrf_field() ?>
 
                         <div class="mb-3">
-                            <label for="nama_penelitian" class="form-label">Nama / Judul Penelitian <span class="text-danger">*</span></label>
+                            <label for="nama_penelitian" class="form-label">Judul Penelitian <span class="text-danger">*</span></label>
                             <input
                                 type="text"
                                 name="nama_penelitian"
@@ -107,14 +107,14 @@
                                 >
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="institusi" class="form-label">Institusi</label>
+                                <label for="nim" class="form-label">NIM</label>
                                 <input
                                     type="text"
-                                    name="institusi"
-                                    id="institusi"
+                                    name="nim"
+                                    id="nim"
                                     class="form-control"
-                                    placeholder="Nama universitas / lembaga"
-                                    value="<?= old('institusi', esc($profile['institusi'] ?? '')) ?>"
+                                    placeholder="Nomor Induk Mahasiswa"
+                                    value="<?= old('nim', esc($profile['nim'] ?? '')) ?>"
                                 >
                             </div>
                         </div>
@@ -132,6 +132,20 @@
                                 >
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="institusi" class="form-label">Perguruan Tinggi</label>
+                                <input
+                                    type="text"
+                                    name="institusi"
+                                    id="institusi"
+                                    class="form-control"
+                                    placeholder="Nama perguruan tinggi"
+                                    value="<?= old('institusi', esc($profile['institusi'] ?? '')) ?>"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label for="tahun_penelitian" class="form-label">Tahun Penelitian</label>
                                 <input
                                     type="text"
@@ -141,6 +155,24 @@
                                     placeholder="<?= date('Y') ?>"
                                     value="<?= old('tahun_penelitian', esc($profile['tahun_penelitian'] ?? date('Y'))) ?>"
                                 >
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ringkasan_penelitian_pdf" class="form-label">Ringkasan Penelitian</label>
+                                <input
+                                    type="file"
+                                    name="ringkasan_penelitian_pdf"
+                                    id="ringkasan_penelitian_pdf"
+                                    class="form-control"
+                                    accept="application/pdf,.pdf"
+                                >
+                                <div class="form-hint">Unggah file PDF ringkasan penelitian. Maksimal 10 MB.</div>
+                                <?php if (!empty($profile['ringkasan_penelitian_pdf'])): ?>
+                                    <div class="mt-2">
+                                        <a href="<?= base_url($profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                            Lihat PDF Tersimpan
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 

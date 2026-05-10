@@ -19,11 +19,19 @@
 
         body {
             margin: 0;
-            background: linear-gradient(180deg, #eef2ff 0%, var(--pub-bg) 28%);
+            background-color: var(--pub-bg);
+            background-image: linear-gradient(180deg, #eef2ff 0%, var(--pub-bg) 360px);
+            background-repeat: no-repeat;
             color: var(--pub-text);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             font-size: 16px;
             line-height: 1.6;
+        }
+
+        #toolbarContainer,
+        #debug-icon,
+        #debug-bar {
+            display: none !important;
         }
 
         .public-shell {
@@ -42,29 +50,55 @@
 
         .bundle-nav {
             display: flex;
-            align-items: center;
-            gap: .75rem;
-            padding: .65rem .9rem;
-            background: var(--pub-blue-soft);
-            border: 1px solid #bfdbfe;
+            align-items: flex-start;
+            gap: .9rem;
+            padding: .95rem 1.05rem;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.28);
             border-radius: var(--pub-radius);
             margin-bottom: .9rem;
             font-size: .95rem;
-            flex-wrap: wrap;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
         }
 
         .bundle-nav a {
             color: var(--pub-blue);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 650;
         }
 
         .bundle-nav a:hover { text-decoration: underline; }
 
+        .bundle-nav-main {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .bundle-nav-top {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            flex-wrap: wrap;
+            margin-bottom: .35rem;
+        }
+
+        .bundle-index {
+            color: #0f172a;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .bundle-title {
+            color: var(--pub-muted);
+            font-size: .96rem;
+            line-height: 1.45;
+        }
+
         .bundle-progress {
             display: flex;
             gap: 4px;
-            margin-left: auto;
+            flex: 0 0 auto;
+            padding-top: .35rem;
         }
 
         .bundle-step {
@@ -95,11 +129,26 @@
             margin-bottom: 0;
         }
 
-        .public-progress-badge {
+        .public-progress-widget {
             margin-left: auto;
-            font-size: .82rem;
-            font-weight: 600;
-            padding: .35rem .58rem;
+            width: min(240px, 100%);
+            padding-top: .1rem;
+        }
+
+        .public-progress-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: .3rem;
+            color: #206bc4;
+            font-size: .86rem;
+            font-weight: 700;
+        }
+
+        .public-progress-count {
+            color: var(--pub-muted);
+            font-weight: 650;
         }
 
         .public-rich-text,
@@ -247,37 +296,209 @@
             font-weight: 600;
         }
 
+        .public-mini-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #206bc4;
+            background: #206bc4;
+            color: #fff;
+            min-height: 34px;
+            padding: .42rem .82rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .92rem;
+            font-weight: 650;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(32, 107, 196, .14);
+        }
+
+        .public-mini-btn:hover,
+        .public-mini-btn:focus {
+            border-color: #206bc4;
+            background: #206bc4;
+            color: #fff;
+            outline: none;
+            filter: brightness(0.92);
+            opacity: 0.95;
+        }
+
+        .identity-card {
+            padding: .85rem 1rem;
+        }
+
+        .identity-card .public-heading {
+            margin-bottom: .55rem;
+            font-size: 1.06rem;
+        }
+
+        .identity-card .public-table {
+            font-size: .92rem;
+        }
+
+        .identity-card .public-table th,
+        .identity-card .public-table td {
+            padding: .46rem .65rem;
+            line-height: 1.42;
+        }
+
+        .identity-card .public-table th {
+            width: 180px;
+        }
+
+        .identity-card .public-mini-btn {
+            min-height: 34px;
+            padding: .38rem .78rem;
+            font-size: .88rem;
+        }
+
+        .public-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+            background: rgba(15, 23, 42, .42);
+        }
+
+        .public-modal-backdrop.show {
+            display: flex;
+        }
+
+        .public-modal {
+            width: min(980px, 100%);
+            max-height: min(82vh, 760px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
+        }
+
+        .public-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .95rem 1.1rem;
+            border-bottom: 1px solid var(--pub-border);
+        }
+
+        .public-modal-title {
+            margin: 0;
+            color: #0f172a;
+            font-size: 1.05rem;
+            font-weight: 750;
+        }
+
+        .public-modal-close {
+            flex: 0 0 auto;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+            border-color: #94a3b8;
+            background: #94a3b8;
+            color: #ffffff;
+            transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+        }
+
+        .public-modal-close .icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.3;
+        }
+
+        .public-modal-close:hover,
+        .public-modal-close:focus {
+            outline: none;
+            border-color: #64748b;
+            background: #64748b;
+            color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(100, 116, 139, .22);
+        }
+
+        .public-modal-body {
+            overflow: auto;
+            padding: 1.1rem;
+        }
+
+        .public-modal-section {
+            padding-bottom: .95rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--pub-border);
+        }
+
+        .public-modal-section:last-child {
+            padding-bottom: 0;
+            margin-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .public-modal-subtitle {
+            margin: 0 0 .45rem;
+            color: #0f172a;
+            font-size: .98rem;
+            font-weight: 750;
+        }
+
+        .public-score-cell {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .public-number-cell,
+        .public-number-head {
+            text-align: center;
+            white-space: nowrap;
+        }
+
         .public-score-option {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
             margin: 0;
-            font-size: .95rem;
-            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .public-score-option .form-selectgroup-input {
+            margin: 0;
+        }
+
+        .public-score-option .form-selectgroup-label {
+            min-width: 42px;
+            text-align: center;
+            font-size: .92rem;
+            font-weight: 700;
             color: #334155;
-            border: 1px solid #dbeafe;
-            background: var(--pub-blue-soft);
             border-radius: 999px;
-            min-height: 34px;
-            padding: 4px 10px;
-            white-space: nowrap;
+            padding: .34rem .7rem;
         }
 
         .public-score-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 1rem;
             flex-wrap: nowrap;
             overflow-x: auto;
             padding-bottom: 2px;
+            min-height: 96px;
         }
 
-        .public-required-note { color: #334155; font-size: .88rem; }
+        .public-score-check {
+            cursor: pointer;
+        }
 
         .item-fill-badge {
             display: inline-flex;
             align-items: center;
-            margin-left: .4rem;
+            margin-top: .35rem;
             padding: .1rem .42rem;
             border-radius: 999px;
             font-size: .74rem;
@@ -316,6 +537,10 @@
             font-size: .98rem;
         }
 
+        #validation-section {
+            scroll-margin-top: 18px;
+        }
+
         .public-btn {
             display: inline-block;
             border: 1px solid var(--pub-blue);
@@ -345,10 +570,10 @@
             transition: filter 0.15s, opacity 0.15s;
         }
 
-        .public-btn[style*="#38bdf8"]:hover,
-        .public-btn[style*="#38bdf8"]:focus {
-            background: #0ea5e9 !important;
-            border-color: #0ea5e9 !important;
+        .public-btn[style*="#f59e0b"]:hover,
+        .public-btn[style*="#f59e0b"]:focus {
+            background: #d97706 !important;
+            border-color: #d97706 !important;
             color: #fff !important;
         }
         .public-btn[style*="#206bc4"]:hover,
@@ -358,11 +583,47 @@
             color: #fff !important;
         }
 
+        .back-to-top-btn {
+            position: fixed;
+            right: max(18px, calc((100vw - 1080px) / 2 - 56px));
+            bottom: 24px;
+            z-index: 20;
+            width: 40px;
+            height: 40px;
+            border: 1px solid #206bc4;
+            border-radius: 8px;
+            background: #206bc4;
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-weight: 700;
+            line-height: 1;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: opacity .18s ease, transform .18s ease, background .18s ease;
+        }
+
+        .back-to-top-btn:hover,
+        .back-to-top-btn:focus {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            outline: none;
+        }
+
+        .back-to-top-btn.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
         .validator-strip {
-            background: var(--pub-blue-soft);
-            border: 1px solid #bfdbfe;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            border-left: 4px solid var(--pub-blue);
             border-radius: var(--pub-radius);
-            padding: .6rem .9rem;
+            padding: .9rem 1.05rem;
             font-size: .95rem;
             margin-bottom: .9rem;
             display: flex;
@@ -370,10 +631,21 @@
             justify-content: space-between;
             gap: .75rem;
             flex-wrap: wrap;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
         }
 
-        .validator-strip .vname { font-weight: 600; color: var(--pub-blue); }
-        .validator-strip .vmeta { color: var(--pub-muted); font-size: .83rem; }
+        .validator-strip .vname {
+            display: inline-block;
+            margin-right: .55rem;
+            color: #0f172a;
+            font-size: 1.02rem;
+            font-weight: 700;
+        }
+
+        .validator-strip .vmeta {
+            color: var(--pub-muted);
+            font-size: .92rem;
+        }
 
         #autosave-indicator {
             font-size: .82rem;
@@ -400,6 +672,9 @@
 
         @media (max-width: 900px) {
             .public-shell { width: min(1080px, calc(100% - 14px)); margin-top: 10px; }
+            .bundle-nav { flex-direction: column; }
+            .bundle-progress { width: 100%; padding-top: .1rem; }
+            .back-to-top-btn { right: 14px; bottom: 18px; }
         }
     </style>
 </head>
@@ -428,6 +703,8 @@ $progressMap      = isset($progressMap) && is_array($progressMap) ? $progressMap
 $token            = $bundle['token'] ?? '';
 $isFinal          = isset($isFinal) ? (bool) $isFinal : false;
 $summaryUrl       = $summaryUrl ?? base_url('paket/' . $token . '/ringkasan');
+$masterPengantar  = trim((string) ($instrumentEntry['pengantar'] ?? ''));
+$masterPetunjuk   = trim((string) ($instrumentEntry['petunjuk'] ?? ''));
 $pengantarValidasi = trim((string) ($instrumentEntry['pengantar_validasi'] ?? ''));
 $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''));
 
@@ -464,9 +741,13 @@ $text = static function (array $row, string $key, string $default = '-'): string
     <?php endif; ?>
 
     <div class="bundle-nav">
-        <a href="<?= base_url('paket/' . esc($token)) ?>">&larr; Daftar Instrumen</a>
-        <strong>Instrumen <?= esc($positionLabel) ?> dari <?= esc($totalLabel) ?></strong>
-        <span style="color: var(--pub-muted);">- <?= esc($text($instrumentEntry, 'judul')) ?></span>
+        <div class="bundle-nav-main">
+            <div class="bundle-nav-top">
+                <a href="<?= base_url('paket/' . esc($token)) ?>">&larr; Daftar Instrumen</a>
+                <span class="bundle-index">Instrumen <?= esc($positionLabel) ?> dari <?= esc($totalLabel) ?></span>
+            </div>
+            <div class="bundle-title"><?= esc($text($instrumentEntry, 'judul')) ?></div>
+        </div>
         <div class="bundle-progress">
             <?php foreach ($instruments as $idx => $instr): ?>
                 <?php
@@ -488,7 +769,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
         </div>
     </div>
 
-    <div class="public-card">
+    <div class="public-card identity-card">
         <h2 class="public-heading">Identitas Instrumen yang Divalidasi</h2>
         <div class="public-table-wrap">
             <table class="public-table">
@@ -504,6 +785,22 @@ $text = static function (array $row, string $key, string $default = '-'): string
                 <tr>
                     <th>Jenis</th>
                     <td><?= esc(title_case_label($text($instrumentEntry, 'jenis'))) ?></td>
+                </tr>
+                <tr>
+                    <th>Kisi-Kisi Instrumen</th>
+                    <td>
+                        <button type="button" class="public-mini-btn" data-open-modal="kisi-modal">
+                            Lihat Kisi-Kisi Instrumen
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Instrumen</th>
+                    <td>
+                        <button type="button" class="public-mini-btn" data-open-modal="instrument-modal">
+                            Lihat Instrumen
+                        </button>
+                    </td>
                 </tr>
                 <tr>
                     <th>Validator</th>
@@ -547,7 +844,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
             <div class="public-alert"><?= esc(session('error')) ?></div>
         <?php endif; ?>
 
-        <div class="public-card">
+        <div class="public-card" id="validation-section">
             <?php
             $filledItems = 0;
             foreach ($items as $item) {
@@ -572,10 +869,27 @@ $text = static function (array $row, string $key, string $default = '-'): string
 
             <div class="public-section-head">
                 <h2 class="public-heading">Lembar Validasi Instrumen</h2>
-                <span id="progress-badge" class="badge bg-primary-lt text-primary public-progress-badge">
-                    Progres butir: <?= esc((string) $filledItems) ?>/<?= esc((string) count($items)) ?> terisi
-                </span>
+                <div class="public-progress-widget">
+                    <div class="public-progress-label">
+                        <span>Progres butir</span>
+                        <span id="progress-badge" class="public-progress-count">
+                            <?= esc((string) $filledItems) ?>/<?= esc((string) count($items)) ?> terisi
+                        </span>
+                    </div>
+                    <div class="progress progress-sm">
+                        <div
+                            id="progress-bar"
+                            class="progress-bar bg-primary"
+                            style="width: <?= count($items) > 0 ? esc((string) round(($filledItems / count($items)) * 100, 2)) : '0' ?>%;"
+                            role="progressbar"
+                            aria-valuenow="<?= esc((string) $filledItems) ?>"
+                            aria-valuemin="0"
+                            aria-valuemax="<?= esc((string) count($items)) ?>"
+                        ></div>
+                    </div>
+                </div>
             </div>
+            <div id="form-success-alert" class="public-success" style="display:none;"></div>
             <p class="public-muted">Berikan penilaian terhadap setiap butir instrumen. Progres disimpan otomatis.</p>
 
             <?php if (empty($items)): ?>
@@ -585,9 +899,9 @@ $text = static function (array $row, string $key, string $default = '-'): string
                     <table id="validation-items-table" class="public-table">
                         <thead>
                         <tr>
-                            <th style="width: 50px;">No</th>
+                            <th class="public-number-head" style="width: 50px;">No</th>
                             <th style="width: 140px;">Aspek</th>
-                            <th style="width: 50px;">No. Butir</th>
+                            <th class="public-number-head" style="width: 56px;">No. Butir</th>
                             <th>Butir yang Dinilai</th>
                             <th style="width: 280px;">Skor Penilaian</th>
                             <th style="width: 200px;">Komentar</th>
@@ -619,29 +933,29 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 || ($tipeButir !== 'skala' && $hasJawabanTeks);
                             ?>
                             <tr>
-                                <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td class="public-number-cell"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
                                 <td><?= esc((string) $aspectName) ?></td>
-                                <td><?= $butirNo++ ?></td>
+                                <td class="public-number-cell"><?= $butirNo++ ?></td>
                                 <td>
                                     <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                     <br>
-                                    <small class="public-required-note"><?= $isRequired ? 'Wajib diisi' : 'Opsional' ?></small>
                                     <span class="item-fill-badge <?= $isFilled ? 'ok' : 'pending' ?>" data-fill-badge><?= $isFilled ? 'Sudah Nilai' : 'Belum Dinilai' ?></span>
                                 </td>
                                 <td>
                                     <?php if ($tipeButir === 'skala'): ?>
                                         <?php $savedSkor = $saved['skor'] ?? null; ?>
-                                        <div class="public-score-row">
+                                        <div class="public-score-row form-selectgroup form-selectgroup-pills">
                                             <?php foreach ($scaleRange as $score): ?>
-                                                <label class="public-score-option">
+                                                <label class="public-score-option form-selectgroup-item">
                                                     <input
+                                                        class="form-selectgroup-input public-score-check"
                                                         type="radio"
                                                         name="answers[<?= $itemId ?>][skor]"
                                                         value="<?= esc((string) $score) ?>"
                                                         <?= $savedSkor !== null && (int) $savedSkor === $score ? 'checked' : '' ?>
                                                         <?= $isFinal ? 'disabled' : '' ?>
                                                     >
-                                                    <?= esc((string) $score) ?>
+                                                    <span class="form-selectgroup-label"><?= esc((string) $score) ?></span>
                                                 </label>
                                             <?php endforeach; ?>
                                         </div>
@@ -701,10 +1015,15 @@ $text = static function (array $row, string $key, string $default = '-'): string
 
         <div class="public-card" style="display:flex; justify-content:space-between; align-items:center; gap:.75rem; flex-wrap:wrap;">
             <div>
+                <a href="<?= base_url('paket/' . esc($token)) ?>"
+                   class="public-btn public-btn-light"
+                   style="display:inline-block; padding:.6rem 1rem; border-radius:6px; text-decoration:none; font-size:.9rem;">
+                    &larr; Daftar Instrumen
+                </a>
                 <?php if ($prevPos !== null): ?>
                     <a href="<?= base_url('paket/' . esc($token) . '/isi/' . $prevPos) ?>"
                        class="public-btn"
-                       style="display:inline-block; padding:.6rem 1rem; border-radius:6px; text-decoration:none; font-size:.9rem; background:#38bdf8; border-color:#38bdf8; color:#fff;">
+                       style="display:inline-block; margin-left:.5rem; padding:.6rem 1rem; border-radius:6px; text-decoration:none; font-size:.9rem; background:#f59e0b; border-color:#f59e0b; color:#fff;">
                         &larr; Instrumen Sebelumnya
                     </a>
                 <?php endif; ?>
@@ -712,13 +1031,13 @@ $text = static function (array $row, string $key, string $default = '-'): string
 
             <?php if ($isFinal): ?>
                 <div style="display:flex; gap:.6rem; align-items:center;">
-                    <span style="font-size:.88rem; color:var(--pub-muted);"><?= esc($positionLabel) ?> / <?= esc($totalLabel) ?></span>
+                    <span style="font-size:.88rem; font-weight:600; color:#d97706;"><?= esc($positionLabel) ?> / <?= esc($totalLabel) ?></span>
                     <a href="<?= esc($summaryUrl) ?>" class="public-btn" style="font-size:.9rem;">Lihat Ringkasan</a>
                 </div>
             <?php else: ?>
                 <div style="display:flex; gap:.6rem; align-items:center;">
-                    <span style="font-size:.88rem; color:var(--pub-muted);"><?= esc($positionLabel) ?> / <?= esc($totalLabel) ?></span>
-                    <button type="button" id="btn-save-progress" class="public-btn" style="font-size:.9rem; background:#38bdf8; border-color:#38bdf8; color:#fff;">
+                    <span style="font-size:.88rem; font-weight:600; color:#d97706;"><?= esc($positionLabel) ?> / <?= esc($totalLabel) ?></span>
+                    <button type="button" id="btn-save-progress" class="public-btn" style="font-size:.9rem; background:#f59e0b; border-color:#f59e0b; color:#fff;">
                         Simpan Progres
                     </button>
                     <button type="submit" name="action" value="save_next" class="public-btn" style="font-size:.9rem; background:#206bc4; border-color:#206bc4; color:#fff;">
@@ -734,6 +1053,150 @@ $text = static function (array $row, string $key, string $default = '-'): string
     </form>
 </div>
 
+<button type="button" id="back-to-top" class="back-to-top-btn" aria-label="Kembali ke atas" title="Kembali ke atas">&uarr;</button>
+
+<div id="kisi-modal" class="public-modal-backdrop" aria-hidden="true">
+    <div class="public-modal" role="dialog" aria-modal="true" aria-labelledby="kisi-modal-title">
+        <div class="public-modal-head">
+            <h2 id="kisi-modal-title" class="public-modal-title">Kisi-Kisi Instrumen</h2>
+            <button type="button" class="btn btn-icon btn-ghost-secondary public-modal-close" data-close-modal aria-label="Tutup">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M18 6l-12 12"/>
+                    <path d="M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="public-modal-body">
+            <div class="public-modal-section">
+                <h3 class="public-modal-subtitle">Kisi-Kisi Instrumen <?= esc($text($instrumentEntry, 'judul')) ?></h3>
+            </div>
+            <div class="public-modal-section">
+            <?php if (empty($aspects)): ?>
+                <p class="public-muted">Kisi-kisi belum tersedia.</p>
+            <?php else: ?>
+                <div class="public-table-wrap">
+                    <table class="public-table">
+                        <thead>
+                        <tr>
+                            <th style="width: 60px;">No</th>
+                            <th style="width: 260px;">Aspek</th>
+                            <th>Indikator</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($aspects as $aspectIndex => $aspect): ?>
+                            <?php
+                            $aspectIndicators = array_values(array_filter($indicators, static function ($indicator) use ($aspect) {
+                                return (int) ($indicator['aspect_id'] ?? 0) === (int) ($aspect['id'] ?? 0);
+                            }));
+                            ?>
+                            <?php if (empty($aspectIndicators)): ?>
+                                <tr>
+                                    <td><?= esc((string) ($aspectIndex + 1)) ?></td>
+                                    <td><?= esc((string) ($aspect['nama_aspek'] ?? '-')) ?></td>
+                                    <td><em>Belum ada indikator.</em></td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($aspectIndicators as $indicatorIndex => $indicator): ?>
+                                    <tr>
+                                        <?php if ($indicatorIndex === 0): ?>
+                                            <td rowspan="<?= count($aspectIndicators) ?>"><?= esc((string) ($aspectIndex + 1)) ?></td>
+                                            <td rowspan="<?= count($aspectIndicators) ?>"><?= esc((string) ($aspect['nama_aspek'] ?? '-')) ?></td>
+                                        <?php endif; ?>
+                                        <td><?= nl2br(esc((string) ($indicator['indikator'] ?? '-'))) ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="instrument-modal" class="public-modal-backdrop" aria-hidden="true">
+    <div class="public-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-modal-title">
+        <div class="public-modal-head">
+            <h2 id="instrument-modal-title" class="public-modal-title">Instrumen yang Divalidasi</h2>
+            <button type="button" class="btn btn-icon btn-ghost-secondary public-modal-close" data-close-modal aria-label="Tutup">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M18 6l-12 12"/>
+                    <path d="M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="public-modal-body">
+            <div class="public-modal-section">
+                <h3 class="public-modal-subtitle">Nama Instrumen</h3>
+                <div class="public-rich-text"><?= esc($text($instrumentEntry, 'judul')) ?></div>
+            </div>
+            <div class="public-modal-section">
+                <h3 class="public-modal-subtitle">Pengantar</h3>
+                <?php if ($masterPengantar !== ''): ?>
+                    <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPengantar) ?></div>
+                <?php else: ?>
+                    <p class="public-muted">Pengantar belum tersedia.</p>
+                <?php endif; ?>
+            </div>
+            <div class="public-modal-section">
+                <h3 class="public-modal-subtitle">Petunjuk</h3>
+                <?php if ($masterPetunjuk !== ''): ?>
+                    <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPetunjuk) ?></div>
+                <?php else: ?>
+                    <p class="public-muted">Petunjuk belum tersedia.</p>
+                <?php endif; ?>
+            </div>
+            <div class="public-modal-section">
+                <h3 class="public-modal-subtitle">Tabel Instrumen</h3>
+            <?php if (empty($items)): ?>
+                <p class="public-muted">Butir instrumen belum tersedia.</p>
+            <?php else: ?>
+                <div class="public-table-wrap">
+                    <table class="public-table">
+                        <thead>
+                        <tr>
+                            <th style="width: 60px;">No</th>
+                            <th style="width: 220px;">Aspek</th>
+                            <th>Butir Pernyataan</th>
+                            <?php foreach ($scaleRange as $score): ?>
+                                <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($items as $item): ?>
+                            <?php
+                            $aspectName = '-';
+                            foreach ($aspects as $aspect) {
+                                if ((int) ($aspect['id'] ?? 0) === (int) ($item['aspect_id'] ?? 0)) {
+                                    $aspectName = (string) ($aspect['nama_aspek'] ?? '-');
+                                    break;
+                                }
+                            }
+                            ?>
+                            <tr>
+                                <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td><?= esc($aspectName) ?></td>
+                                <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                <?php foreach ($scaleRange as $score): ?>
+                                    <td class="public-score-cell">&bigcirc;</td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
     'use strict';
@@ -744,15 +1207,45 @@ $text = static function (array $row, string $key, string $default = '-'): string
     var form = document.getElementById('bundle-form');
     var indicator = document.getElementById('autosave-indicator');
     var progressBadge = document.getElementById('progress-badge');
+    var progressBar = document.getElementById('progress-bar');
+    var validationSection = document.getElementById('validation-section');
+    var saveAlert = document.getElementById('form-success-alert');
+    var backToTop = document.getElementById('back-to-top');
+    var activeModal = null;
     var saving = false;
     var isSubmitting = false;
     var autosaveTimer = null;
+    var saveAlertTimer = null;
     var isFinal = <?= json_encode($isFinal) ?>;
 
     function setIndicator(type, msg) {
         if (!indicator) return;
         indicator.className = type;
         indicator.textContent = msg;
+    }
+
+    function showSaveAlert(type, msg) {
+        if (!saveAlert) return;
+        if (saveAlertTimer) {
+            window.clearTimeout(saveAlertTimer);
+            saveAlertTimer = null;
+        }
+
+        saveAlert.className = type === 'success' ? 'public-success' : 'public-alert';
+        saveAlert.textContent = msg;
+        saveAlert.style.display = '';
+
+        window.setTimeout(function () {
+            (validationSection || saveAlert).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+
+        if (type === 'success') {
+            saveAlertTimer = window.setTimeout(function () {
+                saveAlert.style.display = 'none';
+                saveAlert.textContent = '';
+                saveAlertTimer = null;
+            }, 3500);
+        }
     }
 
     function syncCsrfInput() {
@@ -763,12 +1256,70 @@ $text = static function (array $row, string $key, string $default = '-'): string
         }
     }
 
-    function doAutosave() {
-        if (saving || isSubmitting) return;
+    function toggleBackToTop() {
+        if (!backToTop) return;
+        backToTop.classList.toggle('show', window.scrollY > 360);
+    }
+
+    if (backToTop) {
+        backToTop.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        window.addEventListener('scroll', toggleBackToTop, { passive: true });
+        toggleBackToTop();
+    }
+
+    function openModal(modal) {
+        if (!modal) return;
+        activeModal = modal;
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        var closeBtn = modal.querySelector('[data-close-modal]');
+        if (closeBtn) {
+            closeBtn.focus();
+        }
+    }
+
+    function closeModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        if (activeModal === modal) {
+            activeModal = null;
+        }
+    }
+
+    document.querySelectorAll('[data-open-modal]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            openModal(document.getElementById(button.getAttribute('data-open-modal')));
+        });
+    });
+
+    document.querySelectorAll('.public-modal-backdrop').forEach(function (modal) {
+        modal.addEventListener('click', function (event) {
+            var closeTrigger = event.target && event.target.closest
+                ? event.target.closest('[data-close-modal]')
+                : null;
+
+            if (event.target === modal || closeTrigger) {
+                closeModal(modal);
+            }
+        });
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && activeModal) {
+            closeModal(activeModal);
+        }
+    });
+
+    function sendProgressSave(onDone, onFail) {
         if (!form) return;
 
         saving = true;
-        setIndicator('saving', 'Menyimpan...');
 
         var data = new FormData(form);
         data.set(csrfName, csrfHash);
@@ -778,22 +1329,39 @@ $text = static function (array $row, string $key, string $default = '-'): string
             body: data,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+                if (!res.ok) {
+                    throw new Error('HTTP ' + res.status);
+                }
+                return res.json();
+            })
             .then(function (json) {
                 saving = false;
                 if (json.ok) {
                     csrfHash = json.csrf_hash;
                     csrfName = json.csrf_name;
                     syncCsrfInput();
-                    setIndicator('saved', 'Tersimpan ' + json.saved_at);
+                    onDone(json);
                 } else {
-                    setIndicator('error', 'Gagal menyimpan otomatis');
+                    onFail(json);
                 }
             })
             .catch(function () {
                 saving = false;
-                setIndicator('error', 'Gagal menyimpan otomatis');
+                onFail(null);
             });
+    }
+
+    function doAutosave() {
+        if (saving || isSubmitting) return;
+
+        setIndicator('saving', 'Menyimpan...');
+
+        sendProgressSave(function (json) {
+            setIndicator('saved', 'Tersimpan ' + json.saved_at);
+        }, function () {
+            setIndicator('error', 'Gagal menyimpan otomatis');
+        });
     }
 
     // AJAX untuk tombol Simpan Progres
@@ -801,56 +1369,34 @@ $text = static function (array $row, string $key, string $default = '-'): string
     if (btnSaveProgress) {
         btnSaveProgress.addEventListener('click', function (e) {
             e.preventDefault();
-            if (saving || isSubmitting) return;
-            var data = new FormData(form);
-            data.set(csrfName, csrfHash);
+            if (isSubmitting) return;
+            if (autosaveTimer) {
+                window.clearTimeout(autosaveTimer);
+                autosaveTimer = null;
+            }
             btnSaveProgress.disabled = true;
             btnSaveProgress.textContent = 'Menyimpan...';
-            fetch(AUTOSAVE_URL, {
-                method: 'POST',
-                body: data,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(function (res) { return res.json(); })
-            .then(function (json) {
-                btnSaveProgress.disabled = false;
-                btnSaveProgress.textContent = 'Simpan Progres';
-                if (json.ok) {
-                    csrfHash = json.csrf_hash;
-                    csrfName = json.csrf_name;
-                    syncCsrfInput();
-                    // Tampilkan alert sukses
-                    var alert = document.getElementById('form-success-alert');
-                    if (alert) {
-                        alert.className = 'public-success';
-                        alert.textContent = json.message || 'Progres berhasil disimpan.';
-                        alert.style.display = '';
-                    }
-                    // Scroll ke alert
-                    setTimeout(function() {
-                        alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 100);
-                } else {
-                    var alert = document.getElementById('form-success-alert');
-                    if (alert) {
-                        alert.className = 'public-alert';
-                        alert.textContent = 'Gagal menyimpan progres!';
-                        alert.style.display = '';
-                        alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+
+            var runManualSave = function () {
+                if (saving) {
+                    window.setTimeout(runManualSave, 120);
+                    return;
                 }
-            })
-            .catch(function () {
-                btnSaveProgress.disabled = false;
-                btnSaveProgress.textContent = 'Simpan Progres';
-                var alert = document.getElementById('form-success-alert');
-                if (alert) {
-                    alert.className = 'public-alert';
-                    alert.textContent = 'Gagal menyimpan progres!';
-                    alert.style.display = '';
-                    alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
+
+                sendProgressSave(function (json) {
+                    btnSaveProgress.disabled = false;
+                    btnSaveProgress.textContent = 'Simpan Progres';
+                    setIndicator('saved', 'Tersimpan ' + json.saved_at);
+                    showSaveAlert('success', json.message || 'Progres berhasil disimpan.');
+                }, function () {
+                    btnSaveProgress.disabled = false;
+                    btnSaveProgress.textContent = 'Simpan Progres';
+                    setIndicator('error', 'Gagal menyimpan otomatis');
+                    showSaveAlert('error', 'Gagal menyimpan progres!');
+                });
+            };
+
+            runManualSave();
         });
     }
 
@@ -872,8 +1418,9 @@ $text = static function (array $row, string $key, string $default = '-'): string
         var badge = row.querySelector('[data-fill-badge]');
         if (!badge) return;
 
-        var checkedRadio = row.querySelector('input[type="radio"][name^="answers["]:checked');
-        var textareas = row.querySelectorAll('textarea[name^="answers["]');
+        var scoreInputs = row.querySelectorAll('.public-score-check');
+        var checkedRadio = row.querySelector('.public-score-check:checked');
+        var textareas = row.querySelectorAll('textarea[name$="[jawaban_teks]"]');
         var hasTextValue = false;
 
         textareas.forEach(function (ta) {
@@ -882,7 +1429,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
             }
         });
 
-        var isFilled = Boolean(checkedRadio) || hasTextValue;
+        var isFilled = scoreInputs.length > 0 ? Boolean(checkedRadio) : hasTextValue;
         badge.classList.toggle('ok', isFilled);
         badge.classList.toggle('pending', !isFilled);
         badge.textContent = isFilled ? 'Sudah Nilai' : 'Belum Dinilai';
@@ -904,8 +1451,9 @@ $text = static function (array $row, string $key, string $default = '-'): string
         var filled = 0;
 
         rows.forEach(function (row) {
-            var checkedRadio = row.querySelector('input[type="radio"][name^="answers["]:checked');
-            var textareas = row.querySelectorAll('textarea[name^="answers["]');
+            var scoreInputs = row.querySelectorAll('.public-score-check');
+            var checkedRadio = row.querySelector('.public-score-check:checked');
+            var textareas = row.querySelectorAll('textarea[name$="[jawaban_teks]"]');
             var hasTextValue = false;
 
             textareas.forEach(function (ta) {
@@ -914,12 +1462,27 @@ $text = static function (array $row, string $key, string $default = '-'): string
                 }
             });
 
-            if (Boolean(checkedRadio) || hasTextValue) {
+            if (scoreInputs.length > 0 ? Boolean(checkedRadio) : hasTextValue) {
                 filled++;
             }
         });
 
-        progressBadge.textContent = 'Progres butir: ' + filled + '/' + total + ' terisi';
+        progressBadge.textContent = filled + '/' + total + ' terisi';
+        if (progressBar) {
+            var percent = total > 0 ? (filled / total) * 100 : 0;
+            progressBar.style.width = percent + '%';
+            progressBar.setAttribute('aria-valuenow', String(filled));
+            progressBar.setAttribute('aria-valuemax', String(total));
+        }
+    }
+
+    function selectScoreInput(input, row) {
+        if (!input || input.disabled) return;
+        if (!row) row = input.closest('tr');
+
+        refreshItemBadge(row);
+        refreshProgressBadge();
+        queueAutosave(300);
     }
 
     if (isFinal) {
@@ -971,10 +1534,8 @@ $text = static function (array $row, string $key, string $default = '-'): string
         if (!target || !target.closest) return;
         var row = target.closest('tr');
         if (!row) return;
-        if (target.matches('input[type="radio"][name^="answers["]')) {
-            refreshItemBadge(row);
-            refreshProgressBadge();
-            queueAutosave(300);
+        if (target.matches('.public-score-check')) {
+            selectScoreInput(target, row);
         }
     }, true);
 

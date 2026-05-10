@@ -12,6 +12,7 @@ use App\Models\ValidationBundleInstrumentModel;
 use App\Models\ValidationBundleSessionModel;
 use App\Models\ValidationBundleAnswerModel;
 use App\Models\ValidationBundleInstrumentProgressModel;
+use App\Models\SettingModel;
 
 class PublicBundle extends BaseController
 {
@@ -23,6 +24,7 @@ class PublicBundle extends BaseController
     protected InstrumentAspectModel $aspectModel;
     protected InstrumentIndicatorModel $indicatorModel;
     protected InstrumentItemModel $itemModel;
+    protected SettingModel $settingModel;
     protected AuditLogService $auditLog;
 
     public function __construct()
@@ -35,6 +37,7 @@ class PublicBundle extends BaseController
         $this->aspectModel           = new InstrumentAspectModel();
         $this->indicatorModel        = new InstrumentIndicatorModel();
         $this->itemModel             = new InstrumentItemModel();
+        $this->settingModel          = new SettingModel();
         $this->auditLog              = new AuditLogService();
     }
 
@@ -55,13 +58,17 @@ class PublicBundle extends BaseController
 
         $instruments      = $this->bundleInstrumentModel->getByBundle((int) $bundle['id']);
         $validatorSession = $this->resolveSession($bundle);
+        $profile          = $this->settingModel->getGroupValues('profile');
+        $editIdentity     = $this->request->getGet('identitas') === 'edit';
 
-        if (!$validatorSession) {
+        if (!$validatorSession || $editIdentity) {
             return view('public/bundle_landing', [
-                'title'       => esc($bundle['judul']),
-                'bundle'      => $bundle,
-                'instruments' => $instruments,
-                'state'       => 'identity',
+                'title'            => esc($bundle['judul']),
+                'bundle'           => $bundle,
+                'instruments'      => $instruments,
+                'profile'          => $profile,
+                'validatorSession' => $validatorSession,
+                'state'            => 'identity',
             ]);
         }
 
@@ -74,6 +81,7 @@ class PublicBundle extends BaseController
             'state'            => 'progress',
             'validatorSession' => $validatorSession,
             'progressMap'      => $progressMap,
+            'profile'          => $profile,
         ]);
     }
 
@@ -121,6 +129,22 @@ class PublicBundle extends BaseController
         }
 
         $now = date('Y-m-d H:i:s');
+        $existingSession = $this->resolveSession($bundle);
+        $sessionPayload = [
+            'validator_nama'             => trim((string) $this->request->getPost('nama')),
+            'validator_email'            => trim((string) ($this->request->getPost('email') ?? '')),
+            'validator_instansi'         => trim((string) ($this->request->getPost('instansi') ?? '')),
+            'validator_bidang_keahlian'  => trim((string) ($this->request->getPost('bidang_keahlian') ?? '')),
+        ];
+
+        if ($existingSession) {
+            $this->sessionModel->update((int) $existingSession['id'], $sessionPayload);
+            session()->set($this->sessionKey((int) $bundle['id']), (int) $existingSession['id']);
+
+            return redirect()
+                ->to(base_url('paket/' . $token))
+                ->with('success', 'Identitas validator berhasil diperbarui.');
+        }
 
         if (($bundle['token_access_mode'] ?? 'single_use') === 'single_use' && $this->sessionModel->countByBundle((int) $bundle['id']) > 0) {
             return redirect()
@@ -128,15 +152,11 @@ class PublicBundle extends BaseController
                 ->with('error', 'Token ini hanya untuk satu validator dan sudah digunakan.');
         }
 
-        $sessionId = $this->sessionModel->insert([
-            'bundle_id'                  => (int) $bundle['id'],
-            'validator_nama'             => trim((string) $this->request->getPost('nama')),
-            'validator_email'            => trim((string) ($this->request->getPost('email') ?? '')),
-            'validator_instansi'         => trim((string) ($this->request->getPost('instansi') ?? '')),
-            'validator_bidang_keahlian'  => trim((string) ($this->request->getPost('bidang_keahlian') ?? '')),
-            'status_session'             => 'draft',
-            'started_at'                 => $now,
-        ], true);
+        $sessionId = $this->sessionModel->insert(array_merge([
+            'bundle_id'      => (int) $bundle['id'],
+            'status_session' => 'draft',
+            'started_at'     => $now,
+        ], $sessionPayload), true);
 
         session()->set($this->sessionKey((int) $bundle['id']), (int) $sessionId);
 
@@ -229,7 +249,7 @@ class PublicBundle extends BaseController
             'items'            => $items,
             'scale'            => $scale,
             'validatorSession' => $validatorSession,
-            'isFinal'          => $validatorSession['status_session'] === 'final',
+            'isFinal'          => false,
             'savedAnswers'     => $savedAnswers,
             'savedProgress'    => $savedProgress,
             'progressMap'      => $progressMap,
@@ -254,12 +274,6 @@ class PublicBundle extends BaseController
 
         if (!$validatorSession) {
             return redirect()->to(base_url('paket/' . $token));
-        }
-
-        if ($validatorSession['status_session'] === 'final') {
-            return redirect()
-                ->to(base_url('paket/' . $token . '/ringkasan'))
-                ->with('error', 'Sesi Anda sudah disubmit final. Jawaban tidak dapat diubah.');
         }
 
         // Honeypot
@@ -341,8 +355,7 @@ class PublicBundle extends BaseController
         if ($action === 'save_next') {
             if ($nextPos !== null) {
                 return redirect()
-                    ->to(base_url('paket/' . $token . '/isi/' . $nextPos))
-                    ->with('success', 'Instrumen ' . $position . ' dari ' . $total . ' tersimpan. Lanjutkan ke instrumen berikutnya.');
+                    ->to(base_url('paket/' . $token . '/isi/' . $nextPos));
             }
 
             return redirect()
@@ -374,12 +387,6 @@ class PublicBundle extends BaseController
             return $this->response
                 ->setContentType('application/json')
                 ->setBody(json_encode(['ok' => false, 'error' => 'No session']));
-        }
-
-        if ($validatorSession['status_session'] === 'final') {
-            return $this->response
-                ->setContentType('application/json')
-                ->setBody(json_encode(['ok' => false, 'error' => 'Session is final']));
         }
 
         $instruments     = $this->bundleInstrumentModel->getByBundle((int) $bundle['id']);
@@ -448,72 +455,6 @@ class PublicBundle extends BaseController
                 'csrf_name' => csrf_token(),
                 'csrf_hash' => csrf_hash(),
             ]));
-    }
-
-    // ─── Submit final ─────────────────────────────────────────────────────────
-
-    /**
-     * POST: mark the validator session as final and redirect to summary.
-     */
-    public function submitFinal(string $token = '')
-    {
-        $bundle = $this->getValidatedBundle($token);
-
-        if (isset($bundle['error_view'])) {
-            return $bundle['error_view'];
-        }
-
-        $validatorSession = $this->resolveSession($bundle);
-
-        if (!$validatorSession) {
-            return redirect()->to(base_url('paket/' . $token));
-        }
-
-        if ($validatorSession['status_session'] === 'final') {
-            return redirect()->to(base_url('paket/' . $token . '/ringkasan'));
-        }
-
-        $instruments = $this->bundleInstrumentModel->getByBundle((int) $bundle['id']);
-        $progressMap = $this->syncSessionProgressStatuses((int) $validatorSession['id'], $instruments);
-
-        if (empty($instruments)) {
-            return redirect()
-                ->to(base_url('paket/' . $token))
-                ->with('error', 'Belum ada instrumen pada paket ini untuk disubmit.');
-        }
-
-        $incompleteCount = 0;
-        foreach ($instruments as $instrument) {
-            $instrumentId = (int) ($instrument['instrument_id'] ?? 0);
-            $progress = $progressMap[$instrumentId] ?? null;
-
-            if (($progress['status'] ?? 'belum') !== 'selesai') {
-                $incompleteCount++;
-            }
-        }
-
-        if ($incompleteCount > 0) {
-            return redirect()
-                ->to(base_url('paket/' . $token))
-                ->with('error', 'Semua instrumen harus diselesaikan terlebih dahulu sebelum submit final.');
-        }
-
-        $this->sessionModel->update((int) $validatorSession['id'], [
-            'status_session' => 'final',
-            'submitted_at'   => date('Y-m-d H:i:s'),
-        ]);
-
-        $this->auditLog->log(
-            AuditLogService::ACTION_BUNDLE_SUBMIT_FINAL,
-            AuditLogService::ENTITY_BUNDLE_SESSION,
-            (int) $validatorSession['id'],
-            'Submit final untuk bundle #' . (int) $bundle['id'],
-            [
-                'user_name' => $validatorSession['validator_nama'] ?? null,
-            ]
-        );
-
-        return redirect()->to(base_url('paket/' . $token . '/ringkasan'));
     }
 
     /**

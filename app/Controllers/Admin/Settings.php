@@ -70,10 +70,16 @@ class Settings extends BaseController
         $rules = [
             'nama_penelitian'  => 'required|max_length[255]',
             'nama_peneliti'    => 'permit_empty|max_length[150]',
+            'nim'              => 'permit_empty|max_length[50]',
             'institusi'        => 'permit_empty|max_length[150]',
             'program_studi'    => 'permit_empty|max_length[150]',
             'tahun_penelitian' => 'permit_empty|max_length[20]',
         ];
+
+        $pdf = $this->request->getFile('ringkasan_penelitian_pdf');
+        if ($pdf && $pdf->getError() !== UPLOAD_ERR_NO_FILE) {
+            $rules['ringkasan_penelitian_pdf'] = 'uploaded[ringkasan_penelitian_pdf]|max_size[ringkasan_penelitian_pdf,10240]|ext_in[ringkasan_penelitian_pdf,pdf]|mime_in[ringkasan_penelitian_pdf,application/pdf,application/x-pdf]';
+        }
 
         if (!$this->validate($rules)) {
             return redirect()
@@ -85,6 +91,7 @@ class Settings extends BaseController
         $fields = [
             'nama_penelitian',
             'nama_peneliti',
+            'nim',
             'institusi',
             'program_studi',
             'tahun_penelitian',
@@ -96,6 +103,27 @@ class Settings extends BaseController
                 trim((string) $this->request->getPost($field)),
                 'profile'
             );
+        }
+
+        if ($pdf && $pdf->isValid() && !$pdf->hasMoved()) {
+            $targetDir = FCPATH . 'uploads/settings';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0775, true);
+            }
+
+            $oldPath = (string) ($this->settingModel->getValue('ringkasan_penelitian_pdf') ?? '');
+            $fileName = 'ringkasan-penelitian-' . date('YmdHis') . '.pdf';
+            $pdf->move($targetDir, $fileName);
+
+            $newPath = 'uploads/settings/' . $fileName;
+            $this->settingModel->setValue('ringkasan_penelitian_pdf', $newPath, 'profile');
+
+            if ($oldPath !== '' && str_starts_with($oldPath, 'uploads/settings/')) {
+                $oldFullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $oldPath);
+                if (is_file($oldFullPath)) {
+                    unlink($oldFullPath);
+                }
+            }
         }
 
         return redirect()

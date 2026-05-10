@@ -20,13 +20,10 @@
     <div class="card-body">
         <div class="row g-2">
             <div class="col-md-6"><strong>Paket:</strong> <?= esc($bundle['judul'] ?? '-') ?></div>
-            <div class="col-md-6"><strong>Status Sesi:</strong> <?= esc($validatorSession['status_session'] ?? '-') ?></div>
             <div class="col-md-6"><strong>Email:</strong> <?= esc($validatorSession['validator_email'] ?: '-') ?></div>
             <div class="col-md-6"><strong>Instansi:</strong> <?= esc($validatorSession['validator_instansi'] ?: '-') ?></div>
             <div class="col-md-6"><strong>Bidang:</strong> <?= esc($validatorSession['validator_bidang_keahlian'] ?: '-') ?></div>
-            <div class="col-md-6"><strong>Submitted:</strong>
-                <?= !empty($validatorSession['submitted_at']) ? esc(format_tanggal_indonesia($validatorSession['submitted_at'], true)) : '-' ?>
-            </div>
+            <div class="col-md-6"><strong>Mulai:</strong><?= !empty($validatorSession['started_at']) ? ' ' . esc(format_tanggal_indonesia($validatorSession['started_at'], true)) : ' -' ?></div>
         </div>
     </div>
 </div>

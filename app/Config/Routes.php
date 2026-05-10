@@ -107,5 +107,4 @@ $routes->post('paket/(:segment)/mulai', 'PublicBundle::startSession/$1');
 $routes->get('paket/(:segment)/isi/(:num)', 'PublicBundle::showInstrument/$1/$2');
 $routes->post('paket/(:segment)/isi/(:num)', 'PublicBundle::saveInstrument/$1/$2');
 $routes->post('paket/(:segment)/isi/(:num)/autosave', 'PublicBundle::autosave/$1/$2');
-$routes->post('paket/(:segment)/submit', 'PublicBundle::submitFinal/$1');
 $routes->get('paket/(:segment)/ringkasan', 'PublicBundle::summary/$1');

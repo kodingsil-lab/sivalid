@@ -153,7 +153,6 @@ $instrumentSummaries = isset($instrumentSummaries) && is_array($instrumentSummar
 $selesaiCount = isset($selesaiCount) ? (int) $selesaiCount : 0;
 $total = isset($total) ? (int) $total : count($instrumentSummaries);
 $token = $bundle['token'] ?? '';
-$isFinal = ($validatorSession['status_session'] ?? 'draft') === 'final';
 ?>
 
 <div class="shell">
@@ -165,15 +164,8 @@ $isFinal = ($validatorSession['status_session'] ?? 'draft') === 'final';
     </div>
 
     <div class="card">
-        <div class="status-box <?= $isFinal ? '' : 'draft' ?>">
-            <?php if ($isFinal): ?>
-                Validasi telah disubmit final.
-                <?php if (!empty($validatorSession['submitted_at'])): ?>
-                    Dikirim pada <?= esc(format_tanggal_indonesia($validatorSession['submitted_at'], true)) ?>.
-                <?php endif; ?>
-            <?php else: ?>
-                Progres tersimpan sebagai draft. Anda masih dapat kembali mengisi instrumen.
-            <?php endif; ?>
+        <div class="status-box draft">
+            Progres tersimpan otomatis. Validator masih dapat kembali mengisi atau melengkapi instrumen kapan saja selama paket aktif.
         </div>
     </div>
 
@@ -225,14 +217,6 @@ $isFinal = ($validatorSession['status_session'] ?? 'draft') === 'final';
 
         <div class="actions">
             <a href="<?= base_url('paket/' . esc($token)) ?>" class="btn">Kembali ke Daftar Instrumen</a>
-            <?php if (!$isFinal): ?>
-                <form method="post" action="<?= base_url('paket/' . esc($token) . '/submit') ?>">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="btn btn-success" onclick="return confirm('Submit validasi ini secara final? Setelah submit, jawaban tidak dapat diubah.')">
-                        Submit Final
-                    </button>
-                </form>
-            <?php endif; ?>
         </div>
     </div>
 </div>

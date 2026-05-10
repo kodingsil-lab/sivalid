@@ -34,28 +34,20 @@
                     <th>Validator</th>
                     <th>Email</th>
                     <th>Instansi</th>
-                    <th style="width:130px;">Status</th>
                     <th style="width:130px;">Progress</th>
                     <th style="width:150px;">Mulai</th>
-                    <th style="width:150px;">Submit</th>
                     <th style="width:120px;">Aksi</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php foreach ($sessions as $i => $s): ?>
-                    <?php
-                    $status = $s['status_session'] ?? 'draft';
-                    $badge = $status === 'final' ? 'bg-green-lt text-green' : 'bg-yellow-lt text-yellow';
-                    ?>
                     <tr>
                         <td><?= $i + 1 ?></td>
                         <td><?= esc($s['validator_nama'] ?? '-') ?></td>
                         <td><?= esc($s['validator_email'] ?: '-') ?></td>
                         <td><?= esc($s['validator_instansi'] ?: '-') ?></td>
-                        <td><span class="badge <?= $badge ?>"><?= esc($status) ?></span></td>
                         <td><?= (int) ($s['selesai_count'] ?? 0) ?>/<?= (int) ($s['total'] ?? 0) ?></td>
                         <td><?= !empty($s['started_at']) ? esc(format_tanggal_indonesia($s['started_at'], true)) : '-' ?></td>
-                        <td><?= !empty($s['submitted_at']) ? esc(format_tanggal_indonesia($s['submitted_at'], true)) : '-' ?></td>
                         <td>
                             <a href="<?= base_url('admin/instrument-bundles/' . ($bundle['id'] ?? 0) . '/sessions/' . $s['id']) ?>" class="btn btn-sm btn-primary">
                                 Detail
