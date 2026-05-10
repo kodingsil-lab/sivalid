@@ -10,7 +10,7 @@
         </div>
         <?php if (!empty($instrumentId)): ?>
             <div class="col-auto ms-auto">
-                <a href="<?= base_url('admin/instrument-indicators/new?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
+                <a href="<?= base_url('admin/instrument-aspects?instrument_id=' . $instrumentId) ?>" class="btn btn-primary">
                     + Tambah Indikator
                 </a>
             </div>
@@ -98,6 +98,22 @@
         </tbody>
     </table>
     </div>
+
+    <?php if (isset($pager) && !empty($pagerGroup)): ?>
+        <?php
+        $currentPage = $pager->getCurrentPage($pagerGroup);
+        $perPage = $pager->getPerPage($pagerGroup);
+        $total = $pager->getTotal($pagerGroup);
+        $firstItem = $total > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
+        $lastItem = min($currentPage * $perPage, $total);
+        ?>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+            <div class="text-muted small">
+                Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+            </div>
+            <div><?= $pager->links($pagerGroup, 'default_full') ?></div>
+        </div>
+    <?php endif; ?>
     </div>
 </div>
 <?php endif; ?>

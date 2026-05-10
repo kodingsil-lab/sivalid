@@ -200,8 +200,8 @@ $checkedInstruments = isset($selectedInstruments) && is_array($selectedInstrumen
                                     </td>
                                     <td class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?></td>
                                     <td><?= esc((string) ($instrument['judul'] ?? '-')) ?></td>
-                                    <td><?= esc((string) ($instrument['jenis'] ?? '-')) ?></td>
-                                    <td><span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc((string) ($instrument['status'] ?? '-')) ?></span></td>
+                                    <td><?= esc(title_case_label((string) ($instrument['jenis'] ?? '-'))) ?></td>
+                                       <td><span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc(status_display_label((string) ($instrument['status'] ?? ''))) ?></span></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

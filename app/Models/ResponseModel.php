@@ -14,6 +14,7 @@ class ResponseModel extends Model
     protected $allowedFields = [
         'instrument_id',
         'instrument_link_id',
+        'bundle_id',
         'product_id',
         'respondent_id',
         'mode',

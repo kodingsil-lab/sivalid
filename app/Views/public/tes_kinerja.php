@@ -22,6 +22,8 @@
             background: linear-gradient(180deg, #eef2ff 0%, var(--pub-bg) 28%);
             color: var(--pub-text);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
         .public-shell {
@@ -40,18 +42,18 @@
 
         .public-title {
             margin: 0 0 .25rem;
-            font-size: 1.65rem;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
         .public-muted {
             color: var(--pub-muted);
-            font-size: .92rem;
+            font-size: 1rem;
         }
 
         .public-heading {
             margin: 0 0 .75rem;
-            font-size: 1.06rem;
+            font-size: 1.18rem;
             font-weight: 700;
             color: var(--pub-text);
         }
@@ -69,7 +71,7 @@
         .public-label {
             display: block;
             margin-bottom: .32rem;
-            font-size: .9rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #334155;
         }
@@ -79,8 +81,8 @@
             width: 100%;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
-            padding: .5rem .62rem;
-            font-size: .92rem;
+            padding: .62rem .72rem;
+            font-size: 1rem;
             color: var(--pub-text);
             background: #fff;
             box-sizing: border-box;
@@ -105,14 +107,15 @@
         .public-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: .9rem;
+            font-size: .95rem;
             background: #fff;
         }
 
         .public-table th,
         .public-table td {
             border: 1px solid var(--pub-border);
-            padding: .55rem .6rem;
+            padding: .68rem .72rem;
+            line-height: 1.55;
             vertical-align: top;
         }
 
@@ -127,18 +130,19 @@
             align-items: center;
             gap: 4px;
             margin: 0 8px 6px 0;
-            font-size: .86rem;
+            font-size: .95rem;
             font-weight: 500;
             color: #334155;
             border: 1px solid #dbeafe;
             background: var(--pub-blue-soft);
             border-radius: 999px;
-            padding: 2px 9px;
+            min-height: 36px;
+            padding: 5px 12px;
         }
 
         .public-required-note {
             color: #334155;
-            font-size: .78rem;
+            font-size: .88rem;
         }
 
         .public-alert {
@@ -148,7 +152,7 @@
             padding: .72rem .85rem;
             border-radius: 6px;
             margin-bottom: .9rem;
-            font-size: .9rem;
+            font-size: .98rem;
         }
 
         .public-btn {
@@ -156,10 +160,10 @@
             border: 1px solid var(--pub-blue);
             background: var(--pub-blue);
             color: #fff;
-            padding: .6rem 1.05rem;
+            padding: .72rem 1.15rem;
             border-radius: 6px;
             cursor: pointer;
-            font-size: .92rem;
+            font-size: 1rem;
             font-weight: 600;
         }
 
@@ -188,7 +192,8 @@ $linkJudulLink = isset($link['judul_link']) && is_scalar($link['judul_link']) ? 
 $linkKode = isset($link['kode']) && is_scalar($link['kode']) ? (string) $link['kode'] : '-';
 $linkJudul = isset($link['judul']) && is_scalar($link['judul']) ? (string) $link['judul'] : '-';
 $linkSasaran = isset($link['sasaran']) && is_scalar($link['sasaran']) && (string) $link['sasaran'] !== '' ? (string) $link['sasaran'] : 'Mahasiswa/Peserta';
-$linkStatus = isset($link['status']) && is_scalar($link['status']) ? (string) $link['status'] : '-';
+$rawLinkStatus = isset($link['status']) && is_scalar($link['status']) ? (string) $link['status'] : '-';
+$linkStatus = status_display_label($rawLinkStatus);
 $linkMaksimalRespon = isset($link['maksimal_respon']) && is_scalar($link['maksimal_respon']) ? (string) $link['maksimal_respon'] : '-';
 $linkPengantar = isset($link['pengantar']) && is_scalar($link['pengantar']) && (string) $link['pengantar'] !== ''
     ? (string) $link['pengantar']
@@ -229,9 +234,9 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
                     <tr>
                         <th>Periode</th>
                         <td>
-                            <?= !empty($link['tanggal_mulai']) ? esc(date('d-m-Y', strtotime($link['tanggal_mulai']))) : 'Tidak dibatasi' ?>
+                            <?= !empty($link['tanggal_mulai']) ? esc(format_tanggal_indonesia($link['tanggal_mulai'])) : 'Tidak dibatasi' ?>
                             s.d.
-                            <?= !empty($link['tanggal_selesai']) ? esc(date('d-m-Y', strtotime($link['tanggal_selesai']))) : 'Tidak dibatasi' ?>
+                            <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
                         </td>
                     </tr>
                     <tr>
@@ -423,7 +428,5 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
 
 </body>
 </html>
-
-
 
 

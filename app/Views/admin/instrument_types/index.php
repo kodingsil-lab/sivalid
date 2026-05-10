@@ -5,8 +5,8 @@
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
-            <h2 class="page-title">Jenis Instrumen</h2>
-            <div class="text-muted mt-1">Kelola daftar jenis yang muncul pada dropdown Jenis Instrumen di Master Instrumen.</div>
+            <h2 class="page-title">Jenis/Bentuk Instrumen</h2>
+            <div class="text-muted mt-1">Kelola daftar jenis/bentuk yang muncul pada dropdown Jenis/Bentuk Instrumen di Master Instrumen.</div>
         </div>
     </div>
 </div>
@@ -45,7 +45,7 @@
                 type="text"
                 name="jenis"
                 class="form-control"
-                placeholder="Contoh: Self Assessment Guru"
+                placeholder="Contoh: Angket, Wawancara, Rubrik Penilaian"
                 value="<?= old('jenis') ?>"
                 maxlength="100"
                 required
@@ -57,7 +57,7 @@
 
 <div class="card mb-3">
     <div class="card-header">
-        <h3 class="card-title">Daftar Jenis Instrumen</h3>
+        <h3 class="card-title">Daftar Jenis/Bentuk Instrumen</h3>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -85,7 +85,7 @@
                                 <td><?= $index + 1 ?></td>
                                 <td><?= esc($label) ?></td>
                                 <td>
-                                    <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                    <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                 </td>
                                 <td class="table-actions-cell">
                                     <?php if ($usedCount === 0): ?>

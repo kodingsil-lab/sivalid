@@ -19,9 +19,13 @@ class AdminUsers extends BaseController
 
     public function index()
     {
+        $perPage = config('Pager')->perPage;
+
         $data = [
             'title' => 'Manajemen User Admin',
-            'users' => $this->userModel->orderBy('id', 'ASC')->findAll(),
+            'users' => $this->userModel->orderBy('id', 'ASC')->paginate($perPage, 'admin_users'),
+            'pager' => $this->userModel->pager,
+            'pagerGroup' => 'admin_users',
         ];
 
         return view('admin/admin_users/index', $data);

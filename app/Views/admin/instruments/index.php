@@ -2,19 +2,21 @@
 
 <?= $this->section('content') ?>
 
-<div class="page-header d-print-none mb-3">
-    <div class="row align-items-center">
-        <div class="col">
-            <h2 class="page-title">Master Instrumen</h2>
-            <div class="text-muted mt-1">Kelola data instrumen penelitian dan status validasinya.</div>
-        </div>
-        <div class="col-auto ms-auto d-flex gap-2">
-            <a href="<?= base_url('admin/instruments/new') ?>" class="btn btn-primary">
-                + Tambah Instrumen
-            </a>
-            <a href="<?= base_url('admin/instrumen-valid') ?>" class="btn btn-light">
-                Instrumen Valid
-            </a>
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col">
+                <h2 class="page-title mb-1">Master Instrumen</h2>
+                <div class="text-muted">Kelola data instrumen penelitian dan status validasinya.</div>
+            </div>
+            <div class="col-auto ms-auto d-flex gap-2">
+                <a href="<?= base_url('admin/instruments/new') ?>" class="btn btn-primary">
+                    + Tambah Instrumen
+                </a>
+                <a href="<?= base_url('admin/instrumen-valid') ?>" class="btn btn-light">
+                    Instrumen Valid
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -57,6 +59,14 @@
             </div>
         </div>
     <?php else: ?>
+        <?php
+        $currentPage = isset($pager) ? $pager->getCurrentPage($pagerGroup) : 1;
+        $perPage = isset($pager) ? $pager->getPerPage($pagerGroup) : 0;
+        $total = isset($pager) ? $pager->getTotal($pagerGroup) : count($instruments);
+        $offset = $perPage > 0 ? (($currentPage - 1) * $perPage) : 0;
+        $firstItem = $total > 0 && $perPage > 0 ? $offset + 1 : 0;
+        $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : $total;
+        ?>
         <div class="table-responsive instruments-table-wrap">
             <table class="table table-vcenter table-hover table-sm table-nowrap card-table instruments-table">
                 <thead>
@@ -74,19 +84,19 @@
                 <tbody>
                     <?php foreach ($instruments as $index => $instrument): ?>
                         <tr>
-                            <td class="text-muted col-no"><?= $index + 1 ?></td>
+                            <td class="text-muted col-no"><?= $offset + $index + 1 ?></td>
                             <td class="col-code"><span class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?></span></td>
                             <td class="col-title">
                                 <span class="instrument-title"><?= esc((string) ($instrument['judul'] ?? '-')) ?></span>
                             </td>
-                            <td class="text-muted col-type"><?= esc((string) ($instrument['jenis'] ?? '-')) ?></td>
+                            <td class="text-muted col-type"><?= esc(title_case_label((string) ($instrument['jenis'] ?? '-'))) ?></td>
                             <td class="text-muted col-target"><?= esc((string) (!empty($instrument['sasaran']) ? $instrument['sasaran'] : '-')) ?></td>
                             <td class="text-muted col-scale"><?= esc((string) ($instrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
                             <td class="col-status">
                                 <?php $status = (string) ($instrument['status'] ?? ''); ?>
 
                                 <span class="<?= esc(status_badge_class($status)) ?>">
-                                    <?= esc($status !== '' ? $status : '-') ?>
+                                    <?= esc(status_display_label($status)) ?>
                                 </span>
                             </td>
                             <td class="col-actions table-actions-cell">
@@ -99,18 +109,33 @@
                                         Edit
                                     </a>
 
-                                    <form
-                                        action="<?= base_url('admin/instruments/' . $instrument['id']) ?>"
-                                        method="post"
-                                        class="action-inline"
-                                        onsubmit="return confirm('Yakin ingin menghapus instrumen ini?')"
-                                    >
-                                        <?= csrf_field() ?>
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn-sm btn-danger">
+                                    <?php
+                                    $usageCounts = $instrument['usage_counts'] ?? ['aspects' => 0, 'indicators' => 0, 'items' => 0];
+                                    $canDelete = (bool) ($instrument['can_delete'] ?? false);
+                                    $deleteTitle = 'Tidak bisa dihapus karena masih memiliki '
+                                        . (int) ($usageCounts['aspects'] ?? 0) . ' aspek, '
+                                        . (int) ($usageCounts['indicators'] ?? 0) . ' indikator, dan '
+                                        . (int) ($usageCounts['items'] ?? 0) . ' butir.';
+                                    ?>
+
+                                    <?php if ($canDelete): ?>
+                                        <form
+                                            action="<?= base_url('admin/instruments/' . $instrument['id']) ?>"
+                                            method="post"
+                                            class="action-inline"
+                                            onsubmit="return confirm('Yakin ingin menghapus instrumen ini?')"
+                                        >
+                                            <?= csrf_field() ?>
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    <?php else: ?>
+                                        <button type="button" class="btn btn-sm btn-danger" disabled title="<?= esc($deleteTitle) ?>">
                                             Hapus
                                         </button>
-                                    </form>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -118,6 +143,14 @@
                 </tbody>
             </table>
         </div>
+        <?php if (isset($pager) && !empty($pagerGroup)): ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+                </div>
+                <div><?= $pager->links($pagerGroup, 'default_full') ?></div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 </div>
 

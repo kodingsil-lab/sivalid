@@ -6,6 +6,10 @@
 $pageTitle = isset($title) ? (string) $title : 'Form Instrumen';
 $formAction = isset($action) ? (string) $action : base_url('admin/instruments');
 $formMethod = isset($method) ? (string) $method : 'post';
+$isCreateForm = strtolower($formMethod) === 'post';
+$codeValue = $isCreateForm
+    ? (string) ($autoCode ?? old('kode', '01'))
+    : (string) old('kode', $instrument['kode'] ?? '');
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -13,9 +17,6 @@ $formMethod = isset($method) ? (string) $method : 'post';
         <div class="col">
             <h2 class="page-title"><?= esc($pageTitle) ?></h2>
             <div class="text-muted mt-1">Lengkapi data instrumen secara terstruktur sebelum proses validasi.</div>
-        </div>
-        <div class="col-auto ms-auto">
-            <a href="<?= base_url('admin/instruments') ?>" class="btn btn-light">Kembali</a>
         </div>
     </div>
 </div>
@@ -58,14 +59,16 @@ $formMethod = isset($method) ? (string) $method : 'post';
                         name="kode"
                         id="kode"
                         class="form-control"
-                        value="<?= old('kode', $instrument['kode'] ?? '') ?>"
-                        placeholder="Contoh: INS-001"
+                        value="<?= esc($codeValue) ?>"
+                        placeholder="Contoh: 01"
+                        readonly
                         required
                     >
+                    <small class="text-muted">Kode dibuat otomatis berurutan (01, 02, 03, dst).</small>
                 </div>
 
                 <div class="form-row">
-                    <label class="form-label" for="jenis">Jenis Instrumen</label>
+                    <label class="form-label" for="jenis">Jenis/Bentuk Instrumen</label>
                     <select name="jenis" id="jenis" class="form-control" required>
                         <?php
                         $jenisOptions = isset($jenisOptions) && is_array($jenisOptions)
@@ -78,7 +81,7 @@ $formMethod = isset($method) ? (string) $method : 'post';
                         }
                         ?>
 
-                        <option value="">-- Pilih Jenis --</option>
+                        <option value="">-- Pilih Jenis/Bentuk --</option>
                         <?php foreach ($jenisOptions as $jenis): ?>
                             <option value="<?= esc($jenis) ?>" <?= $selectedJenis === $jenis ? 'selected' : '' ?>>
                                 <?= esc($jenis) ?>
@@ -119,41 +122,41 @@ $formMethod = isset($method) ? (string) $method : 'post';
 
     <div class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Deskripsi dan Petunjuk</h3>
+            <h3 class="card-title">Pengantar dan Petunjuk</h3>
         </div>
         <div class="card-body">
-
-            <div class="form-row">
-                <label class="form-label" for="deskripsi">Deskripsi</label>
-                <textarea
-                    name="deskripsi"
-                    id="deskripsi"
-                    class="form-control"
-                    rows="4"
-                    placeholder="Tuliskan deskripsi singkat instrumen."
-                ><?= old('deskripsi', $instrument['deskripsi'] ?? '') ?></textarea>
-            </div>
-
             <div class="form-row">
                 <label class="form-label" for="pengantar">Pengantar</label>
-                <textarea
+                <input
+                    type="hidden"
                     name="pengantar"
                     id="pengantar"
-                    class="form-control"
-                    rows="5"
-                    placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
-                ><?= old('pengantar', $instrument['pengantar'] ?? '') ?></textarea>
+                    value="<?= esc((string) old('pengantar', $instrument['pengantar'] ?? ''), 'attr') ?>"
+                >
+                <div
+                    id="pengantar-editor"
+                    class="quill-editor"
+                    data-placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
+                    data-target-input="pengantar"
+                    data-initial="<?= esc((string) old('pengantar', $instrument['pengantar'] ?? ''), 'attr') ?>"
+                ></div>
             </div>
 
             <div class="form-row">
                 <label class="form-label" for="petunjuk">Petunjuk Pengisian</label>
-                <textarea
+                <input
+                    type="hidden"
                     name="petunjuk"
                     id="petunjuk"
-                    class="form-control"
-                    rows="5"
-                    placeholder="Tuliskan petunjuk pengisian instrumen."
-                ><?= old('petunjuk', $instrument['petunjuk'] ?? '') ?></textarea>
+                    value="<?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? ''), 'attr') ?>"
+                >
+                <div
+                    id="petunjuk-editor"
+                    class="quill-editor"
+                    data-placeholder="Tuliskan petunjuk pengisian instrumen."
+                    data-target-input="petunjuk"
+                    data-initial="<?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? ''), 'attr') ?>"
+                ></div>
             </div>
         </div>
     </div>
@@ -167,34 +170,30 @@ $formMethod = isset($method) ? (string) $method : 'post';
             <div class="form-grid">
                 <div class="form-row">
                     <label class="form-label" for="status">Status</label>
-                    <select name="status" id="status" class="form-control" required>
-                        <?php
-                        $statusOptions = [
-                            'Draft',
-                            'Aktif',
-                            'Dalam Validasi Instrumen',
-                            'Perlu Revisi',
-                            'Direvisi',
-                            'Layak Ditetapkan Valid',
-                            'Valid',
-                            'Siap Disebar',
-                            'Tidak Aktif',
-                            'Arsip',
-                        ];
+                    <?php
+                    $manualStatuses = ['Draft', 'Aktif'];
+                    $selectedStatus = old('status', $instrument['status'] ?? 'Draft');
+                    $selectedStatusLabel = status_display_label($selectedStatus);
+                    $isWorkflowStatus = !in_array($selectedStatus, $manualStatuses, true);
+                    ?>
 
-                        $selectedStatus = old('status', $instrument['status'] ?? 'Draft');
-
-                        if ($selectedStatus !== '' && !in_array($selectedStatus, $statusOptions, true)) {
-                            array_unshift($statusOptions, $selectedStatus);
-                        }
-                        ?>
-
-                        <?php foreach ($statusOptions as $status): ?>
-                            <option value="<?= esc($status) ?>" <?= $selectedStatus === $status ? 'selected' : '' ?>>
-                                <?= esc($status) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if ($isCreateForm): ?>
+                        <input type="hidden" name="status" value="Draft">
+                        <div class="form-control" style="background-color: #f8f9fa;">Draft (otomatis saat instrumen dibuat)</div>
+                        <small class="text-muted">Status berikutnya akan berubah otomatis saat link validasi dibuat, analisis selesai, revisi, dan penetapan valid.</small>
+                    <?php elseif ($isWorkflowStatus): ?>
+                        <input type="hidden" name="status" value="<?= esc($selectedStatus, 'attr') ?>">
+                        <div class="form-control" style="background-color: #f8f9fa;"><?= esc($selectedStatusLabel) ?> (otomatis dari alur validasi)</div>
+                        <small class="text-muted">Status ini dikontrol sistem workflow validasi instrumen.</small>
+                    <?php else: ?>
+                        <select name="status" id="status" class="form-control" required>
+                            <?php foreach ($manualStatuses as $status): ?>
+                                <option value="<?= esc($status) ?>" <?= $selectedStatus === $status ? 'selected' : '' ?>>
+                                    <?= esc($status) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-row">
@@ -233,5 +232,85 @@ $formMethod = isset($method) ? (string) $method : 'post';
         <a href="<?= base_url('admin/instruments') ?>" class="btn btn-light">Kembali</a>
     </div>
 </form>
+
+<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<style>
+    .quill-editor {
+        background: #fff;
+        border-radius: 4px;
+    }
+
+    .quill-editor .ql-container {
+        min-height: 150px;
+        font-size: 0.875rem;
+    }
+
+    .quill-editor .ql-editor {
+        min-height: 150px;
+        white-space: pre-wrap;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var editorElements = document.querySelectorAll('.quill-editor');
+
+        if (editorElements.length === 0) {
+            return;
+        }
+
+        var editors = [];
+
+        editorElements.forEach(function (editorElement) {
+            var targetInputId = editorElement.getAttribute('data-target-input');
+            var initialContent = editorElement.getAttribute('data-initial') || '';
+            var targetInput = document.getElementById(targetInputId);
+
+            if (!targetInput) {
+                return;
+            }
+
+            var quill = new Quill(editorElement, {
+                theme: 'snow',
+                placeholder: editorElement.getAttribute('data-placeholder') || '',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        [{ indent: '-1' }, { indent: '+1' }],
+                        [{ align: [] }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            if (/<[a-z][\s\S]*>/i.test(initialContent)) {
+                quill.clipboard.dangerouslyPasteHTML(initialContent);
+            } else {
+                quill.setText(initialContent);
+            }
+
+            editors.push({
+                quill: quill,
+                input: targetInput
+            });
+        });
+
+        var form = document.querySelector('form[action]');
+
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener('submit', function () {
+            editors.forEach(function (item) {
+                var text = item.quill.getText().replace(/\n$/, '').trim();
+                item.input.value = text === '' ? '' : item.quill.root.innerHTML;
+            });
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>

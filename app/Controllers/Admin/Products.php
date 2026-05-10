@@ -26,6 +26,7 @@ class Products extends BaseController
     public function index()
     {
         $keyword = trim((string) $this->request->getGet('keyword'));
+        $perPage = config('Pager')->perPage;
 
         $query = $this->productModel;
 
@@ -42,7 +43,9 @@ class Products extends BaseController
         $data = [
             'title'    => 'Produk Penelitian',
             'keyword'  => $keyword,
-            'products' => $query->orderBy('id', 'DESC')->findAll(),
+            'products' => $query->orderBy('id', 'DESC')->paginate($perPage, 'products'),
+            'pager'    => $this->productModel->pager,
+            'pagerGroup' => 'products',
         ];
 
         return view('admin/products/index', $data);

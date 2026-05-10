@@ -33,12 +33,13 @@ class RespondentLinks extends BaseController
     public function index()
     {
         $mode = $this->request->getGet('mode');
+        $perPage = config('Pager')->perPage;
 
         if (!in_array($mode, $this->allowedModes, true)) {
             $mode = null;
         }
 
-        $links = $this->getLinks($mode);
+        $links = $this->linkModel->paginateWithInstrument($mode, $perPage, 'respondent_links');
 
         foreach ($links as &$link) {
             $link['jumlah_respon'] = $this->responseModel->countByLink((int) $link['id']);
@@ -51,6 +52,8 @@ class RespondentLinks extends BaseController
             'mode'         => $mode,
             'links'        => $links,
             'allowedModes' => $this->allowedModes,
+            'pager'        => $this->linkModel->pager,
+            'pagerGroup'   => 'respondent_links',
         ];
 
         return view('admin/respondent_links/index', $data);
@@ -141,9 +144,11 @@ class RespondentLinks extends BaseController
 
         $this->workflowStatusService->markInstrumentReadyToShare($instrumentId);
 
+        $statusLabel = status_display_label('Siap Disebar');
+
         return redirect()
             ->to(base_url('admin/respondent-links?mode=' . $mode))
-            ->with('success', 'Link instrumen responden berhasil dibuat. Status instrumen diperbarui menjadi Siap Disebar.');
+            ->with('success', 'Link instrumen responden berhasil dibuat. Status instrumen diperbarui menjadi ' . $statusLabel . '.');
     }
 
     public function edit($id = null)
@@ -248,28 +253,6 @@ class RespondentLinks extends BaseController
         return redirect()
             ->to(base_url('admin/respondent-links?mode=' . $mode))
             ->with('success', 'Link instrumen responden berhasil dihapus.');
-    }
-
-    private function getLinks(?string $mode = null): array
-    {
-        $builder = $this->linkModel
-            ->select(
-                'instrument_links.*,
-                 instruments.kode,
-                 instruments.judul,
-                 instruments.jenis,
-                 instruments.status AS instrument_status'
-            )
-            ->join('instruments', 'instruments.id = instrument_links.instrument_id')
-            ->whereIn('instrument_links.mode', $this->allowedModes);
-
-        if ($mode !== null) {
-            $builder->where('instrument_links.mode', $mode);
-        }
-
-        return $builder
-            ->orderBy('instrument_links.id', 'DESC')
-            ->findAll();
     }
 
     private function getValidInstruments(): array

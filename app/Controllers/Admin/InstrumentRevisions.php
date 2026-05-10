@@ -36,13 +36,16 @@ class InstrumentRevisions extends BaseController
     {
         $instrumentId = $this->request->getGet('instrument_id');
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
+        $perPage = config('Pager')->perPage;
 
         $data = [
             'title'        => 'Revisi Butir Instrumen',
             'instrumentId' => $instrumentId,
             'instruments'  => $this->instrumentModel->orderBy('judul', 'ASC')->findAll(),
-            'revisions'    => $this->revisionModel->getWithItem($instrumentId),
+            'revisions'    => $this->revisionModel->paginateWithItem($instrumentId, $perPage, 'instrument_revisions'),
             'revisionCandidates' => $this->getRevisionCandidates($instrumentId),
+            'pager'        => $this->revisionModel->pager,
+            'pagerGroup'   => 'instrument_revisions',
         ];
 
         return view('admin/revisions/index', $data);
@@ -151,9 +154,11 @@ class InstrumentRevisions extends BaseController
                 ->with('error', 'Revisi butir gagal disimpan.');
         }
 
+        $statusLabel = status_display_label('Direvisi');
+
         return redirect()
             ->to(base_url('admin/instrument-revisions?instrument_id=' . $item['instrument_id']))
-            ->with('success', 'Revisi butir berhasil disimpan. Status instrumen diperbarui menjadi Direvisi.');
+            ->with('success', 'Revisi butir berhasil disimpan. Status instrumen diperbarui menjadi ' . $statusLabel . '.');
     }
 
     public function edit($id = null)

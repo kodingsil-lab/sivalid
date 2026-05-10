@@ -25,18 +25,18 @@ $modeBadgeClass = static function (?string $mode): string {
     $mode = (string) $mode;
 
     if ($mode === 'validasi_instrumen') {
-        return 'badge badge-status-process';
+        return 'badge bg-blue text-blue-fg';
     }
 
     if ($mode === 'validasi_produk') {
-        return 'badge badge-status-warning';
+        return 'badge bg-orange text-orange-fg';
     }
 
     if (in_array($mode, ['respon_mahasiswa', 'observasi', 'fgd', 'tes_kinerja'], true)) {
-        return 'badge badge-status-success';
+        return 'badge bg-green text-green-fg';
     }
 
-    return 'badge badge-status-draft';
+    return 'badge bg-secondary text-secondary-fg';
 };
 ?>
 
@@ -180,6 +180,13 @@ $modeBadgeClass = static function (?string $mode): string {
             Belum ada hasil pengisian.
         </div>
     <?php else: ?>
+        <?php
+        $currentPage = isset($pager) ? $pager->getCurrentPage('submissions') : 1;
+        $perPage = isset($pager) ? $pager->getPerPage('submissions') : 0;
+        $total = isset($pager) ? $pager->getTotal('submissions') : count($safeResponses);
+        $firstItem = $total > 0 && $perPage > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
+        $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : $total;
+        ?>
         <div class="table-responsive">
             <table class="table table-vcenter table-hover table-sm">
                 <thead>
@@ -200,7 +207,7 @@ $modeBadgeClass = static function (?string $mode): string {
                             <td class="text-muted"><?= $safeOffset + $index + 1 ?></td>
                             <td>
                                 <div class="fw-semibold"><?= esc((string) ($response['nama'] ?? '-')) ?></div>
-                                <div class="small text-muted"><?= esc((string) ($response['jenis_responden'] ?? '-')) ?></div>
+                                <div class="small text-muted"><?= esc(title_case_label((string) ($response['jenis_responden'] ?? '-'))) ?></div>
 
                                 <?php if (!empty($response['nim'])): ?>
                                     <div class="small text-muted">NIM: <?= esc((string) $response['nim']) ?></div>
@@ -250,8 +257,11 @@ $modeBadgeClass = static function (?string $mode): string {
         </div>
 
         <?php if (isset($pager)): ?>
-            <div class="mt-3">
-                <?= $pager->links('submissions') ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-3">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+                </div>
+                <div><?= $pager->links('submissions', 'default_full') ?></div>
             </div>
         <?php endif; ?>
     <?php endif; ?>

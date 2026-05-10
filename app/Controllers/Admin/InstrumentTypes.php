@@ -105,12 +105,13 @@ class InstrumentTypes extends BaseController
     private function seedDefaultTypes(): void
     {
         $defaults = [
-            'Validasi Instrumen',
-            'Validasi Produk',
-            'Angket Respon',
+            'Angket',
+            'Wawancara',
             'Observasi',
             'FGD',
             'Tes Kinerja',
+            'Rubrik Penilaian',
+            'Dokumentasi',
         ];
 
         foreach ($defaults as $index => $label) {

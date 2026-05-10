@@ -551,14 +551,14 @@ class PublicForm extends BaseController
         if (!empty($link['tanggal_mulai']) && $today < $link['tanggal_mulai']) {
             return view('public/thanks', [
                 'title'   => 'Link Belum Dibuka',
-                'message' => 'Link pengisian ini baru dapat digunakan mulai tanggal ' . date('d-m-Y', strtotime($link['tanggal_mulai'])) . '.',
+                'message' => 'Link pengisian ini baru dapat digunakan mulai tanggal ' . format_tanggal_indonesia($link['tanggal_mulai']) . '.',
             ]);
         }
 
         if (!empty($link['tanggal_selesai']) && $today > $link['tanggal_selesai']) {
             return view('public/thanks', [
                 'title'   => 'Link Sudah Ditutup',
-                'message' => 'Masa pengisian link ini sudah berakhir pada tanggal ' . date('d-m-Y', strtotime($link['tanggal_selesai'])) . '.',
+                'message' => 'Masa pengisian link ini sudah berakhir pada tanggal ' . format_tanggal_indonesia($link['tanggal_selesai']) . '.',
             ]);
         }
 

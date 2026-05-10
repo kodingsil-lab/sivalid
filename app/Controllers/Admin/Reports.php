@@ -34,6 +34,8 @@ class Reports extends BaseController
 
     public function index()
     {
+        $perPage = config('Pager')->perPage;
+
         $analyses = $this->analysisResultModel
             ->select(
                 'analysis_results.*,
@@ -47,7 +49,7 @@ class Reports extends BaseController
             ->join('instrument_links', 'instrument_links.id = analysis_results.instrument_link_id')
             ->join('research_products', 'research_products.id = analysis_results.product_id', 'left')
             ->orderBy('analysis_results.id', 'DESC')
-            ->findAll();
+            ->paginate($perPage, 'reports_analyses');
 
         $links = $this->linkModel
             ->select(
@@ -65,7 +67,7 @@ class Reports extends BaseController
                 'tes_kinerja',
             ])
             ->orderBy('instrument_links.id', 'DESC')
-            ->findAll();
+            ->paginate($perPage, 'reports_links');
 
         foreach ($links as &$link) {
             $link['jumlah_respon'] = $this->responseModel->countByLink((int) $link['id']);
@@ -77,6 +79,10 @@ class Reports extends BaseController
             'title'    => 'Laporan',
             'analyses' => $analyses,
             'links'    => $links,
+            'pagerAnalyses' => $this->analysisResultModel->pager,
+            'pagerLinks'    => $this->linkModel->pager,
+            'pagerGroupAnalyses' => 'reports_analyses',
+            'pagerGroupLinks' => 'reports_links',
         ];
 
         return view('admin/reports/index', $data);

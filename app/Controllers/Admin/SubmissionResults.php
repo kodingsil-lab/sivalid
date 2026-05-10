@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Libraries\AuditLogService;
+use Config\Pager;
 use App\Models\InstrumentLinkModel;
 use App\Models\InstrumentModel;
 use App\Models\ResearchProductModel;
@@ -41,7 +42,7 @@ class SubmissionResults extends BaseController
     public function index()
     {
         $filters = $this->getFilters();
-        $perPage = 20;
+        $perPage = config(Pager::class)->perPage;
         $currentPage = max(1, (int) ($this->request->getGet('page_submissions') ?? 1));
 
         $builder = $this->getResponsesQuery();

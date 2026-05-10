@@ -73,7 +73,7 @@
                         <?php if (!empty($link['nama_produk'])): ?>
                             <strong><?= esc($link['product_kode']) ?></strong><br>
                             <?= esc($link['nama_produk']) ?><br>
-                            <small><?= esc($link['jenis_produk']) ?></small>
+                            <small><?= esc(title_case_label((string) ($link['jenis_produk'] ?? '-'))) ?></small>
                         <?php else: ?>
                             -
                         <?php endif; ?>

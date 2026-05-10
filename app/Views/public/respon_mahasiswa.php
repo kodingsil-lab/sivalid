@@ -7,9 +7,17 @@
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/sivalid.css') ?>">
     <style>
-        body { background: var(--sv-bg, #f4f6f8); }
+        body { background: var(--sv-bg, #f4f6f8); font-size: 16px; line-height: 1.6; }
         .public-wrap { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
-        .radio-inline label { display: inline-flex; align-items: center; gap: 4px; margin-right: 12px; font-weight: normal; }
+        .public-wrap .text-muted.small,
+        .public-wrap .small { font-size: .92rem; }
+        .public-wrap .form-label { font-size: 1rem; font-weight: 600; }
+        .public-wrap .form-control,
+        .public-wrap .form-select,
+        .public-wrap .btn { font-size: 1rem; }
+        .public-wrap .table { font-size: .95rem; line-height: 1.55; }
+        .public-wrap .table > :not(caption) > * > * { padding: .68rem .72rem; }
+        .radio-inline label { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; margin-right: 12px; padding: 4px 8px; font-weight: normal; }
         @media (max-width: 600px) { .public-wrap { padding: 0 .5rem; } }
     </style>
 </head>
@@ -45,12 +53,12 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
             <div class="card h-100">
                 <div class="card-body">
                     <h4 class="card-title mb-2">Informasi Pengisian</h4>
-                    <p class="mb-1 small">Status: <strong><?= esc($link['status']) ?></strong></p>
+                    <p class="mb-1 small">Status: <strong><?= esc(status_display_label((string) ($link['status'] ?? ''))) ?></strong></p>
                     <p class="mb-1 small">
                         Periode:
-                        <?= !empty($link['tanggal_mulai']) ? esc(date('d-m-Y', strtotime($link['tanggal_mulai']))) : 'Tidak dibatasi' ?>
+                        <?= !empty($link['tanggal_mulai']) ? esc(format_tanggal_indonesia($link['tanggal_mulai'])) : 'Tidak dibatasi' ?>
                         s.d.
-                        <?= !empty($link['tanggal_selesai']) ? esc(date('d-m-Y', strtotime($link['tanggal_selesai']))) : 'Tidak dibatasi' ?>
+                        <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
                     </p>
                     <p class="mb-0 small">Kuota: <?= !empty($link['maksimal_respon']) ? esc($link['maksimal_respon']) . ' respon' : 'Tidak dibatasi' ?></p>
                 </div>

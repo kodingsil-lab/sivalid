@@ -26,6 +26,16 @@ class AuditLogService
     public const ACTION_CREATE_LINK = 'create_link';
     public const ACTION_DELETE_LINK = 'delete_link';
 
+    // Aksi bundle validator
+    public const ACTION_CREATE_BUNDLE = 'create_bundle';
+    public const ACTION_UPDATE_BUNDLE = 'update_bundle';
+    public const ACTION_DELETE_BUNDLE = 'delete_bundle';
+    public const ACTION_REVOKE_BUNDLE_TOKEN = 'revoke_bundle_token';
+    public const ACTION_ACTIVATE_BUNDLE_TOKEN = 'activate_bundle_token';
+    public const ACTION_BUNDLE_SESSION_START = 'bundle_session_start';
+    public const ACTION_BUNDLE_SUBMIT_FINAL = 'bundle_submit_final';
+    public const ACTION_BUNDLE_TOKEN_DENIED = 'bundle_token_denied';
+
     // Aksi submit publik
     public const ACTION_PUBLIC_SUBMIT = 'public_submit';
 
@@ -44,6 +54,9 @@ class AuditLogService
     public const ENTITY_RESPONSE    = 'response';
     public const ENTITY_REVISION    = 'revision';
     public const ENTITY_ANALYSIS    = 'analysis';
+    public const ENTITY_BUNDLE      = 'bundle';
+    public const ENTITY_BUNDLE_TOKEN = 'bundle_token';
+    public const ENTITY_BUNDLE_SESSION = 'bundle_session';
 
     protected AuditLogModel $model;
 
@@ -56,8 +69,9 @@ class AuditLogService
         string $action,
         ?string $entityType = null,
         ?int $entityId = null,
-        ?string $description = null
+        ?string $description = null,
+        array $context = []
     ): void {
-        $this->model->log($action, $entityType, $entityId, $description);
+        $this->model->log($action, $entityType, $entityId, $description, $context);
     }
 }

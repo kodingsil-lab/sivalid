@@ -20,6 +20,7 @@ class Instruments extends BaseController
     public function index()
     {
         $keyword = trim((string) $this->request->getGet('keyword'));
+        $perPage = config('Pager')->perPage;
 
         $query = $this->instrumentModel;
 
@@ -37,7 +38,9 @@ class Instruments extends BaseController
         $data = [
             'title'       => 'Master Instrumen',
             'keyword'     => $keyword,
-            'instruments' => $query->orderBy('id', 'DESC')->findAll(),
+            'instruments' => $this->appendUsageCounts($query->orderBy('id', 'DESC')->paginate($perPage, 'instruments')),
+            'pager'       => $this->instrumentModel->pager,
+            'pagerGroup'  => 'instruments',
         ];
 
         return view('admin/instruments/index', $data);
@@ -48,6 +51,7 @@ class Instruments extends BaseController
         $data = [
             'title'      => 'Tambah Instrumen',
             'instrument' => null,
+            'autoCode'   => $this->generateNextCode(),
             'jenisOptions' => $this->getJenisOptions(),
             'action'     => base_url('admin/instruments'),
             'method'     => 'post',
@@ -59,12 +63,10 @@ class Instruments extends BaseController
     public function create()
     {
         $rules = [
-            'kode'      => 'required|min_length[2]|max_length[50]|is_unique[instruments.kode]',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
             'skala_min' => 'required|integer',
             'skala_max' => 'required|integer',
-            'status'    => 'required',
         ];
 
         if (!$this->validate($rules)) {
@@ -84,17 +86,18 @@ class Instruments extends BaseController
                 ->with('error', 'Skala minimal harus lebih kecil dari skala maksimal.');
         }
 
+        $kode = $this->generateNextCode();
+
         $this->instrumentModel->insert([
-            'kode'      => trim((string) $this->request->getPost('kode')),
+            'kode'      => $kode,
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
             'sasaran'   => trim((string) $this->request->getPost('sasaran')),
-            'deskripsi' => trim((string) $this->request->getPost('deskripsi')),
             'pengantar' => trim((string) $this->request->getPost('pengantar')),
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
             'skala_max' => $skalaMax,
-            'status'    => trim((string) $this->request->getPost('status')),
+            'status'    => 'Draft',
         ]);
 
         return redirect()
@@ -152,7 +155,6 @@ class Instruments extends BaseController
         }
 
         $rules = [
-            'kode'      => 'required|min_length[2]|max_length[50]|is_unique[instruments.kode,id,' . $id . ']',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
             'skala_min' => 'required|integer',
@@ -177,17 +179,26 @@ class Instruments extends BaseController
                 ->with('error', 'Skala minimal harus lebih kecil dari skala maksimal.');
         }
 
+        $manualStatuses = ['Draft', 'Aktif'];
+        $currentStatus = (string) ($instrument['status'] ?? 'Draft');
+        $requestedStatus = trim((string) $this->request->getPost('status'));
+        $statusToSave = $currentStatus;
+
+        if (in_array($currentStatus, $manualStatuses, true)) {
+            if (in_array($requestedStatus, $manualStatuses, true)) {
+                $statusToSave = $requestedStatus;
+            }
+        }
+
         $this->instrumentModel->update($id, [
-            'kode'      => trim((string) $this->request->getPost('kode')),
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
             'sasaran'   => trim((string) $this->request->getPost('sasaran')),
-            'deskripsi' => trim((string) $this->request->getPost('deskripsi')),
             'pengantar' => trim((string) $this->request->getPost('pengantar')),
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
             'skala_max' => $skalaMax,
-            'status'    => trim((string) $this->request->getPost('status')),
+            'status'    => $statusToSave,
         ]);
 
         return redirect()
@@ -205,6 +216,20 @@ class Instruments extends BaseController
                 ->with('error', 'Data instrumen tidak ditemukan.');
         }
 
+        $usageCounts = $this->getUsageCounts((int) $id);
+
+        if (array_sum($usageCounts) > 0) {
+            return redirect()
+                ->to(base_url('admin/instruments'))
+                ->with(
+                    'error',
+                    'Instrumen tidak bisa dihapus karena masih memiliki '
+                    . $usageCounts['aspects'] . ' aspek, '
+                    . $usageCounts['indicators'] . ' indikator, dan '
+                    . $usageCounts['items'] . ' butir. Hapus data tersebut terlebih dahulu.'
+                );
+        }
+
         $this->instrumentModel->delete($id);
 
         return redirect()
@@ -215,12 +240,104 @@ class Instruments extends BaseController
     private function getJenisOptions(): array
     {
         return $this->settingModel->getInstrumentTypes([
-            'Validasi Instrumen',
-            'Validasi Produk',
-            'Angket Respon',
+            'Angket',
+            'Wawancara',
             'Observasi',
             'FGD',
             'Tes Kinerja',
+            'Rubrik Penilaian',
+            'Dokumentasi',
         ]);
+    }
+
+    private function appendUsageCounts(array $instruments): array
+    {
+        if ($instruments === []) {
+            return [];
+        }
+
+        $ids = array_map(static fn(array $instrument): int => (int) $instrument['id'], $instruments);
+        $countsByTable = [
+            'aspects'    => $this->getCountsByInstrument('instrument_aspects', $ids),
+            'indicators' => $this->getCountsByInstrument('instrument_indicators', $ids),
+            'items'      => $this->getCountsByInstrument('instrument_items', $ids),
+        ];
+
+        foreach ($instruments as &$instrument) {
+            $instrumentId = (int) $instrument['id'];
+            $usageCounts = [
+                'aspects'    => $countsByTable['aspects'][$instrumentId] ?? 0,
+                'indicators' => $countsByTable['indicators'][$instrumentId] ?? 0,
+                'items'      => $countsByTable['items'][$instrumentId] ?? 0,
+            ];
+
+            $instrument['usage_counts'] = $usageCounts;
+            $instrument['can_delete'] = array_sum($usageCounts) === 0;
+        }
+        unset($instrument);
+
+        return $instruments;
+    }
+
+    private function getCountsByInstrument(string $table, array $instrumentIds): array
+    {
+        if ($instrumentIds === []) {
+            return [];
+        }
+
+        $rows = db_connect()
+            ->table($table)
+            ->select('instrument_id, COUNT(*) AS total')
+            ->whereIn('instrument_id', $instrumentIds)
+            ->groupBy('instrument_id')
+            ->get()
+            ->getResultArray();
+
+        $counts = [];
+
+        foreach ($rows as $row) {
+            $counts[(int) $row['instrument_id']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
+    private function getUsageCounts(int $instrumentId): array
+    {
+        $db = db_connect();
+
+        return [
+            'aspects'    => $db->table('instrument_aspects')->where('instrument_id', $instrumentId)->countAllResults(),
+            'indicators' => $db->table('instrument_indicators')->where('instrument_id', $instrumentId)->countAllResults(),
+            'items'      => $db->table('instrument_items')->where('instrument_id', $instrumentId)->countAllResults(),
+        ];
+    }
+
+    private function generateNextCode(): string
+    {
+        $codes = $this->instrumentModel->select('kode')->findAll();
+        $max = 0;
+
+        foreach ($codes as $row) {
+            $code = trim((string) ($row['kode'] ?? ''));
+
+            if ($code === '') {
+                continue;
+            }
+
+            if (preg_match('/(\d+)$/', $code, $matches) === 1) {
+                $max = max($max, (int) $matches[1]);
+            }
+        }
+
+        $next = $max + 1;
+
+        do {
+            $candidate = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
+            $exists = $this->instrumentModel->where('kode', $candidate)->first();
+            $next++;
+        } while ($exists !== null);
+
+        return $candidate;
     }
 }

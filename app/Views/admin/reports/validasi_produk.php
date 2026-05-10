@@ -39,7 +39,7 @@
         </tr>
         <tr>
             <th>Jenis Produk</th>
-            <td><?= esc($link['jenis_produk'] ?? '-') ?></td>
+            <td><?= esc(title_case_label((string) ($link['jenis_produk'] ?? '-'))) ?></td>
         </tr>
         <tr>
             <th>Status Produk</th>
@@ -66,7 +66,7 @@
         </tr>
         <tr>
             <th>Jenis Instrumen</th>
-            <td><?= esc($link['jenis']) ?></td>
+            <td><?= esc(title_case_label((string) ($link['jenis'] ?? '-'))) ?></td>
         </tr>
     </table>
 </div>

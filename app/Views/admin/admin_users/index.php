@@ -34,6 +34,14 @@
     <?php if (empty($users)): ?>
         <div class="empty-state">Belum ada user admin.</div>
     <?php else: ?>
+        <?php
+        $currentPage = isset($pager) ? $pager->getCurrentPage($pagerGroup) : 1;
+        $perPage = isset($pager) ? $pager->getPerPage($pagerGroup) : 0;
+        $total = isset($pager) ? $pager->getTotal($pagerGroup) : count($users);
+        $offset = $perPage > 0 ? (($currentPage - 1) * $perPage) : 0;
+        $firstItem = $total > 0 && $perPage > 0 ? $offset + 1 : 0;
+        $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : $total;
+        ?>
         <div class="table-responsive">
         <table class="table table-vcenter table-hover table-sm">
             <thead>
@@ -50,7 +58,7 @@
             <tbody>
                 <?php foreach ($users as $i => $user): ?>
                     <tr>
-                        <td><?= $i + 1 ?></td>
+                        <td><?= $offset + $i + 1 ?></td>
                         <td><?= esc($user['name']) ?></td>
                         <td><?= esc($user['email']) ?></td>
                         <td><?= esc($user['role']) ?></td>
@@ -77,6 +85,14 @@
             </tbody>
         </table>
         </div>
+        <?php if (isset($pager) && !empty($pagerGroup)): ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+                </div>
+                <div><?= $pager->links($pagerGroup, 'default_full') ?></div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
     </div>
 </div>

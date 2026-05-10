@@ -28,7 +28,7 @@
         </tr>
         <tr>
             <th>Jenis Produk</th>
-            <td><?= esc($product['jenis_produk']) ?></td>
+            <td><?= esc(title_case_label((string) ($product['jenis_produk'] ?? '-'))) ?></td>
         </tr>
         <tr>
             <th>Status</th>
@@ -92,8 +92,8 @@
                         <td><?= $index + 1 ?></td>
                         <td><?= esc($row['kode']) ?></td>
                         <td><?= esc($row['judul']) ?></td>
-                        <td><?= esc($row['jenis']) ?></td>
-                        <td><span class="<?= esc(status_badge_class($row['status'] ?? '')) ?>"><?= esc($row['status']) ?></span></td>
+                        <td><?= esc(title_case_label((string) ($row['jenis'] ?? '-'))) ?></td>
+                        <td><span class="<?= esc(status_badge_class($row['status'] ?? '')) ?>"><?= esc(status_display_label((string) ($row['status'] ?? ''))) ?></span></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

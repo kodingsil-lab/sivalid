@@ -13,6 +13,7 @@ class RespondentModel extends Model
 
     protected $allowedFields = [
         'instrument_link_id',
+        'bundle_id',
         'nama',
         'email',
         'bidang_keahlian',

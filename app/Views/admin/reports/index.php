@@ -32,18 +32,18 @@ $modeBadgeClass = static function (?string $mode): string {
     $mode = (string) $mode;
 
     if ($mode === 'validasi_instrumen') {
-        return 'badge badge-status-process';
+        return 'badge bg-blue text-blue-fg';
     }
 
     if ($mode === 'validasi_produk') {
-        return 'badge badge-status-warning';
+        return 'badge bg-orange text-orange-fg';
     }
 
     if (in_array($mode, ['respon_mahasiswa', 'observasi', 'fgd', 'tes_kinerja'], true)) {
-        return 'badge badge-status-success';
+        return 'badge bg-green text-green-fg';
     }
 
-    return 'badge badge-status-draft';
+    return 'badge bg-secondary text-secondary-fg';
 };
 
 ?>
@@ -85,6 +85,14 @@ $modeBadgeClass = static function (?string $mode): string {
             Belum ada data analisis validasi.
         </div>
     <?php else: ?>
+            <?php
+            $currentPageAnalyses = isset($pagerAnalyses) ? $pagerAnalyses->getCurrentPage($pagerGroupAnalyses) : 1;
+            $perPageAnalyses = isset($pagerAnalyses) ? $pagerAnalyses->getPerPage($pagerGroupAnalyses) : 0;
+            $totalAnalyses = isset($pagerAnalyses) ? $pagerAnalyses->getTotal($pagerGroupAnalyses) : count($safeAnalyses);
+            $offsetAnalyses = $perPageAnalyses > 0 ? (($currentPageAnalyses - 1) * $perPageAnalyses) : 0;
+            $firstAnalyses = $totalAnalyses > 0 && $perPageAnalyses > 0 ? $offsetAnalyses + 1 : 0;
+            $lastAnalyses = $totalAnalyses > 0 && $perPageAnalyses > 0 ? min($currentPageAnalyses * $perPageAnalyses, $totalAnalyses) : $totalAnalyses;
+            ?>
         <div class="table-responsive">
             <table class="table table-vcenter table-hover table-sm">
                 <thead>
@@ -102,7 +110,7 @@ $modeBadgeClass = static function (?string $mode): string {
                     <?php foreach ($safeAnalyses as $index => $analysis): ?>
                         <?php $analysisMode = (string) ($analysis['mode'] ?? ''); ?>
                         <tr>
-                            <td class="text-muted"><?= $index + 1 ?></td>
+                            <td class="text-muted"><?= $offsetAnalyses + $index + 1 ?></td>
                             <td>
                                 <span class="<?= esc($modeBadgeClass($analysisMode)) ?>">
                                     <?= esc($modeLabel($analysisMode)) ?>
@@ -163,6 +171,14 @@ $modeBadgeClass = static function (?string $mode): string {
                 </tbody>
             </table>
         </div>
+        <?php if (isset($pagerAnalyses) && !empty($pagerGroupAnalyses)): ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstAnalyses) ?> sampai <?= esc((string) $lastAnalyses) ?> dari <?= esc((string) $totalAnalyses) ?> entri
+                </div>
+                <div><?= $pagerAnalyses->links($pagerGroupAnalyses, 'default_full') ?></div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
     </div>
 </div>
@@ -183,6 +199,14 @@ $modeBadgeClass = static function (?string $mode): string {
             Belum ada link pengisian responden.
         </div>
     <?php else: ?>
+        <?php
+        $currentPageLinks = isset($pagerLinks) ? $pagerLinks->getCurrentPage($pagerGroupLinks) : 1;
+        $perPageLinks = isset($pagerLinks) ? $pagerLinks->getPerPage($pagerGroupLinks) : 0;
+        $totalLinks = isset($pagerLinks) ? $pagerLinks->getTotal($pagerGroupLinks) : count($safeLinks);
+        $offsetLinks = $perPageLinks > 0 ? (($currentPageLinks - 1) * $perPageLinks) : 0;
+        $firstLinks = $totalLinks > 0 && $perPageLinks > 0 ? $offsetLinks + 1 : 0;
+        $lastLinks = $totalLinks > 0 && $perPageLinks > 0 ? min($currentPageLinks * $perPageLinks, $totalLinks) : $totalLinks;
+        ?>
         <div class="table-responsive">
             <table class="table table-vcenter table-hover table-sm">
                 <thead>
@@ -199,7 +223,7 @@ $modeBadgeClass = static function (?string $mode): string {
                     <?php foreach ($safeLinks as $index => $link): ?>
                         <?php $linkMode = (string) ($link['mode'] ?? ''); ?>
                         <tr>
-                            <td class="text-muted"><?= $index + 1 ?></td>
+                            <td class="text-muted"><?= $offsetLinks + $index + 1 ?></td>
                             <td>
                                 <span class="<?= esc($modeBadgeClass($linkMode)) ?>">
                                     <?= esc($modeLabel($linkMode)) ?>
@@ -239,6 +263,14 @@ $modeBadgeClass = static function (?string $mode): string {
                 </tbody>
             </table>
         </div>
+        <?php if (isset($pagerLinks) && !empty($pagerGroupLinks)): ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstLinks) ?> sampai <?= esc((string) $lastLinks) ?> dari <?= esc((string) $totalLinks) ?> entri
+                </div>
+                <div><?= $pagerLinks->links($pagerGroupLinks, 'default_full') ?></div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
     </div>
 </div>

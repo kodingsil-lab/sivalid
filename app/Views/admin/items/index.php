@@ -14,6 +14,10 @@
                     + Tambah Butir
                 </a>
 
+                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#modalImportButir">
+                    Import Excel
+                </button>
+
                 <a href="<?= base_url('admin/instrument-aspects?instrument_id=' . $instrumentId) ?>" class="btn btn-light">
                     Lihat Kisi-Kisi
                 </a>
@@ -31,6 +35,17 @@
 <?php if (session()->getFlashdata('error')): ?>
     <div class="alert alert-danger">
         <?= esc(session()->getFlashdata('error')) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('errors')): ?>
+    <div class="alert alert-danger">
+        <strong>Periksa kembali input berikut:</strong>
+        <ul>
+            <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                <li><?= esc($error) ?></li>
+            <?php endforeach; ?>
+        </ul>
     </div>
 <?php endif; ?>
 
@@ -104,7 +119,7 @@
                             </small>
                         </td>
                         <td>
-                            <?= esc($item['tipe_butir']) ?>
+                            <?= esc(title_case_label((string) ($item['tipe_butir'] ?? '-'))) ?>
                         </td>
                         <td>
                             <span class="<?= esc(status_badge_class($item['status'] ?? '')) ?>"><?= esc($item['status']) ?></span>
@@ -134,6 +149,89 @@
             </tbody>
         </table>
         </div>
+
+        <?php if (isset($pager) && !empty($pagerGroup)): ?>
+            <?php
+            $currentPage = $pager->getCurrentPage($pagerGroup);
+            $perPage = $pager->getPerPage($pagerGroup);
+            $total = $pager->getTotal($pagerGroup);
+            $firstItem = $total > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
+            $lastItem = min($currentPage * $perPage, $total);
+            ?>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+                <div class="text-muted small">
+                    Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+                </div>
+                <div><?= $pager->links($pagerGroup, 'default_full') ?></div>
+            </div>
+        <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($instrumentId)): ?>
+    <div class="modal modal-blur fade" id="modalImportButir" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import Butir dari Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="<?= base_url('admin/instrument-items/import') ?>" method="post" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="instrument_id" value="<?= (int) $instrumentId ?>">
+
+                        <div class="mb-3">
+                            <label class="form-label">File Excel (.xlsx)</label>
+                            <input type="file" name="file_excel" class="form-control" accept=".xlsx" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <a href="<?= base_url('admin/instrument-items/import-template') ?>" class="btn btn-light">
+                                Download Template Excel
+                            </a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Aspek</th>
+                                        <th>Indikator</th>
+                                        <th>Pernyataan</th>
+                                        <th>Tipe Butir</th>
+                                        <th>Wajib</th>
+                                        <th>Urutan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Pendahuluan</td>
+                                        <td>Kejelasan latar belakang dan urgensi pengembangan model pembelajaran.</td>
+                                        <td>Model pembelajaran memiliki latar belakang pengembangan yang jelas.</td>
+                                        <td>skala</td>
+                                        <td>Ya</td>
+                                        <td>1</td>
+                                        <td>Aktif</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-muted small mt-2">
+                            Aspek wajib sudah ada pada kisi-kisi. Indikator boleh kosong, tetapi jika diisi harus sama dengan indikator pada aspek tersebut. Butir dengan pernyataan yang sama akan dilewati.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Import Excel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 <?php endif; ?>

@@ -21,14 +21,14 @@ $modeBadgeClass = static function (?string $mode): string {
     $mode = (string) $mode;
 
     if ($mode === 'validasi_instrumen') {
-        return 'badge-status-process';
+        return 'bg-blue text-blue-fg';
     }
 
     if ($mode === 'validasi_produk') {
-        return 'badge-status-warning';
+        return 'bg-orange text-orange-fg';
     }
 
-    return 'badge-status-draft';
+    return 'bg-secondary text-secondary-fg';
 };
 
 ?>
@@ -38,6 +38,11 @@ $modeBadgeClass = static function (?string $mode): string {
         <div class="col">
             <h2 class="page-title">Dashboard SIVALID</h2>
             <div class="text-muted mt-1">Ringkasan validasi instrumen penelitian.</div>
+        </div>
+        <div class="col-auto ms-auto d-flex gap-2">
+            <a href="<?= base_url('admin/instruments') ?>" class="btn btn-primary">Kelola Instrumen</a>
+            <a href="<?= base_url('admin/respondent-links') ?>" class="btn btn-light">Link Responden</a>
+            <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Laporan</a>
         </div>
     </div>
 </div>
@@ -51,7 +56,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($totalInstrumen ?? 0) ?></div>
                         <div class="label">Total Instrumen</div>
                     </div>
-                    <span class="badge badge-status-process">Instrumen</span>
+                    <span class="badge bg-blue text-blue-fg">Instrumen</span>
                 </div>
             </div>
         </div>
@@ -65,7 +70,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($instrumenValid ?? 0) ?></div>
                         <div class="label">Instrumen Valid</div>
                     </div>
-                    <span class="badge badge-status-success">Valid</span>
+                    <span class="badge bg-green text-green-fg">Valid</span>
                 </div>
             </div>
         </div>
@@ -79,7 +84,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($totalProduk ?? 0) ?></div>
                         <div class="label">Produk Penelitian</div>
                     </div>
-                    <span class="badge badge-status-draft">Produk</span>
+                    <span class="badge bg-secondary text-secondary-fg">Produk</span>
                 </div>
             </div>
         </div>
@@ -93,7 +98,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($linkAktif ?? 0) ?></div>
                         <div class="label">Link Aktif</div>
                     </div>
-                    <span class="badge badge-status-warning">Distribusi</span>
+                    <span class="badge bg-orange text-orange-fg">Distribusi</span>
                 </div>
             </div>
         </div>
@@ -107,7 +112,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($totalRespon ?? 0) ?></div>
                         <div class="label">Respon Masuk</div>
                     </div>
-                    <span class="badge badge-status-process">Respon</span>
+                    <span class="badge bg-blue text-blue-fg">Respon</span>
                 </div>
             </div>
         </div>
@@ -121,7 +126,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <div class="number"><?= (int) ($totalLaporan ?? 0) ?></div>
                         <div class="label">Laporan Analisis</div>
                     </div>
-                    <span class="badge badge-status-success">Laporan</span>
+                    <span class="badge bg-green text-green-fg">Laporan</span>
                 </div>
             </div>
         </div>
@@ -188,7 +193,7 @@ $modeBadgeClass = static function (?string $mode): string {
                                 <td class="text-muted"><?= $index + 1 ?></td>
                                 <td>
                                     <div class="fw-semibold"><?= esc((string) ($response['nama'] ?? '-')) ?></div>
-                                    <div class="text-muted small"><?= esc((string) ($response['jenis_responden'] ?? '-')) ?></div>
+                                    <div class="text-muted small"><?= esc(title_case_label((string) ($response['jenis_responden'] ?? '-'))) ?></div>
                                 </td>
                                 <td>
                                     <span class="badge <?= esc($modeBadgeClass($response['mode'] ?? '')) ?>">
@@ -275,12 +280,6 @@ $modeBadgeClass = static function (?string $mode): string {
             </div>
         <?php endif; ?>
     </div>
-</div>
-
-<div class="toolbar">
-    <a href="<?= base_url('admin/instruments') ?>" class="btn btn-primary">Kelola Instrumen</a>
-    <a href="<?= base_url('admin/respondent-links') ?>" class="btn btn-light">Link Responden</a>
-    <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Laporan</a>
 </div>
 
 <?= $this->endSection() ?>

@@ -17,8 +17,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('instrument-types', 'Admin\InstrumentTypes::index');
     $routes->post('instrument-types', 'Admin\InstrumentTypes::create');
     $routes->delete('instrument-types/(:num)', 'Admin\InstrumentTypes::delete/$1');
+    $routes->post('instrument-aspects/import', 'Admin\InstrumentAspects::import');
+    $routes->get('instrument-aspects/import-template', 'Admin\InstrumentAspects::importTemplate');
     $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects']);
     $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators']);
+    $routes->post('instrument-items/import', 'Admin\InstrumentItems::import');
+    $routes->get('instrument-items/import-template', 'Admin\InstrumentItems::importTemplate');
     $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems']);
     $routes->resource('instrument-revisions', ['controller' => 'Admin\InstrumentRevisions']);
     $routes->get('products/download/(:num)', 'Admin\Products::download/$1');
@@ -27,6 +31,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('product-types', 'Admin\ProductTypes::create');
     $routes->delete('product-types/(:num)', 'Admin\ProductTypes::delete/$1');
     $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks']);
+    $routes->get('instrument-bundles/(:num)/sessions', 'Admin\InstrumentBundles::sessions/$1');
+    $routes->get('instrument-bundles/(:num)/sessions/(:num)', 'Admin\InstrumentBundles::sessionDetail/$1/$2');
+    $routes->post('instrument-bundles/(:num)/duplicate', 'Admin\InstrumentBundles::duplicate/$1');
+    $routes->post('instrument-bundles/(:num)/revoke-token', 'Admin\InstrumentBundles::revokeToken/$1');
+    $routes->post('instrument-bundles/(:num)/activate-token', 'Admin\InstrumentBundles::activateToken/$1');
+    $routes->resource('instrument-bundles', ['controller' => 'Admin\InstrumentBundles']);
 
     $routes->get('validasi-instrumen', 'Admin\InstrumentValidation::index');
     $routes->post('validasi-instrumen/proses/(:num)', 'Admin\InstrumentValidation::process/$1');
@@ -91,3 +101,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 $routes->get('isi/(:segment)', 'PublicForm::show/$1');
 $routes->post('isi/(:segment)', 'PublicForm::submit/$1');
 $routes->get('terima-kasih', 'PublicForm::thanks');
+
+$routes->get('paket/(:segment)', 'PublicBundle::show/$1');
+$routes->post('paket/(:segment)/mulai', 'PublicBundle::startSession/$1');
+$routes->get('paket/(:segment)/isi/(:num)', 'PublicBundle::showInstrument/$1/$2');
+$routes->post('paket/(:segment)/isi/(:num)', 'PublicBundle::saveInstrument/$1/$2');
+$routes->post('paket/(:segment)/isi/(:num)/autosave', 'PublicBundle::autosave/$1/$2');
+$routes->post('paket/(:segment)/submit', 'PublicBundle::submitFinal/$1');
+$routes->get('paket/(:segment)/ringkasan', 'PublicBundle::summary/$1');

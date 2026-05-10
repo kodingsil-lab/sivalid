@@ -8,14 +8,14 @@ $safeAnswers = isset($answers) && is_array($answers) ? $answers : [];
 
 $modeValue = (string) ($currentResponse['mode'] ?? '');
 $modeLabel = ucwords(str_replace('_', ' ', $modeValue));
-$modeBadgeClass = 'badge badge-status-draft';
+$modeBadgeClass = 'badge bg-secondary text-secondary-fg';
 
 if ($modeValue === 'validasi_instrumen') {
-    $modeBadgeClass = 'badge badge-status-process';
+    $modeBadgeClass = 'badge bg-blue text-blue-fg';
 } elseif ($modeValue === 'validasi_produk') {
-    $modeBadgeClass = 'badge badge-status-warning';
+    $modeBadgeClass = 'badge bg-orange text-orange-fg';
 } elseif (in_array($modeValue, ['respon_mahasiswa', 'observasi', 'fgd', 'tes_kinerja'], true)) {
-    $modeBadgeClass = 'badge badge-status-success';
+    $modeBadgeClass = 'badge bg-green text-green-fg';
 }
 
 $scoreAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
@@ -69,7 +69,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
                     <td>
                         <div class="fw-semibold"><?= esc((string) ($currentResponse['kode'] ?? '-')) ?></div>
                         <div><?= esc((string) ($currentResponse['judul'] ?? '-')) ?></div>
-                        <div class="small text-muted"><?= esc((string) ($currentResponse['jenis'] ?? '-')) ?></div>
+                        <div class="small text-muted"><?= esc(title_case_label((string) ($currentResponse['jenis'] ?? '-'))) ?></div>
                     </td>
                 </tr>
                 <tr>
@@ -77,7 +77,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
                     <td>
                         <?php if (!empty($currentResponse['nama_produk'])): ?>
                             <div class="fw-semibold"><?= esc((string) ($currentResponse['product_kode'] ?? '-')) ?> - <?= esc((string) $currentResponse['nama_produk']) ?></div>
-                            <div class="small text-muted"><?= esc((string) ($currentResponse['jenis_produk'] ?? '-')) ?></div>
+                            <div class="small text-muted"><?= esc(title_case_label((string) ($currentResponse['jenis_produk'] ?? '-'))) ?></div>
                         <?php else: ?>
                             <span class="text-muted">-</span>
                         <?php endif; ?>
@@ -110,7 +110,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
                 </tr>
                 <tr>
                     <th>Jenis Responden</th>
-                    <td><?= esc((string) ($currentResponse['jenis_responden'] ?? '-')) ?></td>
+                    <td><?= esc(title_case_label((string) ($currentResponse['jenis_responden'] ?? '-'))) ?></td>
                 </tr>
                 <tr>
                     <th>Email</th>
@@ -170,7 +170,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
                             <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
                             <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
                             <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
-                            <td><?= esc((string) ($answer['tipe_butir'] ?? '-')) ?></td>
+                            <td><?= esc(title_case_label((string) ($answer['tipe_butir'] ?? '-'))) ?></td>
                             <td><span class="fw-semibold"><?= esc((string) ($answer['skor'] ?? '-')) ?></span></td>
                         </tr>
                     <?php endforeach; ?>

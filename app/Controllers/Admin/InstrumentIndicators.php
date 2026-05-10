@@ -24,12 +24,15 @@ class InstrumentIndicators extends BaseController
     {
         $instrumentId = $this->request->getGet('instrument_id');
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
+        $perPage = config('Pager')->perPage;
 
         $data = [
             'title'        => 'Indikator Kisi-Kisi Instrumen',
             'instrumentId' => $instrumentId,
             'instruments'  => $this->instrumentModel->orderBy('judul', 'ASC')->findAll(),
-            'indicators'   => $this->indicatorModel->getWithRelations($instrumentId),
+            'indicators'   => $this->indicatorModel->paginateWithRelations($instrumentId, $perPage, 'instrument_indicators'),
+            'pager'        => $this->indicatorModel->pager,
+            'pagerGroup'   => 'instrument_indicators',
         ];
 
         return view('admin/indicators/index', $data);
@@ -37,29 +40,11 @@ class InstrumentIndicators extends BaseController
 
     public function new()
     {
-        $instrumentId = $this->request->getGet('instrument_id');
-        $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
+        $instrumentId = (int) ($this->request->getGet('instrument_id') ?? 0);
 
-        $aspects = [];
-
-        if ($instrumentId !== null) {
-            $aspects = $this->aspectModel
-                ->where('instrument_id', $instrumentId)
-                ->orderBy('urutan', 'ASC')
-                ->findAll();
-        }
-
-        $data = [
-            'title'        => 'Tambah Indikator',
-            'indicator'    => null,
-            'instrumentId' => $instrumentId,
-            'instruments'  => $this->instrumentModel->orderBy('judul', 'ASC')->findAll(),
-            'aspects'      => $aspects,
-            'action'       => base_url('admin/instrument-indicators'),
-            'method'       => 'post',
-        ];
-
-        return view('admin/indicators/form', $data);
+        return redirect()
+            ->to(base_url('admin/instrument-aspects' . ($instrumentId > 0 ? '?instrument_id=' . $instrumentId : '')))
+            ->with('info', 'Form lama sudah dinonaktifkan. Gunakan popup pada halaman Kisi-Kisi Instrumen.');
     }
 
     public function create()
@@ -115,22 +100,9 @@ class InstrumentIndicators extends BaseController
                 ->with('error', 'Data indikator tidak ditemukan.');
         }
 
-        $aspects = $this->aspectModel
-            ->where('instrument_id', $indicator['instrument_id'])
-            ->orderBy('urutan', 'ASC')
-            ->findAll();
-
-        $data = [
-            'title'        => 'Edit Indikator',
-            'indicator'    => $indicator,
-            'instrumentId' => $indicator['instrument_id'],
-            'instruments'  => $this->instrumentModel->orderBy('judul', 'ASC')->findAll(),
-            'aspects'      => $aspects,
-            'action'       => base_url('admin/instrument-indicators/' . $id),
-            'method'       => 'put',
-        ];
-
-        return view('admin/indicators/form', $data);
+        return redirect()
+            ->to(base_url('admin/instrument-aspects?instrument_id=' . $indicator['instrument_id']))
+            ->with('info', 'Edit dilakukan melalui popup pada halaman Kisi-Kisi Instrumen.');
     }
 
     public function update($id = null)

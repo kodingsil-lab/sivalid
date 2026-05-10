@@ -27,7 +27,6 @@
     <table class="table table-vcenter table-hover table-sm">
         <thead>
             <tr>
-                <th style="width: 50px;">No</th>
                 <th>Kode</th>
                 <th>Judul Instrumen</th>
                 <th>Jenis</th>
@@ -43,11 +42,11 @@
                     <td><?= $index + 1 ?></td>
                     <td><?= esc($instrument['kode']) ?></td>
                     <td><?= esc($instrument['judul']) ?></td>
-                    <td><?= esc($instrument['jenis']) ?></td>
+                    <td><?= esc(title_case_label((string) ($instrument['jenis'] ?? '-'))) ?></td>
                     <td><?= esc($instrument['sasaran'] ?: '-') ?></td>
                     <td><?= esc($instrument['skala_min']) ?> - <?= esc($instrument['skala_max']) ?></td>
                     <td>
-                        <span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc($instrument['status']) ?></span>
+                        <span class="<?= esc(status_badge_class($instrument['status'] ?? '')) ?>"><?= esc(status_display_label((string) ($instrument['status'] ?? ''))) ?></span>
                     </td>
                     <td class="table-actions-cell">
                         <div class="table-actions">

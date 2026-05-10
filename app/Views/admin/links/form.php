@@ -51,7 +51,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
                         $selectedProduct = old('product_id', $link['product_id'] ?? '');
                         ?>
                         <option value="<?= $product['id'] ?>" <?= (int) $selectedProduct === (int) $product['id'] ? 'selected' : '' ?>>
-                            <?= esc($product['kode']) ?> - <?= esc($product['nama_produk']) ?> (<?= esc($product['jenis_produk']) ?>)
+                            <?= esc($product['kode']) ?> - <?= esc($product['nama_produk']) ?> (<?= esc(title_case_label((string) ($product['jenis_produk'] ?? '-'))) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>

@@ -160,10 +160,10 @@ $generalCommentColumnLabel = $generalCommentColumnLabel ?? 'Komentar Umum';
                         <td><?= esc($answer['nomor']) ?></td>
                         <td><?= esc($answer['nama_aspek'] ?: '-') ?></td>
                         <td><?= nl2br(esc($answer['pernyataan'])) ?></td>
-                        <td><span class="badge"><?= esc($answer['tipe_butir']) ?></span></td>
+                        <td><span class="badge"><?= esc(title_case_label((string) ($answer['tipe_butir'] ?? '-'))) ?></span></td>
                         <td>
                             <?= esc($answer['nama']) ?><br>
-                            <small><?= esc($answer['jenis_responden']) ?></small>
+                            <small><?= esc(title_case_label((string) ($answer['jenis_responden'] ?? '-'))) ?></small>
                         </td>
                         <td><?= nl2br(esc($answer['jawaban_teks'])) ?></td>
                     </tr>

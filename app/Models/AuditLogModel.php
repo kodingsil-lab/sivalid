@@ -29,12 +29,13 @@ class AuditLogModel extends Model
         string $action,
         ?string $entityType = null,
         ?int $entityId = null,
-        ?string $description = null
+        ?string $description = null,
+        array $context = []
     ): void {
         $session   = session();
-        $userId    = $session->get('user_id');
-        $userName  = $session->get('user_name');
-        $ipAddress = service('request')->getIPAddress();
+        $userId    = $context['user_id'] ?? $session->get('user_id');
+        $userName  = $context['user_name'] ?? $session->get('user_name');
+        $ipAddress = $context['ip_address'] ?? service('request')->getIPAddress();
 
         $this->insert([
             'user_id'     => $userId ?: null,

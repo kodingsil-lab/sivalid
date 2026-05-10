@@ -57,6 +57,14 @@
         Belum ada link instrumen responden.
     </div>
 <?php else: ?>
+<?php
+$currentPage = isset($pager) ? $pager->getCurrentPage($pagerGroup) : 1;
+$perPage = isset($pager) ? $pager->getPerPage($pagerGroup) : 0;
+$total = isset($pager) ? $pager->getTotal($pagerGroup) : count($links);
+$offset = $perPage > 0 ? (($currentPage - 1) * $perPage) : 0;
+$firstItem = $total > 0 && $perPage > 0 ? $offset + 1 : 0;
+$lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : $total;
+?>
 <div class="card">
     <div class="card-body p-0">
     <div class="table-responsive">
@@ -79,17 +87,17 @@
                 <?php $publicUrl = base_url('isi/' . $link['token']); ?>
 
                 <tr>
-                    <td><?= $index + 1 ?></td>
+                    <td><?= $offset + $index + 1 ?></td>
                     <td><?= esc($link['judul_link']) ?></td>
                     <td>
-                        <span class="badge badge-status-draft">
+                        <span class="badge bg-secondary text-secondary-fg">
                             <?= esc($link['mode']) ?>
                         </span>
                     </td>
                     <td>
                         <strong><?= esc($link['kode']) ?></strong><br>
                         <?= esc($link['judul']) ?><br>
-                        <small>Status Instrumen: <?= esc($link['instrument_status']) ?></small>
+                        <small>Status Instrumen: <?= esc(status_display_label((string) ($link['instrument_status'] ?? ''))) ?></small>
                     </td>
                     <td><?= esc($link['sasaran'] ?: '-') ?></td>
                     <td>
@@ -140,6 +148,14 @@
         </tbody>
     </table>
     </div>
+    <?php if (isset($pager) && !empty($pagerGroup)): ?>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 px-3 py-3 border-top">
+            <div class="text-muted small">
+                Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+            </div>
+            <div><?= $pager->links($pagerGroup, 'default_full') ?></div>
+        </div>
+    <?php endif; ?>
     </div>
 </div>
 <?php endif; ?>

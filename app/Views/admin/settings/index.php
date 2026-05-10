@@ -180,28 +180,28 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><span class="badge badge-status-success">Sangat Layak</span></td>
+                                        <td><span class="badge bg-green text-green-fg">Sangat Layak</span></td>
                                         <td>
                                             <input type="number" name="kategori_sangat_layak_min" id="kategori_sangat_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_sangat_layak_min', esc((string) ($category['kategori_sangat_layak_min'] ?? 85))) ?>" min="0" max="100">
                                         </td>
                                         <td class="text-muted small">Skor ≥ nilai ini dikategorikan Sangat Layak</td>
                                     </tr>
                                     <tr>
-                                        <td><span class="badge badge-status-process">Layak</span></td>
+                                        <td><span class="badge bg-blue text-blue-fg">Layak</span></td>
                                         <td>
                                             <input type="number" name="kategori_layak_min" id="kategori_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_layak_min', esc((string) ($category['kategori_layak_min'] ?? 70))) ?>" min="0" max="100">
                                         </td>
                                         <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Sangat Layak) dikategorikan Layak</td>
                                     </tr>
                                     <tr>
-                                        <td><span class="badge badge-status-warning">Kurang Layak</span></td>
+                                        <td><span class="badge bg-orange text-orange-fg">Kurang Layak</span></td>
                                         <td>
                                             <input type="number" name="kategori_kurang_layak_min" id="kategori_kurang_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_kurang_layak_min', esc((string) ($category['kategori_kurang_layak_min'] ?? 55))) ?>" min="0" max="100">
                                         </td>
                                         <td class="text-muted small">Skor ≥ nilai ini (dan &lt; Layak) dikategorikan Kurang Layak</td>
                                     </tr>
                                     <tr>
-                                        <td><span class="badge badge-status-danger">Tidak Layak</span></td>
+                                        <td><span class="badge bg-red text-red-fg">Tidak Layak</span></td>
                                         <td>
                                             <input type="number" name="kategori_tidak_layak_min" id="kategori_tidak_layak_min" class="form-control form-control-sm settings-number-input" value="<?= old('kategori_tidak_layak_min', esc((string) ($category['kategori_tidak_layak_min'] ?? 0))) ?>" min="0" max="100">
                                         </td>
@@ -220,8 +220,8 @@
 
                 <section id="section-instrument-types" class="settings-section settings-section-last">
                     <div class="settings-section-header">
-                        <h3>Jenis Instrumen</h3>
-                        <p>Kelola daftar jenis yang muncul pada dropdown Jenis Instrumen di Master Instrumen.</p>
+                        <h3>Jenis/Bentuk Instrumen</h3>
+                        <p>Kelola daftar jenis/bentuk instrumen yang muncul di Master Instrumen, misalnya Angket, Wawancara, Observasi, FGD, atau Tes Kinerja.</p>
                     </div>
 
                     <div class="card mb-3">
@@ -235,7 +235,7 @@
                                     type="text"
                                     name="jenis"
                                     class="form-control"
-                                    placeholder="Contoh: Self Assessment Guru"
+                                    placeholder="Contoh: Angket, Wawancara, Rubrik Penilaian"
                                     value="<?= old('jenis') ?>"
                                     maxlength="100"
                                     required
@@ -247,7 +247,7 @@
 
                     <div class="card mb-0">
                         <div class="card-header">
-                            <h3 class="card-title">Daftar Jenis Instrumen</h3>
+                            <h3 class="card-title">Daftar Jenis/Bentuk Instrumen</h3>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -275,7 +275,7 @@
                                                     <td><?= $index + 1 ?></td>
                                                     <td><?= esc($label) ?></td>
                                                     <td>
-                                                        <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                                        <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                                     </td>
                                                     <td class="table-actions-cell">
                                                         <?php if ($usedCount === 0): ?>
@@ -356,7 +356,7 @@
                                                     <td><?= $index + 1 ?></td>
                                                     <td><?= esc($label) ?></td>
                                                     <td>
-                                                        <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                                        <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                                     </td>
                                                     <td class="table-actions-cell">
                                                         <?php if ($usedCount === 0): ?>

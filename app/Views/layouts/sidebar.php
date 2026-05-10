@@ -47,6 +47,7 @@ if (! function_exists('sivalid_sidebar_icon')) {
             'circle-check' => '<circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>',
             'box' => '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><line x1="12" y1="12" x2="20" y2="7.5"/><line x1="12" y1="12" x2="12" y2="21"/><line x1="12" y1="12" x2="4" y2="7.5"/>',
             'link' => '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+            'bundle' => '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>',
             'chart' => '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
             'settings' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
         ];
@@ -72,11 +73,14 @@ if (! function_exists('sivalid_sidebar_link')) {
     }
 }
 
-$instrumentMenus = [
+$masterInstrumentMenus = [
     ['path' => 'admin/instruments', 'label' => 'Master Instrumen', 'icon' => 'file'],
     ['path' => 'admin/instrument-aspects', 'label' => 'Kisi-Kisi Instrumen', 'icon' => 'table'],
     ['path' => 'admin/instrument-items', 'label' => 'Butir Instrumen', 'icon' => 'list'],
-    ['path' => 'admin/validasi-instrumen', 'label' => 'Validasi Instrumen', 'icon' => 'check'],
+];
+
+$instrumentValidationMenus = [
+    ['path' => 'admin/instrument-bundles', 'label' => 'Paket Validasi Instrumen', 'icon' => 'bundle'],
     ['path' => 'admin/instrument-revisions', 'label' => 'Revisi Butir', 'icon' => 'edit'],
     ['path' => 'admin/instrumen-valid', 'label' => 'Instrumen Valid', 'icon' => 'circle-check'],
 ];
@@ -89,13 +93,19 @@ $productMenus = [
 $fillingMenus = [
     ['path' => 'admin/respondent-links', 'label' => 'Link Responden', 'icon' => 'link'],
     ['path' => 'admin/submissions', 'label' => 'Hasil Pengisian', 'icon' => 'table'],
-    ['path' => 'admin/reports', 'label' => 'Laporan', 'icon' => 'chart'],
 ];
 
-$instrumentGroup = ['label' => 'Instrumen', 'icon' => 'file', 'items' => $instrumentMenus];
+$collapsibleGroups = [
+    ['label' => 'Master Data Instrumen', 'icon' => 'file', 'items' => $masterInstrumentMenus],
+    ['label' => 'Validasi Instrumen', 'icon' => 'check', 'items' => $instrumentValidationMenus],
+];
+
 $directGroups = [
     ['label' => 'Produk', 'items' => $productMenus],
     ['label' => 'Pengisian', 'items' => $fillingMenus],
+    ['label' => 'Laporan', 'items' => [
+        ['path' => 'admin/reports', 'label' => 'Daftar Laporan', 'icon' => 'chart'],
+    ]],
     ['label' => 'Sistem', 'items' => [
         ['path' => 'admin/settings', 'label' => 'Pengaturan', 'icon' => 'settings'],
     ]],
@@ -124,24 +134,26 @@ $directGroups = [
                 ], $currentUri);
                 ?>
 
-                <?php $isInstrumentActive = sivalid_sidebar_group_active($instrumentGroup['items'], $currentUri); ?>
-                <li class="nav-item nav-group">
-                    <details class="nav-group-details <?= $isInstrumentActive ? 'is-active' : '' ?>" <?= $isInstrumentActive ? 'open' : '' ?>>
-                        <summary class="nav-group-toggle">
-                            <span class="nav-link-icon">
-                                <?= sivalid_sidebar_icon($instrumentGroup['icon']) ?>
-                            </span>
-                            <span class="nav-link-title"><?= esc($instrumentGroup['label']) ?></span>
-                            <span class="nav-group-chevron" aria-hidden="true"></span>
-                        </summary>
+                <?php foreach ($collapsibleGroups as $group): ?>
+                    <?php $isGroupActive = sivalid_sidebar_group_active($group['items'], $currentUri); ?>
+                    <li class="nav-item nav-group">
+                        <details class="nav-group-details <?= $isGroupActive ? 'is-active' : '' ?>" <?= $isGroupActive ? 'open' : '' ?>>
+                            <summary class="nav-group-toggle">
+                                <span class="nav-link-icon">
+                                    <?= sivalid_sidebar_icon($group['icon']) ?>
+                                </span>
+                                <span class="nav-link-title"><?= esc($group['label']) ?></span>
+                                <span class="nav-group-chevron" aria-hidden="true"></span>
+                            </summary>
 
-                        <ul class="nav-group-menu">
-                            <?php foreach ($instrumentGroup['items'] as $item): ?>
-                                <?php sivalid_sidebar_link($item, $currentUri); ?>
-                            <?php endforeach; ?>
-                        </ul>
-                    </details>
-                </li>
+                            <ul class="nav-group-menu">
+                                <?php foreach ($group['items'] as $item): ?>
+                                    <?php sivalid_sidebar_link($item, $currentUri); ?>
+                                <?php endforeach; ?>
+                            </ul>
+                        </details>
+                    </li>
+                <?php endforeach; ?>
 
                 <?php foreach ($directGroups as $group): ?>
                     <li class="nav-item mt-1">

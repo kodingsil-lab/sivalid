@@ -41,12 +41,24 @@
         <div class="empty-state">
             Belum ada aspek untuk instrumen ini. Silakan buat kisi-kisi aspek terlebih dahulu.
             <br><br>
-            <a href="<?= base_url('admin/instrument-aspects/new' . (!empty($instrumentId) ? '?instrument_id=' . $instrumentId : '')) ?>" class="btn btn-primary">
+            <a href="<?= base_url('admin/instrument-aspects' . (!empty($instrumentId) ? '?instrument_id=' . $instrumentId : '')) ?>" class="btn btn-primary">
                 Tambah Aspek
             </a>
         </div>
 
     <?php else: ?>
+        <?php
+        $selectedAspect = (int) old('aspect_id', $item['aspect_id'] ?? 0);
+        $selectedIndicator = (int) old('indicator_id', $item['indicator_id'] ?? 0);
+        $indicatorOptions = array_map(static function (array $indicator): array {
+            return [
+                'id'        => (int) ($indicator['id'] ?? 0),
+                'aspect_id' => (int) ($indicator['aspect_id'] ?? 0),
+                'label'     => trim((string) ($indicator['urutan'] ?? '') . '. ' . (string) ($indicator['indikator'] ?? '')),
+            ];
+        }, $indicators ?? []);
+        ?>
+
         <form action="<?= esc($action) ?>" method="post">
             <?= csrf_field() ?>
 
@@ -77,10 +89,7 @@
                 <select name="aspect_id" id="aspect_id" class="form-control" required>
                     <option value="">-- Pilih Aspek --</option>
                     <?php foreach ($aspects as $aspect): ?>
-                        <?php
-                        $selectedAspect = old('aspect_id', $item['aspect_id'] ?? '');
-                        ?>
-                        <option value="<?= $aspect['id'] ?>" <?= (int) $selectedAspect === (int) $aspect['id'] ? 'selected' : '' ?>>
+                        <option value="<?= $aspect['id'] ?>" <?= $selectedAspect === (int) $aspect['id'] ? 'selected' : '' ?>>
                             <?= esc($aspect['urutan']) ?>. <?= esc($aspect['nama_aspek']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -93,10 +102,10 @@
                     <option value="">-- Tanpa Indikator / Pilih Indikator --</option>
 
                     <?php foreach ($indicators as $indicator): ?>
-                        <?php
-                        $selectedIndicator = old('indicator_id', $item['indicator_id'] ?? '');
-                        ?>
-                        <option value="<?= $indicator['id'] ?>" <?= (int) $selectedIndicator === (int) $indicator['id'] ? 'selected' : '' ?>>
+                        <?php if ((int) ($indicator['aspect_id'] ?? 0) !== $selectedAspect) {
+                            continue;
+                        } ?>
+                        <option value="<?= $indicator['id'] ?>" <?= $selectedIndicator === (int) $indicator['id'] ? 'selected' : '' ?>>
                             <?= esc($indicator['urutan']) ?>. <?= esc($indicator['indikator']) ?>
                         </option>
                     <?php endforeach; ?>
@@ -210,5 +219,54 @@
     <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const aspectSelect = document.getElementById('aspect_id');
+    const indicatorSelect = document.getElementById('indicator_id');
+
+    if (!aspectSelect || !indicatorSelect) {
+        return;
+    }
+
+    const indicators = <?= json_encode($indicatorOptions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const initialIndicator = '<?= esc((string) $selectedIndicator, 'js') ?>';
+
+    function createOption(value, label, selected) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        option.selected = selected;
+        return option;
+    }
+
+    function renderIndicators(keepCurrent) {
+        const aspectId = parseInt(aspectSelect.value || '0', 10);
+        const currentValue = keepCurrent ? indicatorSelect.value : initialIndicator;
+        const matchedIndicators = indicators.filter(function (indicator) {
+            return indicator.aspect_id === aspectId;
+        });
+
+        indicatorSelect.innerHTML = '';
+        indicatorSelect.appendChild(createOption('', '-- Tanpa Indikator / Pilih Indikator --', currentValue === ''));
+
+        matchedIndicators.forEach(function (indicator) {
+            indicatorSelect.appendChild(createOption(String(indicator.id), indicator.label, String(indicator.id) === String(currentValue)));
+        });
+
+        if (!matchedIndicators.some(function (indicator) {
+            return String(indicator.id) === String(currentValue);
+        })) {
+            indicatorSelect.value = '';
+        }
+    }
+
+    aspectSelect.addEventListener('change', function () {
+        renderIndicators(true);
+    });
+
+    renderIndicators(false);
+});
+</script>
 
 <?= $this->endSection() ?>

@@ -25,7 +25,8 @@ class InstrumentLinks extends BaseController
 
     public function index()
     {
-        $links = $this->linkModel->getWithInstrument('validasi_instrumen');
+        $perPage = config('Pager')->perPage;
+        $links = $this->linkModel->paginateWithInstrument('validasi_instrumen', $perPage, 'instrument_links');
 
         foreach ($links as &$link) {
             $link['jumlah_respon'] = $this->responseModel->countByLink((int) $link['id']);
@@ -36,6 +37,8 @@ class InstrumentLinks extends BaseController
         $data = [
             'title' => 'Link Validasi Instrumen',
             'links' => $links,
+            'pager' => $this->linkModel->pager,
+            'pagerGroup' => 'instrument_links',
         ];
 
         return view('admin/links/index', $data);
@@ -104,9 +107,11 @@ class InstrumentLinks extends BaseController
 
         $this->workflowStatusService->markInstrumentInValidation($instrumentId);
 
+        $statusLabel = status_display_label('Dalam Validasi Instrumen');
+
         return redirect()
             ->to(base_url('admin/instrument-links'))
-            ->with('success', 'Link validasi instrumen berhasil dibuat. Status instrumen diperbarui menjadi Dalam Validasi Instrumen.');
+            ->with('success', 'Link validasi instrumen berhasil dibuat. Status instrumen diperbarui menjadi ' . $statusLabel . '.');
     }
 
     public function edit($id = null)

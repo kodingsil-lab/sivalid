@@ -39,7 +39,7 @@
         </tr>
         <tr>
             <th>Jenis Instrumen</th>
-            <td><?= esc($link['jenis']) ?></td>
+            <td><?= esc(title_case_label((string) ($link['jenis'] ?? '-'))) ?></td>
         </tr>
         <tr>
             <th>Sasaran</th>
@@ -47,7 +47,7 @@
         </tr>
         <tr>
             <th>Status Instrumen</th>
-            <td><span class="<?= esc(status_badge_class($link['instrument_status'] ?? '')) ?>"><?= esc($link['instrument_status']) ?></span></td>
+            <td><span class="<?= esc(status_badge_class($link['instrument_status'] ?? '')) ?>"><?= esc(status_display_label((string) ($link['instrument_status'] ?? ''))) ?></span></td>
         </tr>
     </table>
 </div>

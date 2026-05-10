@@ -85,7 +85,7 @@
                                 <td><?= $index + 1 ?></td>
                                 <td><?= esc($label) ?></td>
                                 <td>
-                                    <span class="badge badge-status-process"><?= $usedCount ?> data</span>
+                                    <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                 </td>
                                 <td class="table-actions-cell">
                                     <?php if ($usedCount === 0): ?>

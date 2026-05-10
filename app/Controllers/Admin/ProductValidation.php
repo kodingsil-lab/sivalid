@@ -167,9 +167,11 @@ class ProductValidation extends BaseController
 
         $this->workflowStatusService->markProductInValidation($productId);
 
+        $statusLabel = status_display_label('Dalam Validasi Produk');
+
         return redirect()
             ->to(base_url('admin/validasi-produk'))
-            ->with('success', 'Link validasi produk berhasil dibuat. Status produk diperbarui menjadi Dalam Validasi Produk.');
+            ->with('success', 'Link validasi produk berhasil dibuat. Status produk diperbarui menjadi ' . $statusLabel . '.');
     }
 
     public function edit($id = null)
