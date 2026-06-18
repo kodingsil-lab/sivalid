@@ -59,6 +59,8 @@ class Auth extends BaseController
                 ->with('error', 'Password salah.');
         }
 
+        session()->regenerate(true);
+
         session()->set([
             'user_id'    => $user['id'],
             'user_name'  => $user['name'],
