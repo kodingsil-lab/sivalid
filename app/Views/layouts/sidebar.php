@@ -81,13 +81,8 @@ $masterInstrumentMenus = [
 
 $instrumentValidationMenus = [
     ['path' => 'admin/instrument-bundles', 'label' => 'Paket Validasi Instrumen', 'icon' => 'bundle'],
-    ['path' => 'admin/instrument-revisions', 'label' => 'Revisi Butir', 'icon' => 'edit'],
+    ['path' => 'admin/hasil-validasi-instrumen', 'label' => 'Hasil Validasi Instrumen', 'icon' => 'table'],
     ['path' => 'admin/instrumen-valid', 'label' => 'Instrumen Valid', 'icon' => 'circle-check'],
-];
-
-$productMenus = [
-    ['path' => 'admin/products', 'label' => 'Produk Penelitian', 'icon' => 'box'],
-    ['path' => 'admin/validasi-produk', 'label' => 'Validasi Produk', 'icon' => 'check'],
 ];
 
 $fillingMenus = [
@@ -101,11 +96,7 @@ $collapsibleGroups = [
 ];
 
 $directGroups = [
-    ['label' => 'Produk', 'items' => $productMenus],
     ['label' => 'Pengisian', 'items' => $fillingMenus],
-    ['label' => 'Laporan', 'items' => [
-        ['path' => 'admin/reports', 'label' => 'Daftar Laporan', 'icon' => 'chart'],
-    ]],
     ['label' => 'Sistem', 'items' => [
         ['path' => 'admin/settings', 'label' => 'Pengaturan', 'icon' => 'settings'],
     ]],

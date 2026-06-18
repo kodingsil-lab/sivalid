@@ -29,28 +29,15 @@
 
 <div class="card mb-3">
     <div class="card-header">
-        <h3 class="card-title">Form Link Instrumen Responden</h3>
+        <h3 class="card-title">Form Link Penyebaran Instrumen</h3>
     </div>
     <div class="card-body">
-    <form action="<?= esc($action) ?>" method="post">
+    <form action="<?= esc($action) ?>" method="post" class="respondent-link-form">
         <?= csrf_field() ?>
 
         <?php if ($method === 'put'): ?>
             <input type="hidden" name="_method" value="PUT">
         <?php endif; ?>
-
-        <div class="form-row">
-            <label class="form-label" for="mode">Mode Pengisian</label>
-            <?php $selectedMode = old('mode', $link['mode'] ?? 'respon_mahasiswa'); ?>
-
-            <select name="mode" id="mode" class="form-control" required>
-                <?php foreach ($allowedModes as $modeOption): ?>
-                    <option value="<?= esc($modeOption) ?>" <?= $selectedMode === $modeOption ? 'selected' : '' ?>>
-                        <?= esc(str_replace('_', ' ', strtoupper($modeOption))) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
 
         <div class="form-row">
             <label class="form-label" for="instrument_id">Instrumen Valid</label>
@@ -66,7 +53,7 @@
                     </option>
                 <?php endforeach; ?>
             </select>
-            <small>Instrumen yang dapat dibagikan harus berstatus Valid.</small>
+            <small>Instrumen yang dapat disebarkan harus sudah ada di daftar Instrumen Valid.</small>
         </div>
 
         <div class="form-row">
@@ -77,7 +64,7 @@
                 id="judul_link"
                 class="form-control"
                 value="<?= old('judul_link', $link['judul_link'] ?? '') ?>"
-                placeholder="Contoh: Angket Respon Mahasiswa terhadap Pembelajaran Menulis Artikel Ilmiah"
+                placeholder="Contoh: Pengisian Instrumen Evaluasi Pembelajaran"
                 required
             >
         </div>
@@ -91,7 +78,7 @@
                     id="sasaran"
                     class="form-control"
                     value="<?= old('sasaran', $link['sasaran'] ?? '') ?>"
-                    placeholder="Contoh: Mahasiswa, Observer, Peserta FGD"
+                    placeholder="Contoh: Mahasiswa, guru, validator, observer, peserta pelatihan"
                 >
             </div>
 
@@ -110,6 +97,39 @@
                     <?php endforeach; ?>
                 </select>
             </div>
+        </div>
+
+        <?= view('admin/partials/identity_fields_builder', [
+            'identityTemplates' => $identityTemplates ?? [],
+            'identityFields' => $identityFields ?? [],
+            'link' => $link ?? [],
+        ]) ?>
+
+        <?= view('admin/partials/justification_builder', [
+            'justificationTemplates' => $justificationTemplates ?? [],
+            'justificationConfig' => $justificationConfig ?? [],
+        ]) ?>
+
+        <div class="form-row">
+            <label class="form-label" for="pengantar_penyebaran">Pengantar Penyebaran</label>
+            <textarea
+                name="pengantar_penyebaran"
+                id="pengantar_penyebaran"
+                class="form-control rich-text-editor"
+                data-placeholder="Tuliskan pengantar yang akan dibaca responden sebelum mengisi instrumen."
+            ><?= esc((string) old('pengantar_penyebaran', $link['pengantar_penyebaran'] ?? '')) ?></textarea>
+            <small class="text-muted">Gunakan bagian ini untuk menjelaskan tujuan, sasaran, dan arahan awal pengisian.</small>
+        </div>
+
+        <div class="form-row">
+            <label class="form-label" for="petunjuk_penyebaran">Petunjuk Pengisian Angket</label>
+            <textarea
+                name="petunjuk_penyebaran"
+                id="petunjuk_penyebaran"
+                class="form-control rich-text-editor"
+                data-placeholder="Tuliskan petunjuk khusus untuk responden/pengisi angket."
+            ><?= esc((string) old('petunjuk_penyebaran', $link['petunjuk_penyebaran'] ?? '')) ?></textarea>
+            <small class="text-muted">Petunjuk ini khusus untuk angket/instrumen yang diisi responden, berbeda dari petunjuk validasi instrumen.</small>
         </div>
 
         <div class="form-grid">
@@ -162,11 +182,61 @@
         <?php endif; ?>
 
         <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="<?= base_url('admin/respondent-links' . (!empty($selectedMode) ? '?mode=' . $selectedMode : '')) ?>" class="btn btn-light">
+        <a href="<?= base_url('admin/respondent-links') ?>" class="btn btn-light">
             Kembali
         </a>
     </form>
     </div>
 </div>
+
+<style>
+    .respondent-link-form .tox-tinymce {
+        border-color: #cbd5e1;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof tinymce === 'undefined') {
+            return;
+        }
+
+        tinymce.init({
+            selector: '.rich-text-editor',
+            height: 260,
+            menubar: false,
+            branding: false,
+            promotion: false,
+            plugins: 'lists table',
+            toolbar: 'blocks | bold italic underline | numlist bullist | table | removeformat',
+            block_formats: 'Paragraf=p;Judul 2=h2;Judul 3=h3',
+            table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+            table_default_styles: {
+                width: '100%',
+                borderCollapse: 'collapse'
+            },
+            content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.55;color:#1e293b} table{width:100%;border-collapse:collapse;margin:.65rem 0} th,td{border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top} th{background:#f1f5f9;font-weight:700}',
+            setup: function (editor) {
+                editor.on('init', function () {
+                    var textarea = document.getElementById(editor.id);
+                    var placeholder = textarea ? textarea.getAttribute('data-placeholder') : '';
+                    if (placeholder) {
+                        editor.getBody().setAttribute('data-placeholder', placeholder);
+                    }
+                });
+            }
+        });
+
+        var form = document.querySelector('form[action]');
+        if (form) {
+            form.addEventListener('submit', function () {
+                tinymce.triggerSave();
+            });
+        }
+    });
+</script>
 
 <?= $this->endSection() ?>

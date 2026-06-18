@@ -5,11 +5,11 @@
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
-            <h2 class="page-title">Link Instrumen Responden</h2>
-            <div class="text-muted mt-1">Kelola link pengisian untuk mahasiswa, observasi, FGD, dan tes kinerja.</div>
+            <h2 class="page-title">Link Penyebaran Instrumen</h2>
+            <div class="text-muted mt-1">Kelola link untuk menyebarkan instrumen valid kepada sasaran yang ditentukan.</div>
         </div>
         <div class="col-auto ms-auto">
-            <a href="<?= base_url('admin/respondent-links/new' . (!empty($mode) ? '?mode=' . $mode : '')) ?>" class="btn btn-primary">
+            <a href="<?= base_url('admin/respondent-links/new') ?>" class="btn btn-primary">
                 + Buat Link
             </a>
         </div>
@@ -28,33 +28,9 @@
     </div>
 <?php endif; ?>
 
-<div class="card mb-3">
-    <div class="card-body">
-    <form action="<?= base_url('admin/respondent-links') ?>" method="get" class="search-form">
-        <select name="mode" class="form-control" style="min-width: 280px;">
-            <option value="">-- Semua Mode --</option>
-            <?php foreach ($allowedModes as $modeOption): ?>
-                <option value="<?= esc($modeOption) ?>" <?= ($mode ?? '') === $modeOption ? 'selected' : '' ?>>
-                    <?= esc(str_replace('_', ' ', strtoupper($modeOption))) ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-
-        <button type="submit" class="btn btn-primary">Tampilkan</button>
-    </form>
-    </div>
-</div>
-
-<div class="toolbar">
-    <a href="<?= base_url('admin/respondent-links?mode=respon_mahasiswa') ?>" class="btn btn-light">Angket Mahasiswa</a>
-    <a href="<?= base_url('admin/respondent-links?mode=observasi') ?>" class="btn btn-light">Observasi</a>
-    <a href="<?= base_url('admin/respondent-links?mode=fgd') ?>" class="btn btn-light">FGD</a>
-    <a href="<?= base_url('admin/respondent-links?mode=tes_kinerja') ?>" class="btn btn-light">Tes Kinerja</a>
-</div>
-
 <?php if (empty($links)): ?>
     <div class="empty-state">
-        Belum ada link instrumen responden.
+        Belum ada link penyebaran instrumen.
     </div>
 <?php else: ?>
 <?php
@@ -73,7 +49,6 @@ $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : 
             <tr>
                 <th style="width: 50px;">No</th>
                 <th>Judul Link</th>
-                <th>Mode</th>
                 <th>Instrumen</th>
                 <th>Sasaran</th>
                 <th>Status</th>
@@ -89,11 +64,6 @@ $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : 
                 <tr>
                     <td><?= $offset + $index + 1 ?></td>
                     <td><?= esc($link['judul_link']) ?></td>
-                    <td>
-                        <span class="badge bg-secondary text-secondary-fg">
-                            <?= esc($link['mode']) ?>
-                        </span>
-                    </td>
                     <td>
                         <strong><?= esc($link['kode']) ?></strong><br>
                         <?= esc($link['judul']) ?><br>

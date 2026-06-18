@@ -3,6 +3,8 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Libraries\JustificationSchema;
+use App\Libraries\RespondentIdentitySchema;
 use App\Libraries\WorkflowStatusService;
 use App\Models\InstrumentLinkModel;
 use App\Models\InstrumentModel;
@@ -50,10 +52,15 @@ class InstrumentLinks extends BaseController
             'title'       => 'Buat Link Validasi Instrumen',
             'link'        => [
                 'instrument_id' => $this->request->getGet('instrument_id'),
+                'identity_template' => 'validator',
             ],
             'instruments' => $this->instrumentModel
                 ->orderBy('judul', 'ASC')
                 ->findAll(),
+            'identityTemplates' => RespondentIdentitySchema::templates(),
+            'identityFields' => RespondentIdentitySchema::fieldsForTemplate('validator'),
+            'justificationTemplates' => JustificationSchema::templates(),
+            'justificationConfig' => ['template' => 'validasi_instrumen'] + JustificationSchema::configForTemplate('validasi_instrumen'),
             'action'      => base_url('admin/instrument-links'),
             'method'      => 'post',
         ];
@@ -67,6 +74,7 @@ class InstrumentLinks extends BaseController
             'instrument_id'   => 'required|integer',
             'judul_link'      => 'required|min_length[3]|max_length[255]',
             'sasaran'         => 'permit_empty|max_length[150]',
+            'identity_template' => 'permit_empty|max_length[50]',
             'tanggal_mulai'   => 'permit_empty|valid_date[Y-m-d]',
             'tanggal_selesai' => 'permit_empty|valid_date[Y-m-d]',
             'status'          => 'required',
@@ -92,6 +100,10 @@ class InstrumentLinks extends BaseController
 
         $token = $this->generateUniqueToken();
 
+        $identityTemplate = $this->identityTemplateFromRequest();
+        $identityFields = $this->identityFieldsFromRequest($identityTemplate);
+        $justificationConfig = $this->justificationConfigFromRequest();
+
         $this->linkModel->insert([
             'instrument_id'   => $instrumentId,
             'product_id'      => null,
@@ -99,6 +111,9 @@ class InstrumentLinks extends BaseController
             'mode'            => 'validasi_instrumen',
             'judul_link'      => trim((string) $this->request->getPost('judul_link')),
             'sasaran'         => trim((string) $this->request->getPost('sasaran')),
+            'identity_template' => $identityTemplate,
+            'identity_fields'  => json_encode($identityFields, JSON_UNESCAPED_UNICODE),
+            'justification_config' => json_encode($justificationConfig, JSON_UNESCAPED_UNICODE),
             'tanggal_mulai'   => $this->emptyToNull($this->request->getPost('tanggal_mulai')),
             'tanggal_selesai' => $this->emptyToNull($this->request->getPost('tanggal_selesai')),
             'status'          => trim((string) $this->request->getPost('status')),
@@ -124,12 +139,20 @@ class InstrumentLinks extends BaseController
                 ->with('error', 'Link validasi instrumen tidak ditemukan.');
         }
 
+        if (empty($link['identity_template'])) {
+            $link['identity_template'] = RespondentIdentitySchema::defaultTemplateForLink($link);
+        }
+
         $data = [
             'title'       => 'Edit Link Validasi Instrumen',
             'link'        => $link,
             'instruments' => $this->instrumentModel
                 ->orderBy('judul', 'ASC')
                 ->findAll(),
+            'identityTemplates' => RespondentIdentitySchema::templates(),
+            'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
+            'justificationTemplates' => JustificationSchema::templates(),
+            'justificationConfig' => ['template' => JustificationSchema::defaultTemplateForLink($link)] + JustificationSchema::configForLink($link),
             'action'      => base_url('admin/instrument-links/' . $id),
             'method'      => 'put',
         ];
@@ -151,6 +174,7 @@ class InstrumentLinks extends BaseController
             'instrument_id'   => 'required|integer',
             'judul_link'      => 'required|min_length[3]|max_length[255]',
             'sasaran'         => 'permit_empty|max_length[150]',
+            'identity_template' => 'permit_empty|max_length[50]',
             'tanggal_mulai'   => 'permit_empty|valid_date[Y-m-d]',
             'tanggal_selesai' => 'permit_empty|valid_date[Y-m-d]',
             'status'          => 'required',
@@ -174,10 +198,17 @@ class InstrumentLinks extends BaseController
                 ->with('error', 'Instrumen tidak ditemukan.');
         }
 
+        $identityTemplate = $this->identityTemplateFromRequest();
+        $identityFields = $this->identityFieldsFromRequest($identityTemplate);
+        $justificationConfig = $this->justificationConfigFromRequest();
+
         $this->linkModel->update($id, [
             'instrument_id'   => $instrumentId,
             'judul_link'      => trim((string) $this->request->getPost('judul_link')),
             'sasaran'         => trim((string) $this->request->getPost('sasaran')),
+            'identity_template' => $identityTemplate,
+            'identity_fields'  => json_encode($identityFields, JSON_UNESCAPED_UNICODE),
+            'justification_config' => json_encode($justificationConfig, JSON_UNESCAPED_UNICODE),
             'tanggal_mulai'   => $this->emptyToNull($this->request->getPost('tanggal_mulai')),
             'tanggal_selesai' => $this->emptyToNull($this->request->getPost('tanggal_selesai')),
             'status'          => trim((string) $this->request->getPost('status')),
@@ -219,5 +250,55 @@ class InstrumentLinks extends BaseController
     private function emptyToNull($value)
     {
         return $value === '' || $value === null ? null : $value;
+    }
+
+    private function identityTemplateFromRequest(): string
+    {
+        $template = trim((string) $this->request->getPost('identity_template'));
+        $templates = RespondentIdentitySchema::templates();
+
+        return isset($templates[$template]) ? $template : 'validator';
+    }
+
+    private function identityFieldsFromRequest(string $template): array
+    {
+        $keys = $this->request->getPost('identity_field_key');
+        $labels = $this->request->getPost('identity_field_label');
+        $types = $this->request->getPost('identity_field_type');
+        $required = $this->request->getPost('identity_field_required');
+
+        if (!is_array($keys) || !is_array($labels)) {
+            return RespondentIdentitySchema::fieldsForTemplate($template);
+        }
+
+        $fields = [];
+
+        foreach ($keys as $index => $key) {
+            $fields[] = [
+                'key' => $key,
+                'label' => $labels[$index] ?? '',
+                'type' => is_array($types) ? ($types[$index] ?? 'text') : 'text',
+                'required' => is_array($required) && isset($required[$index]),
+            ];
+        }
+
+        return RespondentIdentitySchema::normalizeFields($fields);
+    }
+
+    private function justificationConfigFromRequest(): array
+    {
+        $template = trim((string) $this->request->getPost('justification_template'));
+        $base = JustificationSchema::configForTemplate($template);
+
+        return JustificationSchema::normalizeConfig([
+            'label' => $base['label'] ?? 'Custom',
+            'template' => $template,
+            'comment_label' => $this->request->getPost('justification_comment_label'),
+            'comment_placeholder' => $this->request->getPost('justification_comment_placeholder'),
+            'comment_required' => (bool) $this->request->getPost('justification_comment_required'),
+            'conclusion_label' => $this->request->getPost('justification_conclusion_label'),
+            'conclusion_required' => (bool) $this->request->getPost('justification_conclusion_required'),
+            'conclusion_options' => $this->request->getPost('justification_conclusion_options'),
+        ]);
     }
 }

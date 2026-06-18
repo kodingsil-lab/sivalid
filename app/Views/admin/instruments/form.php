@@ -60,11 +60,10 @@ $codeValue = $isCreateForm
                         id="kode"
                         class="form-control"
                         value="<?= esc($codeValue) ?>"
-                        placeholder="Contoh: 01"
-                        readonly
+                        placeholder="Contoh: INS-002"
                         required
                     >
-                    <small class="text-muted">Kode dibuat otomatis berurutan (01, 02, 03, dst).</small>
+                    <small class="text-muted">Kode boleh disesuaikan manual, misalnya INS-001, INS-002, atau kode lain yang unik.</small>
                 </div>
 
                 <div class="form-row">
@@ -115,6 +114,20 @@ $codeValue = $isCreateForm
                         value="<?= old('sasaran', $instrument['sasaran'] ?? '') ?>"
                         placeholder="Contoh: Validator ahli, mahasiswa, observer"
                     >
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label" for="keterangan">Keterangan</label>
+                    <input
+                        type="text"
+                        name="keterangan"
+                        id="keterangan"
+                        class="form-control"
+                        value="<?= old('keterangan', $instrument['keterangan'] ?? '') ?>"
+                        maxlength="255"
+                        placeholder="Contoh: Tahap analisis, desain pengembangan, evaluasi"
+                    >
+                    <small class="text-muted">Catatan internal untuk menandai tahap penggunaan instrumen. Tidak tampil di halaman publik.</small>
                 </div>
             </div>
         </div>
@@ -171,20 +184,25 @@ $codeValue = $isCreateForm
                 <div class="form-row">
                     <label class="form-label" for="status">Status</label>
                     <?php
-                    $manualStatuses = ['Draft', 'Aktif'];
+                    $manualStatuses = ['Draft', 'Aktif', 'Perlu Revisi', 'Direvisi', 'Tidak Aktif'];
                     $selectedStatus = old('status', $instrument['status'] ?? 'Draft');
                     $selectedStatusLabel = status_display_label($selectedStatus);
-                    $isWorkflowStatus = !in_array($selectedStatus, $manualStatuses, true);
+                    $isManualValid = (bool) ($isManualValid ?? false);
+                    $isWorkflowStatus = $isManualValid || !in_array($selectedStatus, $manualStatuses, true);
                     ?>
 
                     <?php if ($isCreateForm): ?>
                         <input type="hidden" name="status" value="Draft">
                         <div class="form-control" style="background-color: #f8f9fa;">Draft (otomatis saat instrumen dibuat)</div>
                         <small class="text-muted">Status berikutnya akan berubah otomatis saat link validasi dibuat, analisis selesai, revisi, dan penetapan valid.</small>
+                    <?php elseif ($isManualValid): ?>
+                        <input type="hidden" name="status" value="<?= esc($selectedStatus, 'attr') ?>">
+                        <div class="form-control" style="background-color: #f8f9fa;"><?= esc($selectedStatusLabel) ?> (dikunci)</div>
+                        <small class="text-muted">Instrumen masih masuk daftar Instrumen Valid. Hapus dari daftar itu terlebih dahulu jika ingin mengubah status master.</small>
                     <?php elseif ($isWorkflowStatus): ?>
                         <input type="hidden" name="status" value="<?= esc($selectedStatus, 'attr') ?>">
                         <div class="form-control" style="background-color: #f8f9fa;"><?= esc($selectedStatusLabel) ?> (otomatis dari alur validasi)</div>
-                        <small class="text-muted">Status ini dikontrol sistem workflow validasi instrumen.</small>
+                        <small class="text-muted">Status ini dikontrol dari alur validasi instrumen.</small>
                     <?php else: ?>
                         <select name="status" id="status" class="form-control" required>
                             <?php foreach ($manualStatuses as $status): ?>
@@ -240,6 +258,7 @@ $codeValue = $isCreateForm
         border-radius: 4px;
     }
 
+    .quill-editor.ql-container,
     .quill-editor .ql-container {
         min-height: 150px;
         font-size: 0.875rem;

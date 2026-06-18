@@ -29,6 +29,52 @@ $textAnswers = array_values(array_filter($safeAnswers, static function ($answer)
 $commentAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
     return !empty($answer['komentar']);
 }));
+
+$identityData = [];
+if (!empty($currentResponse['identity_data'])) {
+    $decodedIdentity = json_decode((string) $currentResponse['identity_data'], true);
+    $identityData = is_array($decodedIdentity) ? $decodedIdentity : [];
+}
+
+$identityFields = [];
+if (!empty($currentResponse['identity_fields'])) {
+    $decodedFields = json_decode((string) $currentResponse['identity_fields'], true);
+    $identityFields = is_array($decodedFields) ? $decodedFields : [];
+}
+
+if (empty($identityFields)) {
+    $identityFields = [
+        ['key' => 'nama', 'label' => 'Nama'],
+        ['key' => 'email', 'label' => 'Email'],
+        ['key' => 'nim', 'label' => 'NIM'],
+        ['key' => 'program_studi', 'label' => 'Program Studi'],
+        ['key' => 'kelas', 'label' => 'Kelas'],
+        ['key' => 'semester', 'label' => 'Semester/Pertemuan'],
+        ['key' => 'instansi', 'label' => 'Instansi'],
+        ['key' => 'bidang_keahlian', 'label' => 'Bidang/Jabatan'],
+    ];
+}
+
+foreach (['nama', 'email', 'nim', 'program_studi', 'kelas', 'semester', 'instansi', 'bidang_keahlian'] as $identityKey) {
+    if (!isset($identityData[$identityKey])) {
+        $identityData[$identityKey] = $currentResponse[$identityKey] ?? '';
+    }
+}
+
+$justificationData = [];
+if (!empty($currentResponse['justification_data'])) {
+    $decodedJustification = json_decode((string) $currentResponse['justification_data'], true);
+    $justificationData = is_array($decodedJustification) ? $decodedJustification : [];
+}
+
+$justificationConfig = [];
+if (!empty($currentResponse['justification_config'])) {
+    $decodedJustificationConfig = json_decode((string) $currentResponse['justification_config'], true);
+    $justificationConfig = is_array($decodedJustificationConfig) ? $decodedJustificationConfig : [];
+}
+
+$commentLabel = (string) ($justificationData['comment_label'] ?? $justificationConfig['comment_label'] ?? 'Komentar Umum');
+$conclusionLabel = (string) ($justificationData['conclusion_label'] ?? $justificationConfig['conclusion_label'] ?? 'Kesimpulan');
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -105,41 +151,23 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
         <table class="table table-vcenter table-sm">
             <tbody>
                 <tr>
-                    <th style="width: 240px;">Nama</th>
-                    <td class="fw-semibold"><?= esc((string) ($currentResponse['nama'] ?? '-')) ?></td>
-                </tr>
-                <tr>
                     <th>Jenis Responden</th>
                     <td><?= esc(title_case_label((string) ($currentResponse['jenis_responden'] ?? '-'))) ?></td>
                 </tr>
-                <tr>
-                    <th>Email</th>
-                    <td><?= esc((string) (!empty($currentResponse['email']) ? $currentResponse['email'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>NIM</th>
-                    <td><?= esc((string) (!empty($currentResponse['nim']) ? $currentResponse['nim'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>Program Studi</th>
-                    <td><?= esc((string) (!empty($currentResponse['program_studi']) ? $currentResponse['program_studi'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>Kelas</th>
-                    <td><?= esc((string) (!empty($currentResponse['kelas']) ? $currentResponse['kelas'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>Semester/Pertemuan</th>
-                    <td><?= esc((string) (!empty($currentResponse['semester']) ? $currentResponse['semester'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>Instansi</th>
-                    <td><?= esc((string) (!empty($currentResponse['instansi']) ? $currentResponse['instansi'] : '-')) ?></td>
-                </tr>
-                <tr>
-                    <th>Bidang/Jabatan</th>
-                    <td><?= esc((string) (!empty($currentResponse['bidang_keahlian']) ? $currentResponse['bidang_keahlian'] : '-')) ?></td>
-                </tr>
+                <?php foreach ($identityFields as $field): ?>
+                    <?php
+                    $key = (string) ($field['key'] ?? '');
+                    $label = (string) ($field['label'] ?? $key);
+                    $value = $key !== '' ? trim((string) ($identityData[$key] ?? '')) : '';
+                    ?>
+                    <?php if ($key === '' || $value === '') {
+                        continue;
+                    } ?>
+                    <tr>
+                        <th style="width: 240px;"><?= esc($label) ?></th>
+                        <td class="<?= $key === 'nama' ? 'fw-semibold' : '' ?>"><?= nl2br(esc($value)) ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
@@ -246,7 +274,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
     <?php endif; ?>
 
     <div>
-        <div class="fw-semibold mb-1">Komentar Umum</div>
+        <div class="fw-semibold mb-1"><?= esc($commentLabel) ?></div>
         <div class="text-muted"><?= nl2br(esc((string) (!empty($currentResponse['komentar_umum']) ? $currentResponse['komentar_umum'] : '-'))) ?></div>
     </div>
     </div>
@@ -254,7 +282,7 @@ $commentAnswers = array_values(array_filter($safeAnswers, static function ($answ
 
 <div class="card mb-3">
     <div class="card-body">
-        <h3 class="card-title mb-2">Kesimpulan</h3>
+        <h3 class="card-title mb-2"><?= esc($conclusionLabel) ?></h3>
         <div class="fw-semibold"><?= esc((string) (!empty($currentResponse['kesimpulan']) ? $currentResponse['kesimpulan'] : '-')) ?></div>
     </div>
 </div>

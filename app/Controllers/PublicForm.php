@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\JustificationSchema;
+use App\Libraries\RespondentIdentitySchema;
 use App\Models\InstrumentAspectModel;
 use App\Models\InstrumentIndicatorModel;
 use App\Models\InstrumentItemModel;
@@ -45,6 +47,10 @@ class PublicForm extends BaseController
 
         if (isset($link['error_view'])) {
             return $link['error_view'];
+        }
+
+        if (!$this->getRespondentIdentity($link) || $this->request->getGet('identitas') === 'edit') {
+            return $this->showIdentityForm($link);
         }
 
         if ($link['mode'] === 'validasi_instrumen') {
@@ -107,6 +113,9 @@ class PublicForm extends BaseController
             'indicators' => $indicators,
             'items'      => $items,
             'scale'      => $scale,
+            'respondentIdentity' => $this->getRespondentIdentity($link),
+            'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
+            'justificationConfig' => JustificationSchema::configForLink($link),
         ];
 
         return view('public/validasi_instrumen', $data);
@@ -143,6 +152,9 @@ class PublicForm extends BaseController
             'aspects' => $aspects,
             'items'   => $items,
             'scale'   => $scale,
+            'respondentIdentity' => $this->getRespondentIdentity($link),
+            'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
+            'justificationConfig' => JustificationSchema::configForLink($link),
         ];
 
         return view('public/validasi_produk', $data);
@@ -150,7 +162,7 @@ class PublicForm extends BaseController
 
     private function showResponMahasiswa(array $link)
     {
-        return $this->showGenericRespondentForm($link, 'public/respon_mahasiswa', 'Respon Mahasiswa');
+        return $this->showGenericRespondentForm($link, 'public/pengisian_instrumen', 'Pengisian Instrumen');
     }
 
     private function showObservasi(array $link)
@@ -192,6 +204,9 @@ class PublicForm extends BaseController
             'aspects' => $aspects,
             'items'   => $items,
             'scale'   => $scale,
+            'respondentIdentity' => $this->getRespondentIdentity($link),
+            'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
+            'justificationConfig' => JustificationSchema::configForLink($link),
         ]);
     }
 
@@ -216,6 +231,10 @@ class PublicForm extends BaseController
             ]);
         }
 
+        if ((string) $this->request->getPost('action') === 'start_identity') {
+            return $this->startIdentity($link);
+        }
+
         $allowedSubmitModes = [
             'validasi_instrumen',
             'validasi_produk',
@@ -232,17 +251,17 @@ class PublicForm extends BaseController
             ]);
         }
 
-        $rules = [
-            'nama'             => 'required|min_length[3]|max_length[150]',
-            'email'            => 'permit_empty|valid_email|max_length[150]',
-            'bidang_keahlian'  => 'permit_empty|max_length[150]',
-            'instansi'         => 'permit_empty|max_length[150]',
-            'nim'              => 'permit_empty|max_length[50]',
-            'program_studi'    => 'permit_empty|max_length[150]',
-            'semester'         => 'permit_empty|max_length[20]',
-            'kelas'            => 'permit_empty|max_length[50]',
-            'komentar_umum'    => 'permit_empty',
-            'kesimpulan'       => 'permit_empty|max_length[150]',
+        if (!$this->getRespondentIdentity($link)) {
+            return redirect()
+                ->to(base_url('isi/' . $link['token']))
+                ->with('error', 'Silakan lengkapi identitas terlebih dahulu sebelum mengisi instrumen.');
+        }
+
+        $identityFields = RespondentIdentitySchema::fieldsForLink($link);
+        $justificationConfig = JustificationSchema::configForLink($link);
+        $rules = $this->identityValidationRules($identityFields) + [
+            'komentar_umum'    => !empty($justificationConfig['comment_required']) ? 'required' : 'permit_empty',
+            'kesimpulan'       => !empty($justificationConfig['conclusion_required']) ? 'required|max_length[150]' : 'permit_empty|max_length[150]',
         ];
 
         if (!$this->validate($rules)) {
@@ -252,8 +271,10 @@ class PublicForm extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $email = trim((string) $this->request->getPost('email'));
-        $nim = trim((string) $this->request->getPost('nim'));
+        $identity = $this->identityFromRequest($identityFields);
+        $justificationData = $this->justificationFromRequest($justificationConfig);
+        $email = $identity['email'];
+        $nim = $identity['nim'];
 
         if ($email !== '' && $this->respondentModel->hasSubmittedByEmail((int) $link['id'], $email)) {
             return redirect()
@@ -396,18 +417,18 @@ class PublicForm extends BaseController
         }
 
         $now = date('Y-m-d H:i:s');
-
         $respondentId = $this->respondentModel->insert([
             'instrument_link_id' => (int) $link['id'],
-            'nama'               => trim((string) $this->request->getPost('nama')),
-            'email'              => trim((string) $this->request->getPost('email')),
-            'bidang_keahlian'    => trim((string) $this->request->getPost('bidang_keahlian')),
-            'instansi'           => trim((string) $this->request->getPost('instansi')),
+            'nama'               => $identity['nama'],
+            'email'              => $identity['email'],
+            'bidang_keahlian'    => $identity['bidang_keahlian'],
+            'instansi'           => $identity['instansi'],
             'jenis_responden'    => $this->jenisRespondenFromMode($link['mode']),
-            'nim'                => trim((string) $this->request->getPost('nim')),
-            'program_studi'      => trim((string) $this->request->getPost('program_studi')),
-            'semester'           => trim((string) $this->request->getPost('semester')),
-            'kelas'              => trim((string) $this->request->getPost('kelas')),
+            'nim'                => $identity['nim'],
+            'program_studi'      => $identity['program_studi'],
+            'semester'           => $identity['semester'],
+            'kelas'              => $identity['kelas'],
+            'identity_data'       => json_encode($identity, JSON_UNESCAPED_UNICODE),
             'tanggal_isi'        => $now,
         ], true);
 
@@ -418,8 +439,9 @@ class PublicForm extends BaseController
             'respondent_id'      => (int) $respondentId,
             'mode'               => $link['mode'],
             'status'             => 'Terkirim',
-            'komentar_umum'      => trim((string) $this->request->getPost('komentar_umum')),
-            'kesimpulan'         => trim((string) $this->request->getPost('kesimpulan')),
+            'komentar_umum'      => $justificationData['komentar_umum'],
+            'kesimpulan'         => $justificationData['kesimpulan'],
+            'justification_data' => json_encode($justificationData, JSON_UNESCAPED_UNICODE),
             'submitted_at'       => $now,
         ], true);
 
@@ -465,6 +487,7 @@ class PublicForm extends BaseController
         }
 
         $db->transCommit();
+        session()->remove($this->identitySessionKey((int) $link['id']));
 
         $message = $link['mode'] === 'validasi_produk'
             ? 'Hasil validasi produk berhasil dikirim. Terima kasih atas penilaian dan masukan Bapak/Ibu Validator.'
@@ -491,7 +514,7 @@ class PublicForm extends BaseController
         }
 
         if ($mode === 'respon_mahasiswa') {
-            return 'mahasiswa';
+            return 'responden';
         }
 
         if ($mode === 'observasi') {
@@ -600,5 +623,170 @@ class PublicForm extends BaseController
         }
 
         return $link;
+    }
+
+    private function showIdentityForm(array $link)
+    {
+        return view('public/respondent_identity', [
+            'title' => $this->identityTitle($link['mode']),
+            'link' => $link,
+            'respondentIdentity' => $this->getRespondentIdentity($link),
+            'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
+        ]);
+    }
+
+    private function startIdentity(array $link)
+    {
+        $identityFields = RespondentIdentitySchema::fieldsForLink($link);
+        $rules = $this->identityValidationRules($identityFields);
+
+        $messages = [
+            'nama' => [
+                'required'   => 'Mohon isi nama lengkap terlebih dahulu.',
+                'min_length' => 'Nama lengkap minimal 3 karakter.',
+                'max_length' => 'Nama lengkap maksimal 150 karakter.',
+            ],
+            'email' => [
+                'valid_email' => 'Mohon isi alamat email dengan format yang benar.',
+                'max_length'  => 'Alamat email maksimal 150 karakter.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $identity = $this->identityFromRequest($identityFields);
+        $email = $identity['email'];
+        $nim = $identity['nim'];
+
+        if ($email !== '' && $this->respondentModel->hasSubmittedByEmail((int) $link['id'], $email)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Email ini sudah pernah digunakan untuk mengisi link ini.');
+        }
+
+        if (
+            in_array($link['mode'], ['respon_mahasiswa', 'tes_kinerja'], true)
+            && $nim !== ''
+            && $this->respondentModel->hasSubmittedByNim((int) $link['id'], $nim)
+        ) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'NIM/Nomor identitas ini sudah pernah digunakan untuk mengisi link ini.');
+        }
+
+        session()->set($this->identitySessionKey((int) $link['id']), $identity);
+
+        return redirect()->to(base_url('isi/' . $link['token']));
+    }
+
+    private function identityFromRequest(array $fields): array
+    {
+        $identity = [];
+
+        foreach ($fields as $field) {
+            $key = (string) ($field['key'] ?? '');
+
+            if ($key === '') {
+                continue;
+            }
+
+            $identity[$key] = trim((string) $this->request->getPost($key));
+        }
+
+        foreach (RespondentIdentitySchema::knownKeys() as $key) {
+            $identity[$key] = trim((string) ($identity[$key] ?? ''));
+        }
+
+        return $identity;
+    }
+
+    private function getRespondentIdentity(array $link): ?array
+    {
+        $identity = session()->get($this->identitySessionKey((int) $link['id']));
+
+        return is_array($identity) && trim((string) ($identity['nama'] ?? '')) !== ''
+            ? $identity
+            : null;
+    }
+
+    private function identitySessionKey(int $linkId): string
+    {
+        return 'public_form_identity_' . $linkId;
+    }
+
+    private function identityTitle(string $mode): string
+    {
+        if ($mode === 'validasi_produk' || $mode === 'validasi_instrumen') {
+            return 'Identitas Validator';
+        }
+
+        if ($mode === 'observasi') {
+            return 'Identitas Observer';
+        }
+
+        if ($mode === 'fgd') {
+            return 'Identitas Peserta FGD';
+        }
+
+        if ($mode === 'tes_kinerja') {
+            return 'Identitas Peserta/Mahasiswa';
+        }
+
+        return 'Identitas Responden';
+    }
+
+    private function identityValidationRules(array $fields): array
+    {
+        $rules = [];
+
+        foreach ($fields as $field) {
+            $key = (string) ($field['key'] ?? '');
+
+            if ($key === '') {
+                continue;
+            }
+
+            $ruleParts = !empty($field['required']) ? ['required'] : ['permit_empty'];
+            $type = (string) ($field['type'] ?? 'text');
+
+            if ($type === 'email') {
+                $ruleParts[] = 'valid_email';
+            }
+
+            if ($type === 'textarea') {
+                $ruleParts[] = 'max_length[1000]';
+            } else {
+                $ruleParts[] = in_array($key, ['semester', 'kelas', 'nim'], true) ? 'max_length[50]' : 'max_length[150]';
+            }
+
+            if ($key === 'nama') {
+                $ruleParts[] = 'min_length[3]';
+            }
+
+            $rules[$key] = implode('|', $ruleParts);
+        }
+
+        if (!isset($rules['nama'])) {
+            $rules['nama'] = 'required|min_length[3]|max_length[150]';
+        }
+
+        return $rules;
+    }
+
+    private function justificationFromRequest(array $config): array
+    {
+        return [
+            'comment_label' => (string) ($config['comment_label'] ?? 'Komentar/Saran'),
+            'conclusion_label' => (string) ($config['conclusion_label'] ?? 'Kesimpulan'),
+            'komentar_umum' => trim((string) $this->request->getPost('komentar_umum')),
+            'kesimpulan' => trim((string) $this->request->getPost('kesimpulan')),
+        ];
     }
 }

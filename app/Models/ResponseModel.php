@@ -21,6 +21,7 @@ class ResponseModel extends Model
         'status',
         'komentar_umum',
         'kesimpulan',
+        'justification_data',
         'submitted_at',
     ];
 

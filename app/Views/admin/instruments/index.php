@@ -33,6 +33,12 @@
     </div>
 <?php endif; ?>
 
+<?php if (session()->getFlashdata('info')): ?>
+    <div class="alert alert-info">
+        <?= esc((string) session()->getFlashdata('info')) ?>
+    </div>
+<?php endif; ?>
+
 <div class="card mb-3">
     <div class="card-body">
         <form action="<?= base_url('admin/instruments') ?>" method="get" class="search-form">
@@ -40,7 +46,7 @@
                 type="text"
                 name="keyword"
                 value="<?= esc((string) ($keyword ?? '')) ?>"
-                placeholder="Cari kode, judul, jenis, sasaran, status..."
+                placeholder="Cari kode, judul, jenis, sasaran, keterangan, status..."
             >
             <button type="submit" class="btn btn-light btn-sm">Cari</button>
 
@@ -76,21 +82,34 @@
                         <th class="col-title" scope="col">Judul Instrumen</th>
                         <th class="col-type" scope="col">Jenis</th>
                         <th class="col-target" scope="col">Sasaran</th>
+                        <th class="col-note" scope="col">Keterangan</th>
                         <th class="col-scale" scope="col">Skala</th>
                         <th class="col-status" scope="col">Status</th>
                         <th class="col-actions table-actions-cell" scope="col">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody
+                    id="instrument-sortable-body"
+                    data-reorder-url="<?= base_url('admin/instruments/reorder') ?>"
+                    data-offset="<?= esc((string) $offset) ?>"
+                    data-csrf-token="<?= csrf_token() ?>"
+                    data-csrf-hash="<?= csrf_hash() ?>"
+                >
                     <?php foreach ($instruments as $index => $instrument): ?>
-                        <tr>
-                            <td class="text-muted col-no"><?= $offset + $index + 1 ?></td>
+                        <tr data-id="<?= esc((string) $instrument['id']) ?>">
+                            <td class="text-muted col-no">
+                                <span class="drag-handle" title="Geser untuk mengubah urutan" aria-label="Geser untuk mengubah urutan">
+                                    <span></span><span></span><span></span>
+                                </span>
+                                <span class="row-number"><?= $offset + $index + 1 ?></span>
+                            </td>
                             <td class="col-code"><span class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?></span></td>
                             <td class="col-title">
                                 <span class="instrument-title"><?= esc((string) ($instrument['judul'] ?? '-')) ?></span>
                             </td>
                             <td class="text-muted col-type"><?= esc(title_case_label((string) ($instrument['jenis'] ?? '-'))) ?></td>
                             <td class="text-muted col-target"><?= esc((string) (!empty($instrument['sasaran']) ? $instrument['sasaran'] : '-')) ?></td>
+                            <td class="text-muted col-note"><?= esc((string) (!empty($instrument['keterangan']) ? $instrument['keterangan'] : '-')) ?></td>
                             <td class="text-muted col-scale"><?= esc((string) ($instrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
                             <td class="col-status">
                                 <?php $status = (string) ($instrument['status'] ?? ''); ?>
@@ -153,5 +172,114 @@
         <?php endif; ?>
     <?php endif; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<style>
+    .drag-handle {
+        align-items: center;
+        cursor: grab;
+        display: inline-grid;
+        gap: 2px;
+        grid-template-columns: repeat(3, 3px);
+        margin-right: 10px;
+        padding: 6px 3px;
+        vertical-align: middle;
+    }
+
+    .drag-handle span {
+        background: #7b8aa0;
+        border-radius: 50%;
+        display: block;
+        height: 3px;
+        width: 3px;
+    }
+
+    .sortable-ghost {
+        background: #eef6ff;
+        opacity: 0.75;
+    }
+
+    .sortable-chosen .drag-handle {
+        cursor: grabbing;
+    }
+
+    .instrument-sort-saving {
+        opacity: 0.7;
+        pointer-events: none;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tbody = document.getElementById('instrument-sortable-body');
+
+        if (!tbody || typeof Sortable === 'undefined') {
+            return;
+        }
+
+        var offset = parseInt(tbody.getAttribute('data-offset') || '0', 10);
+        var reorderUrl = tbody.getAttribute('data-reorder-url');
+        var csrfToken = tbody.getAttribute('data-csrf-token');
+        var csrfHash = tbody.getAttribute('data-csrf-hash');
+
+        function updateRowNumbers() {
+            tbody.querySelectorAll('tr').forEach(function (row, index) {
+                var number = row.querySelector('.row-number');
+
+                if (number) {
+                    number.textContent = String(offset + index + 1);
+                }
+            });
+        }
+
+        function saveOrder() {
+            var formData = new FormData();
+
+            tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+                formData.append('order[]', row.getAttribute('data-id'));
+            });
+
+            formData.append('offset', String(offset));
+            formData.append(csrfToken, csrfHash);
+            tbody.classList.add('instrument-sort-saving');
+
+            fetch(reorderUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(function (response) {
+                    return response.json().then(function (payload) {
+                        if (!response.ok || !payload.success) {
+                            throw new Error(payload.message || 'Urutan instrumen gagal disimpan.');
+                        }
+
+                        if (payload.csrfHash) {
+                            csrfHash = payload.csrfHash;
+                            tbody.setAttribute('data-csrf-hash', csrfHash);
+                        }
+                    });
+                })
+                .catch(function (error) {
+                    alert(error.message);
+                    window.location.reload();
+                })
+                .finally(function () {
+                    tbody.classList.remove('instrument-sort-saving');
+                });
+        }
+
+        Sortable.create(tbody, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'sortable-ghost',
+            onEnd: function () {
+                updateRowNumbers();
+                saveOrder();
+            }
+        });
+    });
+</script>
 
 <?= $this->endSection() ?>

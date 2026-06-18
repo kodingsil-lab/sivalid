@@ -10,10 +10,6 @@ $modeLabel = static function (?string $mode): string {
         return 'Validasi Instrumen';
     }
 
-    if ($mode === 'validasi_produk') {
-        return 'Validasi Produk';
-    }
-
     return ucwords(str_replace('_', ' ', $mode));
 };
 
@@ -22,10 +18,6 @@ $modeBadgeClass = static function (?string $mode): string {
 
     if ($mode === 'validasi_instrumen') {
         return 'bg-blue text-blue-fg';
-    }
-
-    if ($mode === 'validasi_produk') {
-        return 'bg-orange text-orange-fg';
     }
 
     return 'bg-secondary text-secondary-fg';
@@ -37,12 +29,12 @@ $modeBadgeClass = static function (?string $mode): string {
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Dashboard SIVALID</h2>
-            <div class="text-muted mt-1">Ringkasan validasi instrumen penelitian.</div>
+            <div class="text-muted mt-1">Ringkasan master instrumen, link responden, dan hasil pengisian.</div>
         </div>
         <div class="col-auto ms-auto d-flex gap-2">
             <a href="<?= base_url('admin/instruments') ?>" class="btn btn-primary">Kelola Instrumen</a>
+            <a href="<?= base_url('admin/hasil-validasi-instrumen') ?>" class="btn btn-light">Instrumen Siap Disebar</a>
             <a href="<?= base_url('admin/respondent-links') ?>" class="btn btn-light">Link Responden</a>
-            <a href="<?= base_url('admin/reports') ?>" class="btn btn-light">Laporan</a>
         </div>
     </div>
 </div>
@@ -68,23 +60,9 @@ $modeBadgeClass = static function (?string $mode): string {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="number"><?= (int) ($instrumenValid ?? 0) ?></div>
-                        <div class="label">Instrumen Valid</div>
+                        <div class="label">Instrumen Siap Disebar</div>
                     </div>
-                    <span class="badge bg-green text-green-fg">Valid</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-sm-6 col-lg-4">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="number"><?= (int) ($totalProduk ?? 0) ?></div>
-                        <div class="label">Produk Penelitian</div>
-                    </div>
-                    <span class="badge bg-secondary text-secondary-fg">Produk</span>
+                    <span class="badge bg-green text-green-fg">Siap</span>
                 </div>
             </div>
         </div>
@@ -118,19 +96,6 @@ $modeBadgeClass = static function (?string $mode): string {
         </div>
     </div>
 
-    <div class="col-sm-6 col-lg-4">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="number"><?= (int) ($totalLaporan ?? 0) ?></div>
-                        <div class="label">Laporan Analisis</div>
-                    </div>
-                    <span class="badge bg-green text-green-fg">Laporan</span>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="card mb-3">
@@ -206,73 +171,6 @@ $modeBadgeClass = static function (?string $mode): string {
                                 </td>
                                 <td><?= esc((string) ($response['judul_link'] ?? '-')) ?></td>
                                 <td class="text-muted"><?= esc((string) (!empty($response['submitted_at']) ? $response['submitted_at'] : '-')) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-<div class="card mb-3">
-    <div class="card-body">
-        <h3 class="card-title mb-3">Laporan Analisis Terbaru</h3>
-
-        <?php if (empty($latestAnalyses)): ?>
-            <div class="empty-state">Belum ada laporan analisis.</div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-vcenter table-hover table-sm">
-                    <thead>
-                        <tr>
-                            <th style="width: 70px;">No</th>
-                            <th style="width: 180px;">Jenis</th>
-                            <th>Instrumen/Produk</th>
-                            <th style="width: 130px;">Persentase</th>
-                            <th style="width: 180px;">Kategori</th>
-                            <th class="table-actions-cell">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($latestAnalyses as $index => $analysis): ?>
-                            <tr>
-                                <td class="text-muted"><?= $index + 1 ?></td>
-                                <td>
-                                    <span class="badge <?= esc($modeBadgeClass($analysis['mode'] ?? '')) ?>">
-                                        <?= esc($modeLabel($analysis['mode'] ?? '')) ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold"><?= esc((string) ($analysis['kode'] ?? '-')) ?></div>
-                                    <div class="text-muted small"><?= esc((string) ($analysis['judul'] ?? '-')) ?></div>
-                                    <?php if (!empty($analysis['nama_produk'])): ?>
-                                        <div class="small mt-1">Produk: <?= esc((string) $analysis['nama_produk']) ?></div>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="fw-semibold"><?= (float) ($analysis['persentase'] ?? 0) ?>%</span>
-                                </td>
-                                <td>
-                                    <span class="<?= esc(status_badge_class($analysis['kategori'] ?? '')) ?>">
-                                        <?= esc((string) ($analysis['kategori'] ?? '-')) ?>
-                                    </span>
-                                </td>
-                                <td class="table-actions-cell">
-                                    <div class="table-actions">
-                                        <?php if (($analysis['mode'] ?? '') === 'validasi_instrumen'): ?>
-                                            <a href="<?= base_url('admin/reports/validasi-instrumen/' . $analysis['id']) ?>" class="btn btn-sm btn-light">
-                                                Laporan
-                                            </a>
-                                        <?php elseif (($analysis['mode'] ?? '') === 'validasi_produk'): ?>
-                                            <a href="<?= base_url('admin/reports/validasi-produk/' . $analysis['id']) ?>" class="btn btn-sm btn-light">
-                                                Laporan
-                                            </a>
-                                        <?php else: ?>
-                                            <span class="text-muted">-</span>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

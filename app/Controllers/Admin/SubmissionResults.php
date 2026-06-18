@@ -10,6 +10,14 @@ use App\Models\InstrumentModel;
 use App\Models\ResearchProductModel;
 use App\Models\ResponseAnswerModel;
 use App\Models\ResponseModel;
+use Dompdf\Dompdf;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SubmissionResults extends BaseController
 {
@@ -78,6 +86,162 @@ class SubmissionResults extends BaseController
             ->setHeader('Content-Type', 'text/csv; charset=UTF-8')
             ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
             ->setBody($csv);
+    }
+
+    public function exportExcel()
+    {
+        $filters = $this->getFilters();
+        $matrix = $this->getExcelScoreMatrix($filters);
+        $detailMatrix = $this->getExportMatrix($filters);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Rekap Skor');
+
+        $sheet->fromArray($matrix['headers'], null, 'A1');
+        $rowNumber = 2;
+
+        foreach ($matrix['rows'] as $row) {
+            $sheet->fromArray($row, null, 'A' . $rowNumber);
+            $rowNumber++;
+        }
+
+        $highestColumn = $sheet->getHighestColumn();
+        $highestRow = max(1, $sheet->getHighestRow());
+
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'FFFF00'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ]);
+
+        $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D9E2EC'],
+                ],
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true,
+            ],
+        ]);
+
+        $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+
+        for ($columnIndex = 1; $columnIndex <= $highestColumnIndex; $columnIndex++) {
+            $column = Coordinate::stringFromColumnIndex($columnIndex);
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $sheet->freezePane('A2');
+        $sheet->setAutoFilter('A1:' . $highestColumn . '1');
+        $sheet->getColumnDimension('A')->setWidth(8);
+        $sheet->getColumnDimension('B')->setWidth(12);
+        $sheet->getColumnDimension('C')->setWidth(20);
+        $sheet->getColumnDimension('D')->setWidth(28);
+        $sheet->getColumnDimension('E')->setWidth(24);
+        $sheet->getColumnDimension('F')->setWidth(20);
+        $sheet->getColumnDimension('G')->setWidth(24);
+        $sheet->getColumnDimension('L')->setWidth(28);
+        $sheet->getColumnDimension('N')->setWidth(34);
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+
+        $detailSheet = $spreadsheet->createSheet();
+        $detailSheet->setTitle('Detail');
+        $detailSheet->fromArray($detailMatrix['headers'], null, 'A1');
+        $detailRowNumber = 2;
+
+        foreach ($detailMatrix['rows'] as $row) {
+            $detailSheet->fromArray($row, null, 'A' . $detailRowNumber);
+            $detailRowNumber++;
+        }
+
+        $detailHighestColumn = $detailSheet->getHighestColumn();
+        $detailHighestRow = max(1, $detailSheet->getHighestRow());
+        $detailSheet->getStyle('A1:' . $detailHighestColumn . '1')->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'EAF2F8'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ]);
+        $detailSheet->getStyle('A1:' . $detailHighestColumn . $detailHighestRow)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D9E2EC'],
+                ],
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true,
+            ],
+        ]);
+        $detailHighestColumnIndex = Coordinate::columnIndexFromString($detailHighestColumn);
+
+        for ($columnIndex = 1; $columnIndex <= $detailHighestColumnIndex; $columnIndex++) {
+            $detailSheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setAutoSize(true);
+        }
+
+        $detailSheet->freezePane('A2');
+        $detailSheet->setAutoFilter('A1:' . $detailHighestColumn . '1');
+        $detailSheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $filename = 'rekap-hasil-pengisian-' . date('Ymd-His') . '.xlsx';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($this->spreadsheetToString($spreadsheet));
+    }
+
+    public function exportWord()
+    {
+        $matrix = $this->getExportMatrix($this->getFilters());
+        $html = $this->buildLandscapeExportHtml($matrix, 'Rekap Hasil Pengisian');
+        $filename = 'rekap-hasil-pengisian-' . date('Ymd-His') . '.doc';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/msword; charset=UTF-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($html);
+    }
+
+    public function exportPdf()
+    {
+        $matrix = $this->getExportMatrix($this->getFilters());
+        $html = $this->buildLandscapeExportHtml($matrix, 'Rekap Hasil Pengisian');
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'rekap-hasil-pengisian-' . date('Ymd-His') . '.pdf';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/pdf')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($dompdf->output());
     }
 
     public function show($id = null)
@@ -201,9 +365,13 @@ class SubmissionResults extends BaseController
                  respondents.semester,
                  respondents.instansi,
                  respondents.bidang_keahlian,
+                 respondents.identity_data,
                  instrument_links.judul_link,
+                 instrument_links.identity_fields,
+                 instrument_links.justification_config,
                  instruments.kode,
                  instruments.judul,
+                 instruments.jenis,
                  research_products.nama_produk'
             )
             ->join('respondents', 'respondents.id = responses.respondent_id')
@@ -253,7 +421,10 @@ class SubmissionResults extends BaseController
                  respondents.semester,
                  respondents.instansi,
                  respondents.bidang_keahlian,
+                 respondents.identity_data,
                  instrument_links.judul_link,
+                 instrument_links.identity_fields,
+                 instrument_links.justification_config,
                  instruments.kode,
                  instruments.judul,
                  instruments.jenis,
@@ -284,7 +455,9 @@ class SubmissionResults extends BaseController
                 'instrument_links.id,
                  instrument_links.judul_link,
                  instrument_links.mode,
-                 instruments.kode'
+                 instruments.kode,
+                 instruments.judul,
+                 instruments.jenis'
             )
             ->join('instruments', 'instruments.id = instrument_links.instrument_id')
             ->orderBy('instrument_links.id', 'DESC')
@@ -308,6 +481,7 @@ class SubmissionResults extends BaseController
                  responses.status,
                  responses.komentar_umum,
                  responses.kesimpulan,
+                 responses.justification_data,
                  responses.submitted_at,
                  respondents.nama,
                  respondents.email,
@@ -318,6 +492,7 @@ class SubmissionResults extends BaseController
                  respondents.semester,
                  respondents.instansi,
                  respondents.bidang_keahlian,
+                 respondents.identity_data,
                  instrument_links.judul_link,
                  instruments.kode AS instrument_kode,
                  instruments.judul AS instrument_judul,
@@ -349,6 +524,312 @@ class SubmissionResults extends BaseController
             ->findAll();
     }
 
+    private function getExportMatrix(array $filters): array
+    {
+        $responseBuilder = $this->getResponsesQuery();
+        $this->applyResponseFilters($responseBuilder, $filters);
+        $responses = $responseBuilder
+            ->orderBy('responses.id', 'ASC')
+            ->findAll();
+
+        $responseIds = array_map(static fn (array $row): int => (int) $row['id'], $responses);
+
+        $headers = [
+            'No',
+            'Response ID',
+            'Waktu Submit',
+            'Nama',
+            'Email',
+            'NIM/No. Identitas',
+            'Program Studi',
+            'Kelas',
+            'Semester',
+            'Instansi',
+            'Bidang/Jabatan',
+            'Judul Link',
+            'Kode Instrumen',
+            'Instrumen',
+            'Produk',
+            'Komentar/Saran',
+            'Kesimpulan',
+        ];
+
+        $itemColumns = $this->getMatrixItemColumns($filters, $responses);
+        $answersByResponse = $this->getMatrixAnswers($responseIds);
+        $instrumentCodes = [];
+
+        foreach ($itemColumns as $column) {
+            $instrumentCodes[(string) ($column['instrument_kode'] ?? '')] = true;
+        }
+
+        $multiInstrument = count(array_filter(array_keys($instrumentCodes))) > 1;
+
+        foreach ($itemColumns as $column) {
+            $headers[] = $multiInstrument && $column['instrument_kode'] !== ''
+                ? $column['instrument_kode'] . '-' . $column['nomor']
+                : $column['nomor'];
+        }
+
+        $rows = [];
+
+        foreach ($responses as $index => $response) {
+            $responseId = (int) $response['id'];
+            $row = [
+                $index + 1,
+                $responseId,
+                $response['submitted_at'] ?? '',
+                $response['nama'] ?? '',
+                $response['email'] ?? '',
+                $response['nim'] ?? '',
+                $response['program_studi'] ?? '',
+                $response['kelas'] ?? '',
+                $response['semester'] ?? '',
+                $response['instansi'] ?? '',
+                $response['bidang_keahlian'] ?? '',
+                $response['judul_link'] ?? '',
+                $response['kode'] ?? '',
+                $response['judul'] ?? '',
+                $response['nama_produk'] ?? '',
+                $response['komentar_umum'] ?? '',
+                $response['kesimpulan'] ?? '',
+            ];
+
+            foreach (array_keys($itemColumns) as $columnKey) {
+                $row[] = $answersByResponse[$responseId][$columnKey] ?? '';
+            }
+
+            $rows[] = $row;
+        }
+
+        return [
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
+    }
+
+    private function getExcelScoreMatrix(array $filters): array
+    {
+        $responseBuilder = $this->getResponsesQuery();
+        $this->applyResponseFilters($responseBuilder, $filters);
+        $responses = $responseBuilder
+            ->orderBy('responses.id', 'ASC')
+            ->findAll();
+
+        $responseIds = array_map(static fn (array $row): int => (int) $row['id'], $responses);
+        $itemColumns = $this->getMatrixItemColumns($filters, $responses);
+        $answersByResponse = $this->getMatrixAnswers($responseIds);
+        $instrumentCodes = [];
+
+        foreach ($itemColumns as $column) {
+            $instrumentCodes[(string) ($column['instrument_kode'] ?? '')] = true;
+        }
+
+        $multiInstrument = count(array_filter(array_keys($instrumentCodes))) > 1;
+        $headers = [
+            'No',
+            'Response ID',
+            'Waktu Submit',
+            'Nama',
+            'Email',
+            'NIM/No. Identitas',
+            'Program Studi',
+            'Kelas',
+            'Semester',
+            'Instansi',
+            'Bidang/Jabatan',
+            'Judul Link',
+            'Kode Instrumen',
+            'Instrumen',
+            'Produk',
+        ];
+
+        foreach ($itemColumns as $column) {
+            $headers[] = $multiInstrument && $column['instrument_kode'] !== ''
+                ? $column['instrument_kode'] . '-' . $column['nomor']
+                : $column['nomor'];
+        }
+
+        $headers[] = 'Komentar/Saran';
+        $headers[] = 'Kesimpulan';
+
+        $rows = [];
+
+        foreach ($responses as $index => $response) {
+            $responseId = (int) $response['id'];
+            $row = [
+                $index + 1,
+                $responseId,
+                $response['submitted_at'] ?? '',
+                $response['nama'] ?? '',
+                $response['email'] ?? '',
+                $response['nim'] ?? '',
+                $response['program_studi'] ?? '',
+                $response['kelas'] ?? '',
+                $response['semester'] ?? '',
+                $response['instansi'] ?? '',
+                $response['bidang_keahlian'] ?? '',
+                $response['judul_link'] ?? '',
+                $response['kode'] ?? '',
+                $response['judul'] ?? '',
+                $response['nama_produk'] ?? '',
+            ];
+
+            foreach (array_keys($itemColumns) as $columnKey) {
+                $row[] = $answersByResponse[$responseId][$columnKey] ?? '';
+            }
+
+            $row[] = $response['komentar_umum'] ?? '';
+            $row[] = $response['kesimpulan'] ?? '';
+
+            $rows[] = $row;
+        }
+
+        return [
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
+    }
+
+    private function getMatrixItemColumns(array $filters, array $responses): array
+    {
+        $builder = db_connect()->table('instrument_items')
+            ->select(
+                'instrument_items.id AS item_id,
+                 instrument_items.nomor,
+                 instrument_items.instrument_id,
+                 instruments.kode AS instrument_kode'
+            )
+            ->join('instruments', 'instruments.id = instrument_items.instrument_id');
+
+        if ($filters['instrument_id'] !== '') {
+            $builder->where('instrument_items.instrument_id', (int) $filters['instrument_id']);
+        } elseif ($filters['instrument_link_id'] !== '') {
+            $builder
+                ->join('instrument_links', 'instrument_links.instrument_id = instrument_items.instrument_id')
+                ->where('instrument_links.id', (int) $filters['instrument_link_id']);
+        } elseif (!empty($responses)) {
+            $instrumentIds = array_values(array_unique(array_map(static fn (array $row): int => (int) $row['instrument_id'], $responses)));
+            $builder->whereIn('instrument_items.instrument_id', $instrumentIds);
+        }
+
+        $items = $builder
+            ->orderBy('instruments.kode', 'ASC')
+            ->orderBy('instrument_items.urutan', 'ASC')
+            ->orderBy('instrument_items.nomor', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $columns = [];
+
+        foreach ($items as $item) {
+            $itemId = (int) $item['item_id'];
+            $columns[(string) $itemId] = [
+                'item_id' => $itemId,
+                'nomor' => (string) ($item['nomor'] ?? $itemId),
+                'instrument_kode' => (string) ($item['instrument_kode'] ?? ''),
+            ];
+        }
+
+        return $columns;
+    }
+
+    private function getMatrixAnswers(array $responseIds): array
+    {
+        if (empty($responseIds)) {
+            return [];
+        }
+
+        $items = $this->answerModel
+            ->select(
+                'response_answers.response_id,
+                 response_answers.instrument_item_id,
+                 response_answers.skor,
+                 response_answers.jawaban_teks,
+                 response_answers.komentar'
+            )
+            ->whereIn('response_answers.response_id', $responseIds)
+            ->findAll();
+
+        $answersByResponse = [];
+
+        foreach ($items as $item) {
+            $responseId = (int) $item['response_id'];
+            $columnKey = (string) ((int) $item['instrument_item_id']);
+            $value = $item['skor'] !== null && $item['skor'] !== ''
+                ? (string) $item['skor']
+                : trim((string) ($item['jawaban_teks'] ?? ''));
+
+            if (!empty($item['komentar'])) {
+                $value .= ($value !== '' ? ' | ' : '') . 'Komentar: ' . trim((string) $item['komentar']);
+            }
+
+            $answersByResponse[$responseId][$columnKey] = $value;
+        }
+
+        return $answersByResponse;
+    }
+
+    private function spreadsheetToString(Spreadsheet $spreadsheet): string
+    {
+        $writer = new Xlsx($spreadsheet);
+        ob_start();
+        $writer->save('php://output');
+
+        return (string) ob_get_clean();
+    }
+
+    private function buildLandscapeExportHtml(array $matrix, string $title): string
+    {
+        $headers = $matrix['headers'] ?? [];
+        $rows = $matrix['rows'] ?? [];
+
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                @page { size: A4 landscape; margin: 12mm; }
+                body { font-family: Arial, sans-serif; font-size: 10px; color: #111827; }
+                h1 { font-size: 16px; margin: 0 0 10px; }
+                table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+                th, td { border: 1px solid #cbd5e1; padding: 4px 5px; vertical-align: top; word-wrap: break-word; }
+                th { background: #eaf2f8; font-weight: bold; text-align: center; }
+                .empty { padding: 14px; border: 1px solid #cbd5e1; color: #64748b; }
+            </style>
+        </head>
+        <body>
+            <h1><?= esc($title) ?></h1>
+            <?php if (empty($rows)): ?>
+                <div class="empty">Belum ada hasil pengisian.</div>
+            <?php else: ?>
+                <table>
+                    <thead>
+                        <tr>
+                            <?php foreach ($headers as $header): ?>
+                                <th><?= esc((string) $header) ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rows as $row): ?>
+                            <tr>
+                                <?php foreach ($row as $cell): ?>
+                                    <td><?= nl2br(esc((string) $cell)) ?></td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </body>
+        </html>
+        <?php
+
+        return (string) ob_get_clean();
+    }
+
     private function buildCsv(array $rows): string
     {
         $handle = fopen('php://temp', 'r+');
@@ -367,6 +848,7 @@ class SubmissionResults extends BaseController
             'semester',
             'instansi',
             'bidang_keahlian',
+            'identity_data',
             'judul_link',
             'instrument_kode',
             'instrument_judul',
@@ -382,6 +864,7 @@ class SubmissionResults extends BaseController
             'komentar',
             'komentar_umum',
             'kesimpulan',
+            'justification_data',
         ]);
 
         foreach ($rows as $row) {
@@ -399,6 +882,7 @@ class SubmissionResults extends BaseController
                 $row['semester'],
                 $row['instansi'],
                 $row['bidang_keahlian'],
+                $row['identity_data'],
                 $row['judul_link'],
                 $row['instrument_kode'],
                 $row['instrument_judul'],
@@ -414,6 +898,7 @@ class SubmissionResults extends BaseController
                 $row['komentar'],
                 $row['komentar_umum'],
                 $row['kesimpulan'],
+                $row['justification_data'],
             ]);
         }
 

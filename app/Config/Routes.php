@@ -13,47 +13,37 @@ $routes->get('logout', 'Auth::logout');
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
 
+    $routes->post('instruments/reorder', 'Admin\Instruments::reorder');
+    $routes->post('instruments/(:num)/move/(:segment)', 'Admin\Instruments::move/$1/$2');
     $routes->resource('instruments', ['controller' => 'Admin\Instruments']);
     $routes->get('instrument-types', 'Admin\InstrumentTypes::index');
     $routes->post('instrument-types', 'Admin\InstrumentTypes::create');
     $routes->delete('instrument-types/(:num)', 'Admin\InstrumentTypes::delete/$1');
     $routes->post('instrument-aspects/import', 'Admin\InstrumentAspects::import');
     $routes->get('instrument-aspects/import-template', 'Admin\InstrumentAspects::importTemplate');
-    $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects']);
-    $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators']);
+    $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
+    $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->post('instrument-items/import', 'Admin\InstrumentItems::import');
     $routes->get('instrument-items/import-template', 'Admin\InstrumentItems::importTemplate');
-    $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems']);
-    $routes->resource('instrument-revisions', ['controller' => 'Admin\InstrumentRevisions']);
-    $routes->get('products/download/(:num)', 'Admin\Products::download/$1');
-    $routes->resource('products', ['controller' => 'Admin\Products']);
+    $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->get('product-types', 'Admin\ProductTypes::index');
     $routes->post('product-types', 'Admin\ProductTypes::create');
     $routes->delete('product-types/(:num)', 'Admin\ProductTypes::delete/$1');
-    $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks']);
+    $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->get('instrument-bundles/(:num)/sessions', 'Admin\InstrumentBundles::sessions/$1');
     $routes->get('instrument-bundles/(:num)/sessions/(:num)', 'Admin\InstrumentBundles::sessionDetail/$1/$2');
     $routes->post('instrument-bundles/(:num)/duplicate', 'Admin\InstrumentBundles::duplicate/$1');
     $routes->post('instrument-bundles/(:num)/revoke-token', 'Admin\InstrumentBundles::revokeToken/$1');
     $routes->post('instrument-bundles/(:num)/activate-token', 'Admin\InstrumentBundles::activateToken/$1');
     $routes->resource('instrument-bundles', ['controller' => 'Admin\InstrumentBundles']);
+    $routes->get('hasil-validasi-instrumen', 'Admin\InstrumentValidationResults::index');
+    $routes->get('hasil-validasi-instrumen/(:num)', 'Admin\InstrumentValidationResults::show/$1');
+    $routes->get('hasil-validasi-instrumen/(:num)/excel', 'Admin\InstrumentValidationResults::export/$1');
+    $routes->post('hasil-validasi-instrumen/(:num)/instrumen/(:num)/tetapkan-valid', 'Admin\InstrumentValidationResults::setInstrumentValid/$1/$2');
 
-    $routes->get('validasi-instrumen', 'Admin\InstrumentValidation::index');
-    $routes->post('validasi-instrumen/proses/(:num)', 'Admin\InstrumentValidation::process/$1');
-    $routes->get('validasi-instrumen/hasil/(:num)', 'Admin\InstrumentValidation::show/$1');
-    $routes->get('validasi-instrumen/analisis/(:num)', 'Admin\InstrumentValidation::analysis/$1');
-    $routes->post('validasi-instrumen/tetapkan-valid/(:num)', 'Admin\InstrumentValidation::setValid/$1');
     $routes->get('instrumen-valid', 'Admin\InstrumentValidation::valid');
-
-    $routes->get('validasi-produk', 'Admin\ProductValidation::index');
-    $routes->get('validasi-produk/new', 'Admin\ProductValidation::new');
-    $routes->post('validasi-produk', 'Admin\ProductValidation::create');
-    $routes->get('validasi-produk/(:num)/edit', 'Admin\ProductValidation::edit/$1');
-    $routes->put('validasi-produk/(:num)', 'Admin\ProductValidation::update/$1');
-    $routes->delete('validasi-produk/(:num)', 'Admin\ProductValidation::delete/$1');
-    $routes->post('validasi-produk/proses/(:num)', 'Admin\ProductValidation::process/$1');
-    $routes->get('validasi-produk/hasil/(:num)', 'Admin\ProductValidation::show/$1');
-    $routes->get('validasi-produk/analisis/(:num)', 'Admin\ProductValidation::analysis/$1');
+    $routes->post('instrumen-valid/pilih-master', 'Admin\InstrumentValidation::chooseFromMaster');
+    $routes->delete('instrumen-valid/(:num)', 'Admin\InstrumentValidation::delete/$1');
 
     $routes->get('respondent-links', 'Admin\RespondentLinks::index');
     $routes->get('respondent-links/new', 'Admin\RespondentLinks::new');
@@ -62,23 +52,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->put('respondent-links/(:num)', 'Admin\RespondentLinks::update/$1');
     $routes->delete('respondent-links/(:num)', 'Admin\RespondentLinks::delete/$1');
 
-    $routes->get('reports', 'Admin\Reports::index');
-    $routes->get('reports/validasi-instrumen/(:num)', 'Admin\Reports::validasiInstrumen/$1');
-    $routes->get('reports/validasi-produk/(:num)', 'Admin\Reports::validasiProduk/$1');
-    $routes->get('reports/revisi-butir', 'Admin\Reports::revisiButir');
-    $routes->get('reports/respon-mahasiswa/(:num)', 'Admin\Reports::responMahasiswa/$1');
-    $routes->get('reports/observasi/(:num)', 'Admin\Reports::observasi/$1');
-    $routes->get('reports/fgd/(:num)', 'Admin\Reports::fgd/$1');
-    $routes->get('reports/tes-kinerja/(:num)', 'Admin\Reports::tesKinerja/$1');
-    $routes->get('reports/validasi-instrumen/(:num)/print', 'Admin\Reports::printValidasiInstrumen/$1');
-    $routes->get('reports/validasi-produk/(:num)/print', 'Admin\Reports::printValidasiProduk/$1');
-    $routes->get('reports/validasi-instrumen/(:num)/pdf', 'Admin\ReportPdf::validasiInstrumen/$1');
-    $routes->get('reports/validasi-instrumen/(:num)/pdf-preview', 'Admin\ReportPdf::previewValidasiInstrumen/$1');
-    $routes->get('reports/validasi-produk/(:num)/pdf', 'Admin\ReportPdf::validasiProduk/$1');
-    $routes->get('reports/validasi-produk/(:num)/pdf-preview', 'Admin\ReportPdf::previewValidasiProduk/$1');
-
     $routes->get('submissions', 'Admin\SubmissionResults::index');
     $routes->get('submissions/export', 'Admin\SubmissionResults::export');
+    $routes->get('submissions/export/excel', 'Admin\SubmissionResults::exportExcel');
+    $routes->get('submissions/export/word', 'Admin\SubmissionResults::exportWord');
+    $routes->get('submissions/export/pdf', 'Admin\SubmissionResults::exportPdf');
     $routes->get('submissions/(:num)', 'Admin\SubmissionResults::show/$1');
     $routes->delete('submissions/(:num)', 'Admin\SubmissionResults::delete/$1');
 

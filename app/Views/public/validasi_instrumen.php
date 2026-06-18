@@ -210,107 +210,58 @@ $linkToken = $text($link, 'token', '');
 
 <div class="public-shell">
     <div class="public-card">
-        <h1 class="public-title">Validasi Instrumen</h1>
+        <h1 class="public-title"><?= esc($text($link, 'judul', 'Validasi Instrumen')) ?></h1>
         <div class="public-muted"><?= esc($text($link, 'judul_link', '')) ?></div>
-    </div>
-
-    <div class="public-card">
-        <h2 class="public-heading">Identitas Instrumen yang Divalidasi</h2>
-        <div class="public-table-wrap">
-            <table class="public-table">
-                <tbody>
-                    <tr>
-                        <th style="width: 220px;">Kode dan Judul</th>
-                        <td><strong><?= esc($text($link, 'kode')) ?></strong> - <?= esc($text($link, 'judul')) ?></td>
-                    </tr>
-                    <tr>
-                        <th>Jenis</th>
-                        <td><?= esc(title_case_label($text($link, 'jenis'))) ?></td>
-                    </tr>
-                    <tr>
-                        <th>Sasaran</th>
-                        <td><?= esc($text($link, 'instrument_sasaran', $text($link, 'sasaran'))) ?></td>
-                    </tr>
-                    <tr>
-                        <th>Status Link</th>
-                        <td><?= esc(status_display_label($text($link, 'status'))) ?></td>
-                    </tr>
-                    <tr>
-                        <th>Periode</th>
-                        <td>
-                            <?= !empty($link['tanggal_mulai']) ? esc(format_tanggal_indonesia($link['tanggal_mulai'])) : 'Tidak dibatasi' ?>
-                            s.d.
-                            <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Kuota</th>
-                        <td><?= !empty($link['maksimal_respon']) ? esc($text($link, 'maksimal_respon')) . ' respon' : 'Tidak dibatasi' ?></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <form action="<?= base_url('isi/' . $linkToken) ?>" method="post">
         <div class="public-card">
-            <h2 class="public-heading">A. Identitas Validator</h2>
-            <?= csrf_field() ?>
+            <h2 class="public-heading">Identitas</h2>
+            <?= view('public/partials/respondent_identity_summary', compact('respondentIdentity', 'link', 'identityFields')) ?>
+        </div>
 
-            <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
-                <label for="website">Website</label>
-                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
-            </div>
-
-            <?php if (session()->getFlashdata('error')): ?>
-                <div class="public-alert">
-                    <?= esc((string) session()->getFlashdata('error')) ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('errors')): ?>
-                <div class="public-alert">
-                    <strong>Periksa kembali input berikut:</strong>
-                    <ul>
-                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                            <li><?= esc((string) $error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <div class="public-grid">
-                <div class="public-form-row">
-                    <label for="nama" class="public-label">Nama Validator</label>
-                    <input type="text" name="nama" id="nama" class="public-input" value="<?= old('nama') ?>" required>
-                </div>
-
-                <div class="public-form-row">
-                    <label for="email" class="public-label">Email</label>
-                    <input type="email" name="email" id="email" class="public-input" value="<?= old('email') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="bidang_keahlian" class="public-label">Bidang Keahlian</label>
-                    <input type="text" name="bidang_keahlian" id="bidang_keahlian" class="public-input" value="<?= old('bidang_keahlian') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="instansi" class="public-label">Instansi</label>
-                    <input type="text" name="instansi" id="instansi" class="public-input" value="<?= old('instansi') ?>">
-                </div>
+        <div class="public-card">
+            <h2 class="public-heading">Informasi Instrumen</h2>
+            <div class="public-table-wrap">
+                <table class="public-table">
+                    <tbody>
+                        <tr>
+                            <th style="width: 220px;">Kode dan Judul</th>
+                            <td><strong><?= esc($text($link, 'kode')) ?></strong> - <?= esc($text($link, 'judul')) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Jenis</th>
+                            <td><?= esc(title_case_label($text($link, 'jenis'))) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Sasaran</th>
+                            <td><?= esc($text($link, 'instrument_sasaran', $text($link, 'sasaran'))) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Status Link</th>
+                            <td><?= esc(status_display_label($text($link, 'status'))) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Periode</th>
+                            <td>
+                                <?= !empty($link['tanggal_mulai']) ? esc(format_tanggal_indonesia($link['tanggal_mulai'])) : 'Tidak dibatasi' ?>
+                                s.d.
+                                <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Kuota</th>
+                            <td><?= !empty($link['maksimal_respon']) ? esc($text($link, 'maksimal_respon')) . ' respon' : 'Tidak dibatasi' ?></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <div class="public-card">
-            <h2 class="public-heading">B. Pengantar</h2>
-            <div class="public-muted"><?= nl2br(esc($text($link, 'pengantar', 'Pengantar instrumen belum diisi.'))) ?></div>
-        </div>
-
-        <div class="public-card">
-            <h2 class="public-heading">C. Petunjuk Pengisian</h2>
+            <h2 class="public-heading">Petunjuk Pengisian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= nl2br(esc($text($link, 'petunjuk', 'Petunjuk pengisian belum diisi.'))) ?>
+                <?= render_rich_text_content($text($link, 'petunjuk_penyebaran', $text($link, 'petunjuk', 'Petunjuk pengisian belum diisi.'))) ?>
             </div>
 
             <div class="public-table-wrap">
@@ -342,7 +293,7 @@ $linkToken = $text($link, 'token', '');
         </div>
 
         <div class="public-card">
-            <h2 class="public-heading">D. Kisi-Kisi Instrumen</h2>
+            <h2 class="public-heading">Kisi-Kisi Instrumen</h2>
 
             <?php if (empty($aspects)): ?>
                 <p class="public-muted">Kisi-kisi belum tersedia.</p>
@@ -390,7 +341,7 @@ $linkToken = $text($link, 'token', '');
         </div>
 
         <div class="public-card">
-            <h2 class="public-heading">E. Instrumen yang Divalidasi</h2>
+            <h2 class="public-heading">Instrumen yang Divalidasi</h2>
 
             <?php if (empty($items)): ?>
                 <p class="public-muted">Butir instrumen belum tersedia.</p>
@@ -429,12 +380,13 @@ $linkToken = $text($link, 'token', '');
         </div>
 
         <div class="public-card">
-            <h2 class="public-heading">F. Lembar Validasi Instrumen</h2>
+            <h2 class="public-heading">Butir Instrumen</h2>
             <p class="public-muted">Berikan penilaian terhadap relevansi setiap butir instrumen.</p>
 
             <?php if (empty($items)): ?>
                 <p class="public-muted">Belum ada butir yang dapat divalidasi.</p>
             <?php else: ?>
+                <?= view('public/partials/fill_progress') ?>
                 <div class="public-table-wrap">
                     <table class="public-table">
                         <thead>
@@ -458,7 +410,7 @@ $linkToken = $text($link, 'token', '');
                                     }
                                 }
                                 ?>
-                                <tr>
+                                <tr class="instrument-item-row">
                                     <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
                                     <td><?= esc((string) $aspectName) ?></td>
                                     <td>
@@ -553,42 +505,7 @@ $linkToken = $text($link, 'token', '');
             <?php endif; ?>
         </div>
 
-        <div class="public-card">
-            <h2 class="public-heading">G. Komentar Umum Validator</h2>
-            <textarea class="public-textarea" name="komentar_umum" placeholder="Tuliskan komentar umum terhadap instrumen."><?= old('komentar_umum') ?></textarea>
-        </div>
-
-        <div class="public-card">
-            <h2 class="public-heading">H. Kesimpulan Validasi</h2>
-
-            <div class="public-form-row">
-                <label class="public-label">
-                    <input type="radio" name="kesimpulan" value="Layak digunakan tanpa revisi" required>
-                    Layak digunakan tanpa revisi
-                </label>
-            </div>
-
-            <div class="public-form-row">
-                <label class="public-label">
-                    <input type="radio" name="kesimpulan" value="Layak digunakan dengan revisi kecil" required>
-                    Layak digunakan dengan revisi kecil
-                </label>
-            </div>
-
-            <div class="public-form-row">
-                <label class="public-label">
-                    <input type="radio" name="kesimpulan" value="Perlu revisi besar sebelum digunakan" required>
-                    Perlu revisi besar sebelum digunakan
-                </label>
-            </div>
-
-            <div class="public-form-row">
-                <label class="public-label">
-                    <input type="radio" name="kesimpulan" value="Tidak layak digunakan" required>
-                    Tidak layak digunakan
-                </label>
-            </div>
-        </div>
+        <?= view('public/partials/justification_fields', compact('justificationConfig')) ?>
 
         <div class="public-card" style="text-align: right;">
             <button type="submit" class="public-btn">Kirim Validasi</button>

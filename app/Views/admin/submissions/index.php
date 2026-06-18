@@ -14,11 +14,38 @@ $safeOffset = isset($offset) ? (int) $offset : 0;
 $modeLabel = static function (?string $mode): string {
     $mode = (string) $mode;
 
+    $labels = [
+        'validasi_instrumen' => 'Validasi Instrumen',
+        'validasi_produk'    => 'Validasi Produk',
+        'respon_mahasiswa'   => 'Pengisian Responden',
+        'observasi'          => 'Observasi',
+        'fgd'                => 'FGD',
+        'tes_kinerja'        => 'Penilaian Kinerja',
+    ];
+
     if ($mode === '') {
         return '-';
     }
 
+    if (isset($labels[$mode])) {
+        return $labels[$mode];
+    }
+
     return ucwords(str_replace('_', ' ', $mode));
+};
+
+$categoryLabel = static function (array $row) use ($modeLabel): string {
+    $jenis = trim((string) ($row['jenis'] ?? ''));
+    if ($jenis !== '') {
+        return title_case_label($jenis);
+    }
+
+    $judulLink = trim((string) ($row['judul_link'] ?? ''));
+    if ($judulLink !== '') {
+        return $judulLink;
+    }
+
+    return $modeLabel((string) ($row['mode'] ?? ''));
 };
 
 $modeBadgeClass = static function (?string $mode): string {
@@ -68,19 +95,26 @@ $modeBadgeClass = static function (?string $mode): string {
         return $value !== null && $value !== '';
     });
 
-    $exportUrl = base_url('admin/submissions/export');
+    $exportCsvUrl = base_url('admin/submissions/export');
+    $exportExcelUrl = base_url('admin/submissions/export/excel');
+    $exportWordUrl = base_url('admin/submissions/export/word');
+    $exportPdfUrl = base_url('admin/submissions/export/pdf');
 
     if (!empty($activeFilters)) {
-        $exportUrl .= '?' . http_build_query($activeFilters);
+        $queryString = '?' . http_build_query($activeFilters);
+        $exportCsvUrl .= $queryString;
+        $exportExcelUrl .= $queryString;
+        $exportWordUrl .= $queryString;
+        $exportPdfUrl .= $queryString;
     }
     ?>
 
     <form action="<?= base_url('admin/submissions') ?>" method="get" class="filter-form">
         <div class="form-grid">
             <div class="form-row">
-                <label class="form-label" for="mode">Mode</label>
+                <label class="form-label" for="mode">Kategori Teknis</label>
                 <select name="mode" id="mode" class="form-control">
-                    <option value="">-- Semua Mode --</option>
+                    <option value="">-- Semua Kategori --</option>
                     <?php foreach ($safeAllowedModes as $modeOption): ?>
                         <option value="<?= esc((string) $modeOption) ?>" <?= ($safeFilters['mode'] ?? '') === $modeOption ? 'selected' : '' ?>>
                             <?= esc($modeLabel($modeOption)) ?>
@@ -107,7 +141,7 @@ $modeBadgeClass = static function (?string $mode): string {
                     <option value="">-- Semua Link --</option>
                     <?php foreach ($safeLinks as $link): ?>
                         <option value="<?= esc((string) ($link['id'] ?? '')) ?>" <?= ($safeFilters['instrument_link_id'] ?? '') === (string) ($link['id'] ?? '') ? 'selected' : '' ?>>
-                            <?= esc((string) ($link['kode'] ?? '-')) ?> - <?= esc((string) ($link['judul_link'] ?? '-')) ?> (<?= esc($modeLabel((string) ($link['mode'] ?? ''))) ?>)
+                            <?= esc((string) ($link['kode'] ?? '-')) ?> - <?= esc((string) ($link['judul_link'] ?? '-')) ?> (<?= esc($categoryLabel($link)) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -154,24 +188,45 @@ $modeBadgeClass = static function (?string $mode): string {
                 <a href="<?= base_url('admin/submissions') ?>" class="btn btn-light btn-sm">Reset</a>
             </div>
 
-            <a href="<?= esc($exportUrl) ?>" class="btn btn-light btn-sm">Export CSV</a>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="<?= esc($exportExcelUrl) ?>" class="btn btn-light btn-sm">Export Excel</a>
+                <a href="<?= esc($exportWordUrl) ?>" class="btn btn-light btn-sm">Export Word</a>
+                <a href="<?= esc($exportPdfUrl) ?>" class="btn btn-light btn-sm">Export PDF</a>
+                <a href="<?= esc($exportCsvUrl) ?>" class="btn btn-light btn-sm">CSV</a>
+            </div>
         </div>
     </form>
     </div>
 </div>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <div class="d-flex flex-wrap gap-2">
-            <a href="<?= base_url('admin/submissions?mode=validasi_instrumen') ?>" class="btn btn-light btn-sm">Validasi Instrumen</a>
-            <a href="<?= base_url('admin/submissions?mode=validasi_produk') ?>" class="btn btn-light btn-sm">Validasi Produk</a>
-            <a href="<?= base_url('admin/submissions?mode=respon_mahasiswa') ?>" class="btn btn-light btn-sm">Respon Mahasiswa</a>
-            <a href="<?= base_url('admin/submissions?mode=observasi') ?>" class="btn btn-light btn-sm">Observasi</a>
-            <a href="<?= base_url('admin/submissions?mode=fgd') ?>" class="btn btn-light btn-sm">FGD</a>
-            <a href="<?= base_url('admin/submissions?mode=tes_kinerja') ?>" class="btn btn-light btn-sm">Tes Kinerja</a>
+<?php if (count($safeLinks) > 1): ?>
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="fw-semibold mb-2">Filter cepat berdasarkan link/instrumen</div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="<?= base_url('admin/submissions') ?>" class="btn btn-sm <?= empty($safeFilters['instrument_link_id']) && empty($safeFilters['mode']) ? 'btn-primary' : 'btn-light' ?>">
+                    Semua
+                </a>
+                <?php foreach ($safeLinks as $link): ?>
+                    <?php
+                    $linkId = (string) ($link['id'] ?? '');
+                    $isActiveLink = ($safeFilters['instrument_link_id'] ?? '') === $linkId;
+                    $buttonLabel = trim((string) ($link['judul_link'] ?? ''));
+                    if ($buttonLabel === '') {
+                        $buttonLabel = trim((string) ($link['jenis'] ?? ''));
+                    }
+                    if ($buttonLabel === '') {
+                        $buttonLabel = trim((string) ($link['judul'] ?? 'Link Pengisian'));
+                    }
+                    ?>
+                    <a href="<?= base_url('admin/submissions?instrument_link_id=' . rawurlencode($linkId)) ?>" class="btn btn-sm <?= $isActiveLink ? 'btn-primary' : 'btn-light' ?>">
+                        <?= esc($buttonLabel) ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
-</div>
+<?php endif; ?>
 
 <div class="card">
     <div class="card-body">
@@ -193,7 +248,7 @@ $modeBadgeClass = static function (?string $mode): string {
                     <tr>
                         <th style="width: 70px;">No</th>
                         <th>Responden</th>
-                        <th style="width: 180px;">Mode</th>
+                        <th style="width: 180px;">Kategori</th>
                         <th>Instrumen</th>
                         <th style="width: 170px;">Produk</th>
                         <th style="width: 220px;">Kesimpulan</th>
@@ -219,7 +274,7 @@ $modeBadgeClass = static function (?string $mode): string {
                             </td>
                             <td>
                                 <span class="<?= esc($modeBadgeClass((string) ($response['mode'] ?? ''))) ?>">
-                                    <?= esc($modeLabel((string) ($response['mode'] ?? ''))) ?>
+                                    <?= esc($categoryLabel($response)) ?>
                                 </span>
                             </td>
                             <td>

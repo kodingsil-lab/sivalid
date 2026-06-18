@@ -9,15 +9,9 @@
             <div class="text-muted mt-1">Kelola link validasi dan proses analisis berdasarkan respon validator.</div>
         </div>
         <div class="col-auto ms-auto">
-            <?php if (service('uri')->getSegment(2) === 'validasi-produk'): ?>
-                <a href="<?= base_url('admin/validasi-produk/new') ?>" class="btn btn-primary">
-                    + Buat Link Validasi Produk
-                </a>
-            <?php else: ?>
-                <a href="<?= base_url('admin/instrument-links/new') ?>" class="btn btn-primary">
-                    + Buat Link Validasi Instrumen
-                </a>
-            <?php endif; ?>
+            <a href="<?= base_url('admin/instrument-links/new') ?>" class="btn btn-primary">
+                + Buat Link Validasi Instrumen
+            </a>
         </div>
     </div>
 </div>
@@ -107,31 +101,12 @@ $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : 
                                 Buka
                             </a>
 
-                            <?php if ($link['mode'] === 'validasi_instrumen'): ?>
-                                <form
-                                    action="<?= base_url('admin/validasi-instrumen/proses/' . $link['id']) ?>"
-                                    method="post"
-                                    class="action-inline"
-                                >
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="btn btn-primary">
-                                        Analisis
-                                    </button>
-                                </form>
-                            <?php endif; ?>
-
-                            <?php if ($link['mode'] === 'validasi_produk'): ?>
-                                <a href="<?= base_url('admin/validasi-produk/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                                    Edit
-                                </a>
-                            <?php else: ?>
-                                <a href="<?= base_url('admin/instrument-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
-                                    Edit
-                                </a>
-                            <?php endif; ?>
+                            <a href="<?= base_url('admin/instrument-links/' . $link['id'] . '/edit') ?>" class="btn btn-warning">
+                                Edit
+                            </a>
 
                             <form
-                                action="<?= $link['mode'] === 'validasi_produk' ? base_url('admin/validasi-produk/' . $link['id']) : base_url('admin/instrument-links/' . $link['id']) ?>"
+                                action="<?= base_url('admin/instrument-links/' . $link['id']) ?>"
                                 method="post"
                                 class="action-inline"
                                 onsubmit="return confirm('Yakin ingin menghapus link ini?')"

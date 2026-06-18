@@ -119,6 +119,26 @@
             vertical-align: top;
         }
 
+        .rich-text-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: .7rem 0;
+            background: #fff;
+        }
+
+        .rich-text-content th,
+        .rich-text-content td {
+            border: 1px solid var(--pub-border);
+            padding: .62rem .72rem;
+            vertical-align: top;
+        }
+
+        .rich-text-content th {
+            background: #f1f5f9;
+            font-weight: 600;
+            text-align: left;
+        }
+
         .public-table th {
             background: #f1f5f9;
             color: #334155;
@@ -198,8 +218,9 @@ $linkMaksimalRespon = isset($link['maksimal_respon']) && is_scalar($link['maksim
 $linkPengantar = isset($link['pengantar']) && is_scalar($link['pengantar']) && (string) $link['pengantar'] !== ''
     ? (string) $link['pengantar']
     : 'Instrumen ini digunakan untuk menilai kinerja peserta berdasarkan aspek dan kriteria yang telah ditetapkan.';
-$linkPetunjuk = isset($link['petunjuk']) && is_scalar($link['petunjuk']) && (string) $link['petunjuk'] !== ''
-    ? (string) $link['petunjuk']
+$petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
+$linkPetunjuk = $petunjukPenyebaran !== ''
+    ? $petunjukPenyebaran
     : 'Berikan skor sesuai kualitas kinerja yang ditunjukkan peserta. Catatan dapat diberikan untuk memperjelas dasar penilaian.';
 
 $scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min'] ?? 1);
@@ -251,59 +272,7 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
     <form action="<?= base_url('isi/' . $linkToken) ?>" method="post">
         <div class="public-card">
             <h2 class="public-heading">A. Identitas Peserta/Mahasiswa</h2>
-            <?= csrf_field() ?>
-
-            <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
-                <label for="website">Website</label>
-                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
-            </div>
-
-            <?php if (session()->getFlashdata('error')): ?>
-                <div class="public-alert"><?= esc((string) session()->getFlashdata('error')) ?></div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('errors')): ?>
-                <div class="public-alert">
-                    <strong>Periksa kembali input berikut:</strong>
-                    <ul>
-                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                            <li><?= esc((string) $error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <div class="public-grid">
-                <div class="public-form-row">
-                    <label for="nama" class="public-label">Nama Peserta/Mahasiswa</label>
-                    <input type="text" name="nama" id="nama" class="public-input" value="<?= old('nama') ?>" required>
-                </div>
-
-                <div class="public-form-row">
-                    <label for="nim" class="public-label">NIM/Nomor Identitas</label>
-                    <input type="text" name="nim" id="nim" class="public-input" value="<?= old('nim') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="program_studi" class="public-label">Program Studi</label>
-                    <input type="text" name="program_studi" id="program_studi" class="public-input" value="<?= old('program_studi') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="kelas" class="public-label">Kelas/Rombel</label>
-                    <input type="text" name="kelas" id="kelas" class="public-input" value="<?= old('kelas') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="semester" class="public-label">Semester/Pertemuan</label>
-                    <input type="text" name="semester" id="semester" class="public-input" value="<?= old('semester') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="bidang_keahlian" class="public-label">Nama Penilai/Jabatan Penilai</label>
-                    <input type="text" name="bidang_keahlian" id="bidang_keahlian" class="public-input" value="<?= old('bidang_keahlian') ?>" placeholder="Contoh: Dosen pengampu / penilai kinerja">
-                </div>
-            </div>
+            <?= view('public/partials/respondent_identity_summary', compact('respondentIdentity', 'link', 'identityFields')) ?>
         </div>
 
         <div class="public-card">
@@ -314,35 +283,9 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
         <div class="public-card">
             <h2 class="public-heading">C. Petunjuk Penilaian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= nl2br(esc($linkPetunjuk)) ?>
+                <?= render_rich_text_content($linkPetunjuk) ?>
             </div>
 
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 120px;">Skor</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($scaleRange as $score): ?>
-                            <tr>
-                                <td><?= esc((string) $score) ?></td>
-                                <td>
-                                    <?php if ($score === $scaleMin): ?>
-                                        Kurang / Belum Tampak
-                                    <?php elseif ($score === $scaleMax): ?>
-                                        Sangat Baik / Sangat Tampak
-                                    <?php else: ?>
-                                        Tingkat kinerja <?= esc((string) $score) ?>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <div class="public-card">
@@ -415,10 +358,7 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
             <?php endif; ?>
         </div>
 
-        <div class="public-card">
-            <h2 class="public-heading">E. Catatan Penilai</h2>
-            <textarea class="public-textarea" name="komentar_umum" placeholder="Tuliskan catatan umum, kekuatan, kelemahan, atau rekomendasi tindak lanjut."><?= old('komentar_umum') ?></textarea>
-        </div>
+        <?= view('public/partials/justification_fields', compact('justificationConfig')) ?>
 
         <div class="public-card" style="text-align: right;">
             <button type="submit" class="public-btn">Kirim Penilaian Kinerja</button>
@@ -428,5 +368,3 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
 
 </body>
 </html>
-
-

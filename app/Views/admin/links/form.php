@@ -27,44 +27,17 @@
     </div>
 <?php endif; ?>
 
-<?php
-$isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produk';
-?>
-
 <div class="card">
     <form action="<?= esc($action) ?>" method="post">
         <?= csrf_field() ?>
-        <input type="hidden" name="mode" value="<?= $isProductValidation ? 'validasi_produk' : 'validasi_instrumen' ?>">
+        <input type="hidden" name="mode" value="validasi_instrumen">
 
         <?php if ($method === 'put'): ?>
             <input type="hidden" name="_method" value="PUT">
         <?php endif; ?>
 
-        <?php if ($isProductValidation): ?>
-            <div class="form-row">
-                <label class="form-label" for="product_id">Produk yang Divalidasi</label>
-                <select name="product_id" id="product_id" class="form-control" required>
-                    <option value="">-- Pilih Produk --</option>
-
-                    <?php foreach ($products ?? [] as $product): ?>
-                        <?php
-                        $selectedProduct = old('product_id', $link['product_id'] ?? '');
-                        ?>
-                        <option value="<?= $product['id'] ?>" <?= (int) $selectedProduct === (int) $product['id'] ? 'selected' : '' ?>>
-                            <?= esc($product['kode']) ?> - <?= esc($product['nama_produk']) ?> (<?= esc(title_case_label((string) ($product['jenis_produk'] ?? '-'))) ?>)
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <small>
-                    Produk inilah yang akan dilihat oleh validator produk pada halaman publik.
-                </small>
-            </div>
-        <?php endif; ?>
-
         <div class="form-row">
-            <label class="form-label" for="instrument_id">
-                <?= $isProductValidation ? 'Instrumen Validasi Produk' : 'Instrumen yang Divalidasi' ?>
-            </label>
+            <label class="form-label" for="instrument_id">Instrumen yang Divalidasi</label>
             <select name="instrument_id" id="instrument_id" class="form-control" required>
                 <option value="">-- Pilih Instrumen --</option>
 
@@ -78,11 +51,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
                 <?php endforeach; ?>
             </select>
             <small>
-                <?php if ($isProductValidation): ?>
-                    Validator produk akan melihat produk yang divalidasi dan instrumen penilaian produk. Instrumen harus berstatus Valid dan sudah dihubungkan dengan produk.
-                <?php else: ?>
-                    Validator instrumen akan melihat kisi-kisi, instrumen, dan lembar validasi instrumen.
-                <?php endif; ?>
+                Validator instrumen akan melihat kisi-kisi, instrumen, dan lembar validasi instrumen.
             </small>
         </div>
 
@@ -99,6 +68,17 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
             >
         </div>
 
+        <?= view('admin/partials/identity_fields_builder', [
+            'identityTemplates' => $identityTemplates ?? [],
+            'identityFields' => $identityFields ?? [],
+            'link' => $link ?? [],
+        ]) ?>
+
+        <?= view('admin/partials/justification_builder', [
+            'justificationTemplates' => $justificationTemplates ?? [],
+            'justificationConfig' => $justificationConfig ?? [],
+        ]) ?>
+
         <div class="form-grid">
             <div class="form-row">
                 <label class="form-label" for="sasaran">Sasaran</label>
@@ -107,8 +87,8 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
                     name="sasaran"
                     id="sasaran"
                     class="form-control"
-                    value="<?= old('sasaran', $link['sasaran'] ?? ($isProductValidation ? 'Validator Produk' : 'Validator Instrumen')) ?>"
-                    placeholder="<?= $isProductValidation ? 'Contoh: Validator Produk' : 'Contoh: Validator Instrumen' ?>"
+                    value="<?= old('sasaran', $link['sasaran'] ?? 'Validator Instrumen') ?>"
+                    placeholder="Contoh: Validator Instrumen"
                 >
             </div>
 
@@ -180,7 +160,7 @@ $isProductValidation = isset($link['mode']) && $link['mode'] === 'validasi_produ
         <?php endif; ?>
 
         <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="<?= $isProductValidation ? base_url('admin/validasi-produk') : base_url('admin/instrument-links') ?>" class="btn btn-light">Kembali</a>
+        <a href="<?= base_url('admin/instrument-links') ?>" class="btn btn-light">Kembali</a>
     </form>
 </div>
 

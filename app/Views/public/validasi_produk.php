@@ -18,6 +18,9 @@
         .public-wrap .table { font-size: .95rem; line-height: 1.55; }
         .public-wrap .table > :not(caption) > * > * { padding: .68rem .72rem; }
         .radio-inline label { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; margin-right: 12px; padding: 4px 8px; font-weight: normal; }
+        .instrument-info-table { width: 100%; border-collapse: collapse; border: 1px solid #dde6ef; background: #fff; font-size: .95rem; }
+        .instrument-info-table th, .instrument-info-table td { border: 1px solid #dde6ef; padding: .62rem .72rem; vertical-align: top; }
+        .instrument-info-table th { width: 210px; background: #f1f5f9; color: #1f2a3d; font-weight: 680; text-align: left; }
         @media (max-width: 600px) { .public-wrap { padding: 0 .5rem; } }
     </style>
 </head>
@@ -33,104 +36,62 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
     <div class="page-header d-print-none mb-3 mt-2">
         <div class="row align-items-center">
             <div class="col">
-                <h2 class="page-title">Validasi Produk</h2>
-                <div class="text-muted mt-1"><?= esc($link['judul_link']) ?></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-3">
-        <div class="col-12 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-2">Produk yang Divalidasi</h4>
-                    <p class="mb-1"><strong><?= esc($link['product_kode'] ?? '-') ?></strong> â€” <?= esc($link['nama_produk'] ?? '-') ?></p>
-                    <p class="text-muted small mb-1">Jenis: <?= esc(title_case_label((string) ($link['jenis_produk'] ?? '-'))) ?> | Status: <?= esc(status_display_label((string) ($link['product_status'] ?? ''))) ?></p>
-                    <?php if (!empty($link['product_deskripsi'])): ?>
-                        <p class="mb-1"><?= nl2br(esc($link['product_deskripsi'])) ?></p>
-                    <?php endif; ?>
-                    <?php if (!empty($link['link_produk'])): ?>
-                        <a href="<?= esc($link['link_produk']) ?>" target="_blank" class="btn btn-sm btn-light mt-1">Buka Produk</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h4 class="card-title mb-2">Instrumen &amp; Info Pengisian</h4>
-                    <p class="mb-1"><strong><?= esc($link['kode']) ?></strong> â€” <?= esc($link['judul']) ?></p>
-                    <p class="text-muted small mb-1">Jenis: <?= esc(title_case_label((string) ($link['jenis'] ?? '-'))) ?> | Sasaran: <?= esc($link['instrument_sasaran'] ?: $link['sasaran'] ?: '-') ?></p>
-                    <hr class="my-2">
-                    <p class="mb-1 small">Status: <strong><?= esc(status_display_label((string) ($link['status'] ?? ''))) ?></strong></p>
-                    <p class="mb-1 small">
-                        Periode:
-                        <?= !empty($link['tanggal_mulai']) ? esc(format_tanggal_indonesia($link['tanggal_mulai'])) : 'Tidak dibatasi' ?>
-                        s.d.
-                        <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
-                    </p>
-                    <p class="mb-0 small">Kuota: <?= !empty($link['maksimal_respon']) ? esc($link['maksimal_respon']) . ' respon' : 'Tidak dibatasi' ?></p>
-                </div>
+                <h2 class="page-title"><?= esc($link['judul'] ?? ($link['judul_link'] ?? 'Validasi Produk')) ?></h2>
+                <div class="text-muted mt-1"><?= esc($link['judul_link'] ?? 'Validasi Produk') ?></div>
             </div>
         </div>
     </div>
 
     <div class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">A. Identitas Validator</h3>
+            <h3 class="card-title">Identitas</h3>
         </div>
         <div class="card-body">
             <form action="<?= base_url('isi/' . $link['token']) ?>" method="post">
-                <?= csrf_field() ?>
-
-                <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
-                    <label for="website">Website</label>
-                    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
-                </div>
-
-                <?php if (session()->getFlashdata('error')): ?>
-                    <div class="alert alert-danger mb-3">
-                        <?= esc(session()->getFlashdata('error')) ?>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (session()->getFlashdata('errors')): ?>
-                    <div class="alert alert-danger mb-3">
-                        <strong>Periksa kembali input berikut:</strong>
-                        <ul class="mb-0 mt-1">
-                            <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                                <li><?= esc($error) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="nama">Nama Validator</label>
-                        <input type="text" name="nama" id="nama" class="form-control" value="<?= old('nama') ?>" required>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" value="<?= old('email') ?>">
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="bidang_keahlian">Bidang Keahlian</label>
-                        <input type="text" name="bidang_keahlian" id="bidang_keahlian" class="form-control" value="<?= old('bidang_keahlian') ?>">
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="instansi">Instansi</label>
-                        <input type="text" name="instansi" id="instansi" class="form-control" value="<?= old('instansi') ?>">
-                    </div>
-                </div>
+                <?= view('public/partials/respondent_identity_summary', compact('respondentIdentity', 'link', 'identityFields')) ?>
 
                 <hr class="my-4">
-                <h4>B. Pengantar</h4>
-                <p><?= nl2br(esc($link['pengantar'] ?: 'Pengantar instrumen belum diisi.')) ?></p>
+                <h4>Informasi Instrumen</h4>
+                <table class="instrument-info-table mb-3">
+                    <tbody>
+                        <tr>
+                            <th>Kode Instrumen</th>
+                            <td><?= esc($link['kode'] ?? '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>Judul Instrumen</th>
+                            <td><?= esc($link['judul'] ?? '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>Jenis</th>
+                            <td><?= esc(title_case_label((string) ($link['jenis'] ?? '-'))) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Sasaran</th>
+                            <td><?= esc($link['instrument_sasaran'] ?: $link['sasaran'] ?: '-') ?></td>
+                        </tr>
+                        <tr>
+                            <th>Produk</th>
+                            <td>
+                                <strong><?= esc($link['product_kode'] ?? '-') ?></strong> - <?= esc($link['nama_produk'] ?? '-') ?>
+                                <?php if (!empty($link['link_produk'])): ?>
+                                    <div class="mt-1"><a href="<?= esc($link['link_produk']) ?>" target="_blank">Buka Produk</a></div>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Skala</th>
+                            <td><?= esc((string) $scaleMin) ?> sampai <?= esc((string) $scaleMax) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Kuota</th>
+                            <td><?= !empty($link['maksimal_respon']) ? esc($link['maksimal_respon']) . ' respon' : 'Tidak dibatasi' ?></td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                <hr class="my-4">
-                <h4>C. Petunjuk Pengisian</h4>
-                <p><?= nl2br(esc($link['petunjuk'] ?: 'Petunjuk pengisian belum diisi.')) ?></p>
+                <h4>Petunjuk Pengisian</h4>
+                <div><?= render_rich_text_content($link['petunjuk_penyebaran'] ?: ($link['petunjuk'] ?: 'Petunjuk pengisian belum diisi.')) ?></div>
 
                 <div class="table-responsive mb-3">
                     <table class="table table-bordered table-sm">
@@ -160,11 +121,12 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                 </div>
 
                 <hr class="my-4">
-                <h4>D. Instrumen Penilaian Produk</h4>
+                <h4>Butir Instrumen</h4>
 
                 <?php if (empty($items)): ?>
                     <div class="empty-state">Butir instrumen belum tersedia.</div>
                 <?php else: ?>
+                    <?= view('public/partials/fill_progress') ?>
                     <div class="table-responsive">
                         <table class="table table-bordered table-vcenter">
                             <thead class="table-light">
@@ -187,7 +149,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                         }
                                     }
                                     ?>
-                                    <tr>
+                                    <tr class="instrument-item-row">
                                         <td><?= esc($item['nomor']) ?></td>
                                         <td><?= esc($aspectName) ?></td>
                                         <td>
@@ -222,22 +184,7 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                     </div>
                 <?php endif; ?>
 
-                <hr class="my-4">
-                <h4>E. Komentar/Saran Umum</h4>
-                <textarea class="form-control mb-3" name="komentar_umum" rows="4" placeholder="Tuliskan komentar atau saran umum terhadap produk."><?= old('komentar_umum') ?></textarea>
-
-                <hr class="my-4">
-                <h4>F. Kesimpulan Validasi Produk</h4>
-                <div class="row g-2 mb-3">
-                    <?php foreach (['Sangat Layak', 'Layak', 'Kurang Layak', 'Tidak Layak'] as $kesimpulan): ?>
-                        <div class="col-12 col-sm-6 col-md-3">
-                            <label class="form-check">
-                                <input class="form-check-input" type="radio" name="kesimpulan" value="<?= esc($kesimpulan) ?>" required>
-                                <span class="form-check-label"><?= esc($kesimpulan) ?></span>
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                <?= view('public/partials/justification_fields', compact('justificationConfig')) ?>
 
                 <div class="d-flex">
                     <button type="submit" class="btn btn-primary">

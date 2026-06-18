@@ -16,6 +16,8 @@ class InstrumentModel extends Model
         'judul',
         'jenis',
         'sasaran',
+        'keterangan',
+        'sort_order',
         'pengantar',
         'petunjuk',
         'skala_min',
@@ -30,7 +32,7 @@ class InstrumentModel extends Model
      */
     public function getOrderedByCodeSequence(): array
     {
-        $rows = $this->findAll();
+        $rows = $this->orderBy('sort_order', 'ASC')->orderBy('id', 'DESC')->findAll();
 
         usort($rows, static function (array $left, array $right): int {
             $leftCode = trim((string) ($left['kode'] ?? ''));

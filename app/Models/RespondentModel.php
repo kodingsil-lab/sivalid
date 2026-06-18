@@ -23,6 +23,7 @@ class RespondentModel extends Model
         'program_studi',
         'semester',
         'kelas',
+        'identity_data',
         'tanggal_isi',
     ];
 

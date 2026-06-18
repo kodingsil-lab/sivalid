@@ -31,6 +31,7 @@ class Instruments extends BaseController
                 ->orLike('judul', $keyword)
                 ->orLike('jenis', $keyword)
                 ->orLike('sasaran', $keyword)
+                ->orLike('keterangan', $keyword)
                 ->orLike('status', $keyword)
                 ->groupEnd();
         }
@@ -38,7 +39,7 @@ class Instruments extends BaseController
         $data = [
             'title'       => 'Master Instrumen',
             'keyword'     => $keyword,
-            'instruments' => $this->appendUsageCounts($query->orderBy('id', 'DESC')->paginate($perPage, 'instruments')),
+            'instruments' => $this->appendUsageCounts($query->orderBy('sort_order', 'ASC')->orderBy('id', 'DESC')->paginate($perPage, 'instruments')),
             'pager'       => $this->instrumentModel->pager,
             'pagerGroup'  => 'instruments',
         ];
@@ -63,8 +64,10 @@ class Instruments extends BaseController
     public function create()
     {
         $rules = [
+            'kode'      => 'required|max_length[50]|is_unique[instruments.kode]',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
+            'keterangan' => 'permit_empty|max_length[255]',
             'skala_min' => 'required|integer',
             'skala_max' => 'required|integer',
         ];
@@ -86,17 +89,19 @@ class Instruments extends BaseController
                 ->with('error', 'Skala minimal harus lebih kecil dari skala maksimal.');
         }
 
-        $kode = $this->generateNextCode();
+        $kode = trim((string) $this->request->getPost('kode'));
 
         $this->instrumentModel->insert([
             'kode'      => $kode,
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
             'sasaran'   => trim((string) $this->request->getPost('sasaran')),
+            'keterangan' => trim((string) $this->request->getPost('keterangan')),
             'pengantar' => trim((string) $this->request->getPost('pengantar')),
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
             'skala_max' => $skalaMax,
+            'sort_order' => $this->getNextSortOrder(),
             'status'    => 'Draft',
         ]);
 
@@ -137,6 +142,7 @@ class Instruments extends BaseController
             'title'      => 'Edit Instrumen',
             'instrument' => $instrument,
             'jenisOptions' => $this->getJenisOptions(),
+            'isManualValid' => $this->isManualValidInstrument((int) $id),
             'action'     => base_url('admin/instruments/' . $id),
             'method'     => 'put',
         ];
@@ -155,8 +161,10 @@ class Instruments extends BaseController
         }
 
         $rules = [
+            'kode'      => 'required|max_length[50]|is_unique[instruments.kode,id,' . (int) $id . ']',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
+            'keterangan' => 'permit_empty|max_length[255]',
             'skala_min' => 'required|integer',
             'skala_max' => 'required|integer',
             'status'    => 'required',
@@ -179,21 +187,21 @@ class Instruments extends BaseController
                 ->with('error', 'Skala minimal harus lebih kecil dari skala maksimal.');
         }
 
-        $manualStatuses = ['Draft', 'Aktif'];
+        $manualStatuses = ['Draft', 'Aktif', 'Perlu Revisi', 'Direvisi', 'Tidak Aktif'];
         $currentStatus = (string) ($instrument['status'] ?? 'Draft');
         $requestedStatus = trim((string) $this->request->getPost('status'));
         $statusToSave = $currentStatus;
 
-        if (in_array($currentStatus, $manualStatuses, true)) {
-            if (in_array($requestedStatus, $manualStatuses, true)) {
-                $statusToSave = $requestedStatus;
-            }
+        if (! $this->isManualValidInstrument((int) $id) && in_array($requestedStatus, $manualStatuses, true)) {
+            $statusToSave = $requestedStatus;
         }
 
         $this->instrumentModel->update($id, [
+            'kode'      => trim((string) $this->request->getPost('kode')),
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
             'sasaran'   => trim((string) $this->request->getPost('sasaran')),
+            'keterangan' => trim((string) $this->request->getPost('keterangan')),
             'pengantar' => trim((string) $this->request->getPost('pengantar')),
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
@@ -204,6 +212,123 @@ class Instruments extends BaseController
         return redirect()
             ->to(base_url('admin/instruments'))
             ->with('success', 'Data instrumen berhasil diperbarui.');
+    }
+
+    public function move($id = null, ?string $direction = null)
+    {
+        $instrument = $this->instrumentModel->find($id);
+
+        if (!$instrument) {
+            return redirect()
+                ->to(base_url('admin/instruments'))
+                ->with('error', 'Data instrumen tidak ditemukan.');
+        }
+
+        if (!in_array($direction, ['up', 'down'], true)) {
+            return redirect()
+                ->to(base_url('admin/instruments'))
+                ->with('error', 'Arah urutan instrumen tidak valid.');
+        }
+
+        $this->normalizeSortOrder();
+
+        $rows = $this->instrumentModel
+            ->select('id, sort_order')
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        $currentIndex = null;
+
+        foreach ($rows as $index => $row) {
+            if ((int) $row['id'] === (int) $id) {
+                $currentIndex = $index;
+                break;
+            }
+        }
+
+        if ($currentIndex === null) {
+            return redirect()
+                ->to(base_url('admin/instruments'))
+                ->with('error', 'Posisi instrumen tidak ditemukan.');
+        }
+
+        $targetIndex = $direction === 'up' ? $currentIndex - 1 : $currentIndex + 1;
+
+        if (!isset($rows[$targetIndex])) {
+            return redirect()
+                ->to(base_url('admin/instruments'))
+                ->with('info', 'Instrumen sudah berada di posisi paling ' . ($direction === 'up' ? 'atas.' : 'bawah.'));
+        }
+
+        $current = $rows[$currentIndex];
+        $target = $rows[$targetIndex];
+
+        $this->instrumentModel->update((int) $current['id'], ['sort_order' => (int) $target['sort_order']]);
+        $this->instrumentModel->update((int) $target['id'], ['sort_order' => (int) $current['sort_order']]);
+
+        return redirect()
+            ->to(base_url('admin/instruments'))
+            ->with('success', 'Urutan instrumen berhasil diperbarui.');
+    }
+
+    public function reorder()
+    {
+        $order = $this->request->getPost('order');
+        $offset = (int) ($this->request->getPost('offset') ?? 0);
+
+        if (!is_array($order) || $order === []) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON([
+                    'success'  => false,
+                    'message'  => 'Urutan instrumen tidak valid.',
+                    'csrfHash' => csrf_hash(),
+                ]);
+        }
+
+        $ids = array_values(array_unique(array_map(static fn($id): int => (int) $id, $order)));
+        $ids = array_values(array_filter($ids, static fn(int $id): bool => $id > 0));
+
+        if (count($ids) !== count($order)) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON([
+                    'success'  => false,
+                    'message'  => 'Urutan instrumen tidak valid.',
+                    'csrfHash' => csrf_hash(),
+                ]);
+        }
+
+        $existingIds = $this->instrumentModel
+            ->select('id')
+            ->whereIn('id', $ids)
+            ->findAll();
+        $existingIds = array_map(static fn(array $row): int => (int) $row['id'], $existingIds);
+
+        if (count($existingIds) !== count($ids)) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'success'  => false,
+                    'message'  => 'Ada instrumen yang tidak ditemukan.',
+                    'csrfHash' => csrf_hash(),
+                ]);
+        }
+
+        $this->normalizeSortOrder();
+
+        foreach ($ids as $index => $instrumentId) {
+            $this->instrumentModel->update($instrumentId, [
+                'sort_order' => $offset + $index + 1,
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success'  => true,
+            'message'  => 'Urutan instrumen berhasil disimpan.',
+            'csrfHash' => csrf_hash(),
+        ]);
     }
 
     public function delete($id = null)
@@ -333,11 +458,47 @@ class Instruments extends BaseController
         $next = $max + 1;
 
         do {
-            $candidate = str_pad((string) $next, 2, '0', STR_PAD_LEFT);
+            $candidate = 'INS-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
             $exists = $this->instrumentModel->where('kode', $candidate)->first();
             $next++;
         } while ($exists !== null);
 
         return $candidate;
+    }
+
+    private function getNextSortOrder(): int
+    {
+        $row = $this->instrumentModel
+            ->selectMax('sort_order')
+            ->first();
+
+        return ((int) ($row['sort_order'] ?? 0)) + 1;
+    }
+
+    private function isManualValidInstrument(int $instrumentId): bool
+    {
+        return db_connect()
+            ->table('manual_valid_instruments')
+            ->where('instrument_id', $instrumentId)
+            ->countAllResults() > 0;
+    }
+
+    private function normalizeSortOrder(): void
+    {
+        $rows = $this->instrumentModel
+            ->select('id, sort_order')
+            ->orderBy('sort_order', 'ASC')
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        foreach ($rows as $index => $row) {
+            $expected = $index + 1;
+
+            if ((int) ($row['sort_order'] ?? 0) === $expected) {
+                continue;
+            }
+
+            $this->instrumentModel->update((int) $row['id'], ['sort_order' => $expected]);
+        }
     }
 }

@@ -119,6 +119,26 @@
             vertical-align: top;
         }
 
+        .rich-text-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: .7rem 0;
+            background: #fff;
+        }
+
+        .rich-text-content th,
+        .rich-text-content td {
+            border: 1px solid var(--pub-border);
+            padding: .62rem .72rem;
+            vertical-align: top;
+        }
+
+        .rich-text-content th {
+            background: #f1f5f9;
+            font-weight: 600;
+            text-align: left;
+        }
+
         .public-table th {
             background: #f1f5f9;
             color: #334155;
@@ -202,6 +222,10 @@ $scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min
 $scaleMax = isset($scale['max']) ? (int) $scale['max'] : (int) ($link['skala_max'] ?? 4);
 $rawScaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawScaleRange) ? $rawScaleRange : []);
+$petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
+$petunjuk = $petunjukPenyebaran !== ''
+    ? $petunjukPenyebaran
+    : 'Berikan penilaian sesuai kondisi yang diamati. Catatan observasi dapat ditambahkan pada setiap butir atau pada bagian catatan umum.';
 $linkToken = $text($link, 'token', '');
 ?>
 
@@ -248,59 +272,7 @@ $linkToken = $text($link, 'token', '');
     <form action="<?= base_url('isi/' . $linkToken) ?>" method="post">
         <div class="public-card">
             <h2 class="public-heading">A. Identitas Observer</h2>
-            <?= csrf_field() ?>
-
-            <div style="position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden;">
-                <label for="website">Website</label>
-                <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
-            </div>
-
-            <?php if (session()->getFlashdata('error')): ?>
-                <div class="public-alert"><?= esc((string) session()->getFlashdata('error')) ?></div>
-            <?php endif; ?>
-
-            <?php if (session()->getFlashdata('errors')): ?>
-                <div class="public-alert">
-                    <strong>Periksa kembali input berikut:</strong>
-                    <ul>
-                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                            <li><?= esc((string) $error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <div class="public-grid">
-                <div class="public-form-row">
-                    <label for="nama" class="public-label">Nama Observer</label>
-                    <input type="text" name="nama" id="nama" class="public-input" value="<?= old('nama') ?>" required>
-                </div>
-
-                <div class="public-form-row">
-                    <label for="instansi" class="public-label">Instansi/Unit</label>
-                    <input type="text" name="instansi" id="instansi" class="public-input" value="<?= old('instansi') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="bidang_keahlian" class="public-label">Peran/Jabatan Observer</label>
-                    <input type="text" name="bidang_keahlian" id="bidang_keahlian" class="public-input" value="<?= old('bidang_keahlian') ?>" placeholder="Contoh: Dosen pengamat, ahli pembelajaran, peneliti">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="program_studi" class="public-label">Program Studi/Konteks Kelas</label>
-                    <input type="text" name="program_studi" id="program_studi" class="public-input" value="<?= old('program_studi') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="kelas" class="public-label">Kelas/Rombel yang Diobservasi</label>
-                    <input type="text" name="kelas" id="kelas" class="public-input" value="<?= old('kelas') ?>">
-                </div>
-
-                <div class="public-form-row">
-                    <label for="semester" class="public-label">Pertemuan/Semester</label>
-                    <input type="text" name="semester" id="semester" class="public-input" value="<?= old('semester') ?>" placeholder="Contoh: Pertemuan 1 / Semester 4">
-                </div>
-            </div>
+            <?= view('public/partials/respondent_identity_summary', compact('respondentIdentity', 'link', 'identityFields')) ?>
         </div>
 
         <div class="public-card">
@@ -311,35 +283,9 @@ $linkToken = $text($link, 'token', '');
         <div class="public-card">
             <h2 class="public-heading">C. Petunjuk Pengisian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= nl2br(esc($text($link, 'petunjuk', 'Berikan penilaian sesuai kondisi yang diamati. Catatan observasi dapat ditambahkan pada setiap butir atau pada bagian catatan umum.'))) ?>
+                <?= render_rich_text_content($petunjuk) ?>
             </div>
 
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 120px;">Skor</th>
-                            <th>Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($scaleRange as $score): ?>
-                            <tr>
-                                <td><?= esc((string) $score) ?></td>
-                                <td>
-                                    <?php if ($score === $scaleMin): ?>
-                                        Tidak Terlaksana / Tidak Tampak
-                                    <?php elseif ($score === $scaleMax): ?>
-                                        Sangat Terlaksana / Sangat Tampak
-                                    <?php else: ?>
-                                        Tingkat keterlaksanaan <?= esc((string) $score) ?>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <div class="public-card">
@@ -412,10 +358,7 @@ $linkToken = $text($link, 'token', '');
             <?php endif; ?>
         </div>
 
-        <div class="public-card">
-            <h2 class="public-heading">E. Catatan Observasi</h2>
-            <textarea class="public-textarea" name="komentar_umum" placeholder="Tuliskan ringkasan temuan observasi, kejadian penting, atau catatan pelaksanaan pembelajaran."><?= old('komentar_umum') ?></textarea>
-        </div>
+        <?= view('public/partials/justification_fields', compact('justificationConfig')) ?>
 
         <div class="public-card" style="text-align: right;">
             <button type="submit" class="public-btn">Kirim Hasil Observasi</button>
