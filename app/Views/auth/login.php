@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login - SIVALID</title>
+    <link rel="icon" href="<?= sivalid_favicon_url() ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <style>
         body {
@@ -13,16 +14,20 @@
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #1d6fb8 0%, #1e40af 100%);
+            background: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -1px;
             margin: 0 auto 12px;
             box-shadow: 0 4px 12px rgba(29,111,184,.25);
+            overflow: hidden;
+            border: 1px solid rgba(29,111,184,.12);
+        }
+        .sv-brand-logo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
     </style>
 </head>
@@ -32,7 +37,9 @@
     <div class="card card-md shadow-sm">
         <div class="card-body">
             <div class="text-center mb-4">
-                <div class="sv-brand-logo">S</div>
+                <div class="sv-brand-logo">
+                    <img src="<?= sivalid_logo_url() ?>" alt="Logo SIVALID">
+                </div>
                 <h2 class="fw-bold mb-0 mt-2" style="letter-spacing:-.5px;">SIVALID</h2>
                 <p class="text-muted mt-1 mb-0" style="font-size:13.5px;">Sistem Validasi Instrumen Penelitian</p>
             </div>

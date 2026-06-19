@@ -23,7 +23,7 @@ class Settings extends BaseController
     public function index()
     {
         $activeTab = trim((string) $this->request->getGet('tab'));
-        $allowedTabs = ['profile', 'category', 'instrument-types', 'product-types', 'system'];
+        $allowedTabs = ['profile', 'category', 'instrument-types', 'product-types', 'application', 'system'];
 
         if (! in_array($activeTab, $allowedTabs, true)) {
             $activeTab = 'profile';
@@ -56,6 +56,7 @@ class Settings extends BaseController
             'activeTab' => $activeTab,
             'profile'  => $this->settingModel->getGroupValues('profile'),
             'category' => $this->settingModel->getGroupValues('category'),
+            'application' => $this->settingModel->getGroupValues('application'),
             'instrumentTypes' => $instrumentTypes,
             'productTypes' => $productTypes,
             'instrumentTypeUsage' => $instrumentTypeUsage,
@@ -151,6 +152,68 @@ class Settings extends BaseController
         return redirect()
             ->to(base_url('admin/settings?tab=category'))
             ->with('success', 'Pengaturan kategori kelayakan berhasil disimpan.');
+    }
+
+    public function saveApplication()
+    {
+        $rules = [];
+        $logo = $this->request->getFile('app_logo');
+        $favicon = $this->request->getFile('app_favicon');
+
+        if ($logo && $logo->getError() !== UPLOAD_ERR_NO_FILE) {
+            $rules['app_logo'] = 'uploaded[app_logo]|max_size[app_logo,2048]|ext_in[app_logo,png,jpg,jpeg,gif,webp,svg]';
+        }
+
+        if ($favicon && $favicon->getError() !== UPLOAD_ERR_NO_FILE) {
+            $rules['app_favicon'] = 'uploaded[app_favicon]|max_size[app_favicon,1024]|ext_in[app_favicon,ico,png,jpg,jpeg,gif,webp,svg]';
+        }
+
+        if ($rules !== [] && ! $this->validate($rules)) {
+            return redirect()
+                ->to(base_url('admin/settings?tab=application'))
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        if ($logo && $logo->isValid() && ! $logo->hasMoved()) {
+            $this->saveBrandingFile($logo, 'app_logo', 'logo', 'application');
+        }
+
+        if ($favicon && $favicon->isValid() && ! $favicon->hasMoved()) {
+            $this->saveBrandingFile($favicon, 'app_favicon', 'favicon', 'application');
+        }
+
+        if ((! $logo || $logo->getError() === UPLOAD_ERR_NO_FILE) && (! $favicon || $favicon->getError() === UPLOAD_ERR_NO_FILE)) {
+            $this->settingModel->setValue('app_logo', 'assets/sivalid copy.png', 'application');
+            $this->settingModel->setValue('app_favicon', 'assets/sivalid copy.png', 'application');
+        }
+
+        return redirect()
+            ->to(base_url('admin/settings?tab=application'))
+            ->with('success', 'Pengaturan aplikasi berhasil disimpan.');
+    }
+
+    private function saveBrandingFile(\CodeIgniter\HTTP\Files\UploadedFile $file, string $settingKey, string $prefix, string $group): void
+    {
+        $targetDir = FCPATH . 'uploads/settings';
+        if (! is_dir($targetDir)) {
+            mkdir($targetDir, 0775, true);
+        }
+
+        $oldPath = (string) ($this->settingModel->getValue($settingKey) ?? '');
+        $extension = $file->getClientExtension() ?: $file->guessExtension();
+        $fileName = $prefix . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.' . strtolower($extension);
+        $file->move($targetDir, $fileName);
+
+        $newPath = 'uploads/settings/' . $fileName;
+        $this->settingModel->setValue($settingKey, $newPath, $group);
+
+        if ($oldPath !== '' && str_starts_with($oldPath, 'uploads/settings/')) {
+            $oldFullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $oldPath);
+            if (is_file($oldFullPath)) {
+                unlink($oldFullPath);
+            }
+        }
     }
 
     private function seedDefaultInstrumentTypes(): void

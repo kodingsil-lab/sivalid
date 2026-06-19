@@ -111,8 +111,13 @@ $directGroups = [
         </button>
 
         <a href="<?= base_url('admin/dashboard') ?>" class="navbar-brand">
-            <span class="brand-name">SIVALID</span>
-            <span class="brand-sub">Sistem Validasi Instrumen</span>
+            <span class="brand-logo-wrap">
+                <img src="<?= sivalid_logo_url() ?>" width="46" height="46" alt="Logo SIVALID">
+            </span>
+            <span class="brand-copy">
+                <span class="brand-name">SIVALID</span>
+                <span class="brand-sub">Sistem Validasi Instrumen</span>
+            </span>
         </a>
 
         <div class="collapse navbar-collapse" id="sidebar-menu">

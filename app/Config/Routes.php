@@ -63,6 +63,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings/profile', 'Admin\Settings::saveProfile');
     $routes->post('settings/category', 'Admin\Settings::saveCategory');
+    $routes->post('settings/application', 'Admin\Settings::saveApplication');
 
     $routes->get('admin-users', 'Admin\AdminUsers::index');
     $routes->get('admin-users/new', 'Admin\AdminUsers::new');

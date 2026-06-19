@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title ?? 'Informasi') ?></title>
+    <link rel="icon" href="<?= sivalid_favicon_url() ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/sivalid.css') ?>">
     <style>

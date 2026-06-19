@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title ?? 'SIVALID') ?> - SIVALID</title>
+    <link rel="icon" href="<?= sivalid_favicon_url() ?>">
 
     <!-- Tabler CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
 
     <!-- SIVALID custom styles -->
-    <link rel="stylesheet" href="<?= base_url('assets/css/sivalid.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/sivalid.css?v=' . filemtime(FCPATH . 'assets/css/sivalid.css')) ?>">
 </head>
 <body class="antialiased">
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title ?? 'Identitas Responden') ?></title>
+    <link rel="icon" href="<?= sivalid_favicon_url() ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <style>
         :root {

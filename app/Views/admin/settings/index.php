@@ -64,6 +64,7 @@
 
                 <div class="settings-nav-group">
                     <div class="settings-nav-label">Sistem</div>
+                    <a href="<?= base_url('admin/settings?tab=application') ?>" class="settings-nav-link <?= $activeTab === 'application' ? 'active' : '' ?>">Aplikasi</a>
                     <a href="<?= base_url('admin/settings?tab=system') ?>" class="settings-nav-link <?= $activeTab === 'system' ? 'active' : '' ?>">User Admin &amp; Backup</a>
                 </div>
             </aside>
@@ -409,6 +410,59 @@
                             </div>
                         </div>
                     </div>
+                </section>
+                <?php elseif ($activeTab === 'application'): ?>
+
+                <?php
+                    $currentLogo = (string) ($application['app_logo'] ?? 'assets/sivalid copy.png');
+                    $currentFavicon = (string) ($application['app_favicon'] ?? 'assets/sivalid copy.png');
+                ?>
+
+                <section id="section-application" class="settings-section settings-section-last">
+                    <div class="settings-section-header">
+                        <h3>Pengaturan Aplikasi</h3>
+                        <p>Atur logo pada halaman login dan favicon yang tampil di tab browser.</p>
+                    </div>
+
+                    <form action="<?= base_url('admin/settings/application?tab=application') ?>" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="app_logo" class="form-label">Logo Login</label>
+                                <div class="settings-brand-preview mb-2">
+                                    <img src="<?= sivalid_asset_url($currentLogo, 'assets/sivalid copy.png') ?>" alt="Logo aplikasi saat ini">
+                                </div>
+                                <input
+                                    type="file"
+                                    name="app_logo"
+                                    id="app_logo"
+                                    class="form-control"
+                                    accept=".png,.jpg,.jpeg,.gif,.webp,.svg,image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                                >
+                                <div class="form-hint">Format PNG, JPG, GIF, WebP, atau SVG. Maksimal 2 MB.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="app_favicon" class="form-label">Favicon</label>
+                                <div class="settings-brand-preview settings-brand-preview-sm mb-2">
+                                    <img src="<?= sivalid_asset_url($currentFavicon, 'assets/sivalid copy.png') ?>" alt="Favicon saat ini">
+                                </div>
+                                <input
+                                    type="file"
+                                    name="app_favicon"
+                                    id="app_favicon"
+                                    class="form-control"
+                                    accept=".ico,.png,.jpg,.jpeg,.gif,.webp,.svg,image/x-icon,image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                                >
+                                <div class="form-hint">Format ICO, PNG, JPG, GIF, WebP, atau SVG. Maksimal 1 MB.</div>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">Simpan Aplikasi</button>
+                        </div>
+                    </form>
                 </section>
                 <?php elseif ($activeTab === 'system'): ?>
 
