@@ -331,6 +331,11 @@ if ($selectedScaleTemplate === '') {
         var scaleMaxInput = document.getElementById('skala_max');
         var scalePreviewBody = document.getElementById('scale-preview-body');
 
+        function syncQuillEditor(item) {
+            var text = item.quill.getText().replace(/\n$/, '').trim();
+            item.input.value = text === '' ? '' : item.quill.root.innerHTML;
+        }
+
         if (typeof Quill !== 'undefined') {
             editorElements.forEach(function (editorElement) {
                 var targetInputId = editorElement.getAttribute('data-target-input');
@@ -365,6 +370,12 @@ if ($selectedScaleTemplate === '') {
                 editors.push({
                     quill: quill,
                     input: targetInput
+                });
+
+                var item = editors[editors.length - 1];
+                syncQuillEditor(item);
+                quill.on('text-change', function () {
+                    syncQuillEditor(item);
                 });
             });
         } else {
@@ -416,10 +427,7 @@ if ($selectedScaleTemplate === '') {
 
         if (form) {
             form.addEventListener('submit', function () {
-                editors.forEach(function (item) {
-                    var text = item.quill.getText().replace(/\n$/, '').trim();
-                    item.input.value = text === '' ? '' : item.quill.root.innerHTML;
-                });
+                editors.forEach(syncQuillEditor);
             });
         }
     });
