@@ -138,7 +138,7 @@ $renderDetailText = static function (?string $value): string {
                     <thead>
                         <tr>
                             <th>Nilai</th>
-                            <th>Label</th>
+                            <th>Kategori</th>
                         </tr>
                     </thead>
                     <tbody>
