@@ -206,6 +206,9 @@ $scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min
 $scaleMax = isset($scale['max']) ? (int) $scale['max'] : (int) ($link['skala_max'] ?? 4);
 $rawScaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawScaleRange) ? $rawScaleRange : []);
+$scaleOptions = isset($scale['options']) && is_array($scale['options'])
+    ? $scale['options']
+    : sivalid_scale_options(['skala_min' => $scaleMin, 'skala_max' => $scaleMax] + $link);
 $linkToken = $text($link, 'token', '');
 ?>
 
@@ -274,18 +277,14 @@ $linkToken = $text($link, 'token', '');
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($scaleRange as $score): ?>
+                        <?php foreach ($scaleOptions as $option): ?>
+                            <?php
+                            $score = (int) ($option['score'] ?? 0);
+                            $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                            ?>
                             <tr>
                                 <td><?= esc((string) $score) ?></td>
-                                <td>
-                                    <?php if ($score === $scaleMin): ?>
-                                        Tidak Relevan / Sangat Tidak Sesuai
-                                    <?php elseif ($score === $scaleMax): ?>
-                                        Sangat Relevan / Sangat Sesuai
-                                    <?php else: ?>
-                                        Tingkat penilaian <?= esc((string) $score) ?>
-                                    <?php endif; ?>
-                                </td>
+                                <td><?= esc($label) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -431,7 +430,11 @@ $linkToken = $text($link, 'token', '');
                                         ?>
 
                                         <?php if ($tipeButir === 'skala'): ?>
-                                            <?php foreach ($scaleRange as $score): ?>
+                                            <?php foreach ($scaleOptions as $option): ?>
+                                                <?php
+                                                $score = (int) ($option['score'] ?? 0);
+                                                $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                                                ?>
                                                 <label class="public-score-option">
                                                     <input
                                                         type="radio"
@@ -439,7 +442,7 @@ $linkToken = $text($link, 'token', '');
                                                         value="<?= esc((string) $score) ?>"
                                                         <?= $isRequired ?>
                                                     >
-                                                    <?= esc((string) $score) ?>
+                                                    <?= esc($label) ?>
                                                 </label>
                                             <?php endforeach; ?>
 

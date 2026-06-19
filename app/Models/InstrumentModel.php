@@ -22,6 +22,7 @@ class InstrumentModel extends Model
         'petunjuk',
         'skala_min',
         'skala_max',
+        'skala_labels',
         'status',
     ];
 

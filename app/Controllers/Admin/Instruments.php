@@ -79,8 +79,9 @@ class Instruments extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $skalaMin = (int) $this->request->getPost('skala_min');
-        $skalaMax = (int) $this->request->getPost('skala_max');
+        $scaleConfig = $this->scaleConfigFromRequest();
+        $skalaMin = $scaleConfig['min'];
+        $skalaMax = $scaleConfig['max'];
 
         if ($skalaMin >= $skalaMax) {
             return redirect()
@@ -101,6 +102,7 @@ class Instruments extends BaseController
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
             'skala_max' => $skalaMax,
+            'skala_labels' => $scaleConfig['labels_json'],
             'sort_order' => $this->getNextSortOrder(),
             'status'    => 'Draft',
         ]);
@@ -177,8 +179,9 @@ class Instruments extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $skalaMin = (int) $this->request->getPost('skala_min');
-        $skalaMax = (int) $this->request->getPost('skala_max');
+        $scaleConfig = $this->scaleConfigFromRequest();
+        $skalaMin = $scaleConfig['min'];
+        $skalaMax = $scaleConfig['max'];
 
         if ($skalaMin >= $skalaMax) {
             return redirect()
@@ -206,6 +209,7 @@ class Instruments extends BaseController
             'petunjuk'  => trim((string) $this->request->getPost('petunjuk')),
             'skala_min' => $skalaMin,
             'skala_max' => $skalaMax,
+            'skala_labels' => $scaleConfig['labels_json'],
             'status'    => $statusToSave,
         ]);
 
@@ -481,6 +485,26 @@ class Instruments extends BaseController
             ->table('manual_valid_instruments')
             ->where('instrument_id', $instrumentId)
             ->countAllResults() > 0;
+    }
+
+    private function scaleConfigFromRequest(): array
+    {
+        $templateKey = trim((string) $this->request->getPost('scale_template'));
+        $templates = sivalid_scale_templates();
+
+        if (isset($templates[$templateKey])) {
+            return [
+                'min' => (int) $templates[$templateKey]['min'],
+                'max' => (int) $templates[$templateKey]['max'],
+                'labels_json' => json_encode($templates[$templateKey]['labels'], JSON_UNESCAPED_UNICODE),
+            ];
+        }
+
+        return [
+            'min' => (int) $this->request->getPost('skala_min'),
+            'max' => (int) $this->request->getPost('skala_max'),
+            'labels_json' => null,
+        ];
     }
 
     private function normalizeSortOrder(): void

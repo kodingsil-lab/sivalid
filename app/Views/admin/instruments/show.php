@@ -137,15 +137,17 @@ $renderDetailText = static function (?string $value): string {
                 <table class="table table-sm instrument-scale-table">
                     <thead>
                         <tr>
-                            <th>Skor Minimum</th>
-                            <th>Skor Maksimum</th>
+                            <th>Nilai</th>
+                            <th>Label</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><?= esc((string) ($instrument['skala_min'] ?? '-')) ?></td>
-                            <td><?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
-                        </tr>
+                        <?php foreach (sivalid_scale_options($currentInstrument) as $option): ?>
+                            <tr>
+                                <td><?= esc((string) ($option['score'] ?? '-')) ?></td>
+                                <td><?= esc((string) ($option['label'] ?? '-')) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>

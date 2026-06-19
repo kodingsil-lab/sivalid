@@ -10,6 +10,26 @@ $isCreateForm = strtolower($formMethod) === 'post';
 $codeValue = $isCreateForm
     ? (string) ($autoCode ?? old('kode', '01'))
     : (string) old('kode', $instrument['kode'] ?? '');
+$scaleTemplates = sivalid_scale_templates();
+$currentScaleLabels = sivalid_scale_labels(is_array($instrument ?? null) ? $instrument : []);
+$selectedScaleTemplate = (string) old('scale_template', '');
+
+if ($selectedScaleTemplate === '') {
+    foreach ($scaleTemplates as $templateKey => $template) {
+        if (
+            (int) ($template['min'] ?? 0) === (int) ($instrument['skala_min'] ?? 1)
+            && (int) ($template['max'] ?? 0) === (int) ($instrument['skala_max'] ?? 4)
+            && ($template['labels'] ?? []) == $currentScaleLabels
+        ) {
+            $selectedScaleTemplate = (string) $templateKey;
+            break;
+        }
+    }
+}
+
+if ($selectedScaleTemplate === '') {
+    $selectedScaleTemplate = 'relevance_4';
+}
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -182,6 +202,24 @@ $codeValue = $isCreateForm
 
             <div class="form-grid">
                 <div class="form-row">
+                    <label class="form-label" for="scale_template">Jenis Skala Validasi</label>
+                    <select name="scale_template" id="scale_template" class="form-control" required>
+                        <?php foreach ($scaleTemplates as $templateKey => $template): ?>
+                            <option
+                                value="<?= esc((string) $templateKey) ?>"
+                                data-min="<?= esc((string) $template['min']) ?>"
+                                data-max="<?= esc((string) $template['max']) ?>"
+                                data-labels="<?= esc(json_encode($template['labels'], JSON_UNESCAPED_UNICODE), 'attr') ?>"
+                                <?= $selectedScaleTemplate === $templateKey ? 'selected' : '' ?>
+                            >
+                                <?= esc((string) $template['label']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small class="text-muted">Pilih skala yang dipakai validator saat memvalidasi butir instrumen.</small>
+                </div>
+
+                <div class="form-row">
                     <label class="form-label" for="status">Status</label>
                     <?php
                     $manualStatuses = ['Draft', 'Aktif', 'Perlu Revisi', 'Direvisi', 'Tidak Aktif'];
@@ -240,6 +278,21 @@ $codeValue = $isCreateForm
                         min="2"
                         required
                     >
+                </div>
+            </div>
+
+            <div class="form-row mb-0">
+                <label class="form-label">Label Pilihan</label>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered mb-0" style="max-width: 520px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">Nilai</th>
+                                <th>Label</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scale-preview-body"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -318,6 +371,49 @@ $codeValue = $isCreateForm
         });
 
         var form = document.querySelector('form[action]');
+        var scaleTemplate = document.getElementById('scale_template');
+        var scaleMinInput = document.getElementById('skala_min');
+        var scaleMaxInput = document.getElementById('skala_max');
+        var scalePreviewBody = document.getElementById('scale-preview-body');
+
+        function refreshScaleTemplate() {
+            if (!scaleTemplate || !scaleMinInput || !scaleMaxInput || !scalePreviewBody) {
+                return;
+            }
+
+            var selected = scaleTemplate.options[scaleTemplate.selectedIndex];
+            if (!selected) {
+                return;
+            }
+
+            scaleMinInput.value = selected.getAttribute('data-min') || scaleMinInput.value;
+            scaleMaxInput.value = selected.getAttribute('data-max') || scaleMaxInput.value;
+
+            var labels = {};
+            try {
+                labels = JSON.parse(selected.getAttribute('data-labels') || '{}');
+            } catch (error) {
+                labels = {};
+            }
+
+            scalePreviewBody.innerHTML = '';
+            Object.keys(labels).forEach(function (score) {
+                var tr = document.createElement('tr');
+                var tdScore = document.createElement('td');
+                var tdLabel = document.createElement('td');
+
+                tdScore.textContent = score;
+                tdLabel.textContent = labels[score];
+                tr.appendChild(tdScore);
+                tr.appendChild(tdLabel);
+                scalePreviewBody.appendChild(tr);
+            });
+        }
+
+        if (scaleTemplate) {
+            scaleTemplate.addEventListener('change', refreshScaleTemplate);
+            refreshScaleTemplate();
+        }
 
         if (!form) {
             return;

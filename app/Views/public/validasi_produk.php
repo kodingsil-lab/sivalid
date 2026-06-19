@@ -31,6 +31,9 @@
 $scaleMin = $scale['min'] ?? (int) ($link['skala_min'] ?? 1);
 $scaleMax = $scale['max'] ?? (int) ($link['skala_max'] ?? 4);
 $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
+$scaleOptions = isset($scale['options']) && is_array($scale['options'])
+    ? $scale['options']
+    : sivalid_scale_options(['skala_min' => (int) $scaleMin, 'skala_max' => (int) $scaleMax] + $link);
 ?>
 
 <div class="public-wrap">
@@ -103,18 +106,14 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($scaleRange as $score): ?>
+                            <?php foreach ($scaleOptions as $option): ?>
+                                <?php
+                                $score = (int) ($option['score'] ?? 0);
+                                $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                                ?>
                                 <tr>
                                     <td><?= esc($score) ?></td>
-                                    <td>
-                                        <?php if ($score === $scaleMin): ?>
-                                            Tidak Sesuai
-                                        <?php elseif ($score === $scaleMax): ?>
-                                            Sangat Sesuai
-                                        <?php else: ?>
-                                            Tingkat penilaian <?= esc($score) ?>
-                                        <?php endif; ?>
-                                    </td>
+                                    <td><?= esc($label) ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -164,10 +163,14 @@ $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
                                             ?>
                                             <?php if ($tipeButir === 'skala'): ?>
                                                 <div class="radio-inline">
-                                                    <?php foreach ($scaleRange as $score): ?>
+                                                    <?php foreach ($scaleOptions as $option): ?>
+                                                        <?php
+                                                        $score = (int) ($option['score'] ?? 0);
+                                                        $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                                                        ?>
                                                         <label>
                                                             <input type="radio" name="answers[<?= $item['id'] ?>][skor]" value="<?= esc($score) ?>" <?= $isRequired ?>>
-                                                            <?= esc($score) ?>
+                                                            <?= esc($label) ?>
                                                         </label>
                                                     <?php endforeach; ?>
                                                 </div>

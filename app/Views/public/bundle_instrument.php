@@ -712,6 +712,9 @@ $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''))
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
 $scaleRange = array_map('intval', $scale['range'] ?? range($scaleMin, $scaleMax));
+$scaleOptions = isset($scale['options']) && is_array($scale['options'])
+    ? $scale['options']
+    : sivalid_scale_options(['skala_min' => $scaleMin, 'skala_max' => $scaleMax] + $instrumentEntry);
 
 $text = static function (array $row, string $key, string $default = '-'): string {
     $value = $row[$key] ?? $default;
@@ -946,7 +949,11 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                     <?php if ($tipeButir === 'skala'): ?>
                                         <?php $savedSkor = $saved['skor'] ?? null; ?>
                                         <div class="public-score-row form-selectgroup form-selectgroup-pills">
-                                            <?php foreach ($scaleRange as $score): ?>
+                                            <?php foreach ($scaleOptions as $option): ?>
+                                                <?php
+                                                $score = (int) ($option['score'] ?? 0);
+                                                $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                                                ?>
                                                 <label class="public-score-option form-selectgroup-item">
                                                     <input
                                                         class="form-selectgroup-input public-score-check"
@@ -956,7 +963,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                                         <?= $savedSkor !== null && (int) $savedSkor === $score ? 'checked' : '' ?>
                                                         <?= $isFinal ? 'disabled' : '' ?>
                                                     >
-                                                    <span class="form-selectgroup-label"><?= esc((string) $score) ?></span>
+                                                    <span class="form-selectgroup-label"><?= esc($label) ?></span>
                                                 </label>
                                             <?php endforeach; ?>
                                         </div>
@@ -1164,8 +1171,9 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             <th style="width: 60px;">No</th>
                             <th style="width: 220px;">Aspek</th>
                             <th>Butir Pernyataan</th>
-                            <?php foreach ($scaleRange as $score): ?>
-                                <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
+                            <?php foreach ($scaleOptions as $option): ?>
+                                <?php $label = (string) ($option['label'] ?? ('Skor ' . (int) ($option['score'] ?? 0))); ?>
+                                <th class="public-score-cell" style="width: 86px;"><?= esc($label) ?></th>
                             <?php endforeach; ?>
                         </tr>
                         </thead>
@@ -1184,7 +1192,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
                                 <td><?= esc($aspectName) ?></td>
                                 <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
-                                <?php foreach ($scaleRange as $score): ?>
+                                <?php foreach ($scaleOptions as $option): ?>
                                     <td class="public-score-cell">&bigcirc;</td>
                                 <?php endforeach; ?>
                             </tr>

@@ -91,6 +91,7 @@ class InstrumentLinkModel extends Model
              instruments.petunjuk,
              instruments.skala_min,
              instruments.skala_max,
+             instruments.skala_labels,
              instruments.status AS instrument_status,
              research_products.kode AS product_kode,
              research_products.nama_produk,

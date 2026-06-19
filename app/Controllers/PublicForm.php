@@ -549,6 +549,8 @@ class PublicForm extends BaseController
             'min'   => $min,
             'max'   => $max,
             'range' => range($min, $max),
+            'options' => sivalid_scale_options(['skala_min' => $min, 'skala_max' => $max] + $link),
+            'labels' => sivalid_scale_labels(['skala_min' => $min, 'skala_max' => $max] + $link),
         ];
     }
 

@@ -38,6 +38,7 @@ class ValidationBundleInstrumentModel extends Model
                  instruments.petunjuk,
                  instruments.skala_min,
                  instruments.skala_max,
+                 instruments.skala_labels,
                  instruments.status AS instrument_status'
             )
             ->join('instruments', 'instruments.id = validation_bundle_instruments.instrument_id')
