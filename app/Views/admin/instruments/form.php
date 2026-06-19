@@ -163,16 +163,13 @@ if ($selectedScaleTemplate === '') {
                 <textarea
                     name="pengantar"
                     id="pengantar"
-                    class="form-control rich-text-fallback"
-                    rows="5"
-                    placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
+                    class="quill-source"
                 ><?= esc((string) old('pengantar', $instrument['pengantar'] ?? '')) ?></textarea>
                 <div
                     id="pengantar-editor"
                     class="quill-editor"
                     data-placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
                     data-target-input="pengantar"
-                    data-initial="<?= esc((string) old('pengantar', $instrument['pengantar'] ?? ''), 'attr') ?>"
                 ></div>
             </div>
 
@@ -181,16 +178,13 @@ if ($selectedScaleTemplate === '') {
                 <textarea
                     name="petunjuk"
                     id="petunjuk"
-                    class="form-control rich-text-fallback"
-                    rows="5"
-                    placeholder="Tuliskan petunjuk pengisian instrumen."
+                    class="quill-source"
                 ><?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? '')) ?></textarea>
                 <div
                     id="petunjuk-editor"
                     class="quill-editor"
                     data-placeholder="Tuliskan petunjuk pengisian instrumen."
                     data-target-input="petunjuk"
-                    data-initial="<?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? ''), 'attr') ?>"
                 ></div>
             </div>
         </div>
@@ -308,28 +302,20 @@ if ($selectedScaleTemplate === '') {
 
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
-    .quill-editor {
+    .quill-source {
         display: none;
+    }
+
+    .quill-editor {
+        min-height: 180px;
         background: #fff;
         border-radius: 4px;
     }
 
-    .quill-editor.is-ready {
-        display: block;
-    }
-
-    .rich-text-fallback.is-enhanced {
-        display: none;
-    }
-
-    .quill-editor.ql-container,
-    .quill-editor .ql-container {
-        min-height: 150px;
-        font-size: 0.875rem;
-    }
-
     .quill-editor .ql-editor {
-        min-height: 150px;
+        min-height: 180px;
+        font-size: 0.95rem;
+        line-height: 1.65;
         white-space: pre-wrap;
     }
 </style>
@@ -337,23 +323,23 @@ if ($selectedScaleTemplate === '') {
 <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var editorElements = document.querySelectorAll('.quill-editor');
+        var form = document.querySelector('form[action]');
         var editors = [];
+        var editorElements = document.querySelectorAll('.quill-editor');
+        var scaleTemplate = document.getElementById('scale_template');
+        var scaleMinInput = document.getElementById('skala_min');
+        var scaleMaxInput = document.getElementById('skala_max');
+        var scalePreviewBody = document.getElementById('scale-preview-body');
 
-        editorElements.forEach(function (editorElement) {
-            var targetInputId = editorElement.getAttribute('data-target-input');
-            var initialContent = editorElement.getAttribute('data-initial') || '';
-            var targetInput = document.getElementById(targetInputId);
+        if (typeof Quill !== 'undefined') {
+            editorElements.forEach(function (editorElement) {
+                var targetInputId = editorElement.getAttribute('data-target-input');
+                var targetInput = document.getElementById(targetInputId);
 
-            if (!targetInput) {
-                return;
-            }
+                if (!targetInput) {
+                    return;
+                }
 
-            if (typeof Quill === 'undefined') {
-                return;
-            }
-
-            try {
                 var quill = new Quill(editorElement, {
                     theme: 'snow',
                     placeholder: editorElement.getAttribute('data-placeholder') || '',
@@ -369,30 +355,25 @@ if ($selectedScaleTemplate === '') {
                     }
                 });
 
+                var initialContent = targetInput.value || '';
                 if (/<[a-z][\s\S]*>/i.test(initialContent)) {
                     quill.clipboard.dangerouslyPasteHTML(initialContent);
                 } else {
                     quill.setText(initialContent);
                 }
 
-                editorElement.classList.add('is-ready');
-                targetInput.classList.add('is-enhanced');
-
                 editors.push({
                     quill: quill,
                     input: targetInput
                 });
-            } catch (error) {
-                editorElement.classList.remove('is-ready');
-                targetInput.classList.remove('is-enhanced');
-            }
-        });
-
-        var form = document.querySelector('form[action]');
-        var scaleTemplate = document.getElementById('scale_template');
-        var scaleMinInput = document.getElementById('skala_min');
-        var scaleMaxInput = document.getElementById('skala_max');
-        var scalePreviewBody = document.getElementById('scale-preview-body');
+            });
+        } else {
+            document.querySelectorAll('.quill-source').forEach(function (textarea) {
+                textarea.style.display = 'block';
+                textarea.classList.add('form-control');
+                textarea.setAttribute('rows', '7');
+            });
+        }
 
         function refreshScaleTemplate() {
             if (!scaleTemplate || !scaleMinInput || !scaleMaxInput || !scalePreviewBody) {
@@ -433,16 +414,14 @@ if ($selectedScaleTemplate === '') {
             refreshScaleTemplate();
         }
 
-        if (!form) {
-            return;
-        }
-
-        form.addEventListener('submit', function () {
-            editors.forEach(function (item) {
-                var text = item.quill.getText().replace(/\n$/, '').trim();
-                item.input.value = text === '' ? '' : item.quill.root.innerHTML;
+        if (form) {
+            form.addEventListener('submit', function () {
+                editors.forEach(function (item) {
+                    var text = item.quill.getText().replace(/\n$/, '').trim();
+                    item.input.value = text === '' ? '' : item.quill.root.innerHTML;
+                });
             });
-        });
+        }
     });
 </script>
 
