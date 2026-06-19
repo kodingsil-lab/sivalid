@@ -2,6 +2,11 @@
 
 <?= $this->section('content') ?>
 
+<?php
+$selectedIndicator = 0;
+$indicatorOptions = [];
+?>
+
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
@@ -229,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    const indicators = <?= json_encode($indicatorOptions, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    const indicators = <?= json_encode($indicatorOptions ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     const initialIndicator = '<?= esc((string) $selectedIndicator, 'js') ?>';
 
     function createOption(value, label, selected) {
