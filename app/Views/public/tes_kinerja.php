@@ -216,13 +216,12 @@ $linkSasaran = isset($link['sasaran']) && is_scalar($link['sasaran']) && (string
 $rawLinkStatus = isset($link['status']) && is_scalar($link['status']) ? (string) $link['status'] : '-';
 $linkStatus = status_display_label($rawLinkStatus);
 $linkMaksimalRespon = isset($link['maksimal_respon']) && is_scalar($link['maksimal_respon']) ? (string) $link['maksimal_respon'] : '-';
-$linkPengantar = isset($link['pengantar']) && is_scalar($link['pengantar']) && (string) $link['pengantar'] !== ''
-    ? (string) $link['pengantar']
-    : 'Instrumen ini digunakan untuk menilai kinerja peserta berdasarkan aspek dan kriteria yang telah ditetapkan.';
+$pengantarPenyebaran = trim((string) ($link['pengantar_penyebaran'] ?? ''));
+$pengantarMaster = trim((string) ($link['pengantar'] ?? ''));
+$linkPengantar = $pengantarPenyebaran !== '' ? $pengantarPenyebaran : $pengantarMaster;
 $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
-$linkPetunjuk = $petunjukPenyebaran !== ''
-    ? $petunjukPenyebaran
-    : 'Berikan skor sesuai kualitas kinerja yang ditunjukkan peserta. Catatan dapat diberikan untuk memperjelas dasar penilaian.';
+$petunjukMaster = trim((string) ($link['petunjuk'] ?? ''));
+$linkPetunjuk = $petunjukPenyebaran !== '' ? $petunjukPenyebaran : $petunjukMaster;
 
 $scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min'] ?? 1);
 $scaleMax = isset($scale['max']) ? (int) $scale['max'] : (int) ($link['skala_max'] ?? 4);
@@ -278,13 +277,15 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
 
         <div class="public-card">
             <h2 class="public-heading">B. Pengantar Tes Kinerja</h2>
-            <div class="public-muted"><?= nl2br(esc($linkPengantar)) ?></div>
+            <div class="public-muted">
+                <?= $linkPengantar !== '' ? render_rich_text_content($linkPengantar) : '-' ?>
+            </div>
         </div>
 
         <div class="public-card">
             <h2 class="public-heading">C. Petunjuk Penilaian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= render_rich_text_content($linkPetunjuk) ?>
+                <?= $linkPetunjuk !== '' ? render_rich_text_content($linkPetunjuk) : '-' ?>
             </div>
 
         </div>

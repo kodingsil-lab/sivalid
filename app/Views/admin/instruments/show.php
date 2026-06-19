@@ -5,9 +5,6 @@
 <?php
 $currentInstrument = isset($instrument) && is_array($instrument) ? $instrument : [];
 $instrumentId = (int) ($currentInstrument['id'] ?? 0);
-$status = (string) ($currentInstrument['status'] ?? '');
-$statusLabel = status_display_label($status);
-$statusClass = status_badge_class($status);
 
 $renderDetailText = static function (?string $value): string {
     $value = trim((string) $value);
@@ -58,7 +55,7 @@ $renderDetailText = static function (?string $value): string {
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Detail Instrumen</h2>
-            <div class="text-muted mt-1">Informasi lengkap instrumen untuk proses validasi penelitian.</div>
+            <div class="text-muted mt-1">Informasi lengkap master instrumen dan naskah penyebarannya.</div>
         </div>
         <div class="col-auto ms-auto">
             <div class="d-flex flex-wrap justify-content-end gap-2 instrument-header-actions">
@@ -103,14 +100,6 @@ $renderDetailText = static function (?string $value): string {
                         <th>Sasaran</th>
                         <td><?= esc((string) (!empty($currentInstrument['sasaran']) ? $currentInstrument['sasaran'] : '-')) ?></td>
                     </tr>
-                    <tr>
-                        <th>Status</th>
-                        <td>
-                            <span class="<?= esc($statusClass) ?>">
-                                <?= esc($statusLabel) ?>
-                            </span>
-                        </td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -119,41 +108,19 @@ $renderDetailText = static function (?string $value): string {
 
 <div class="card mb-3 instrument-detail-card">
     <div class="card-body">
-        <h3 class="card-title mb-3">Pengantar dan Petunjuk</h3>
+        <h3 class="card-title mb-3">Pengantar dan Petunjuk Penyebaran</h3>
 
         <div class="instrument-document-section">
-            <h4>1. Pengantar</h4>
+            <h4>1. Pengantar Instrumen Siap Disebar</h4>
             <?= $renderDetailText($currentInstrument['pengantar'] ?? '') ?>
         </div>
 
         <div class="instrument-document-section">
-            <h4>2. Petunjuk</h4>
+            <h4>2. Petunjuk Pengisian Responden</h4>
             <?= $renderDetailText($currentInstrument['petunjuk'] ?? '') ?>
         </div>
 
-        <div class="instrument-document-section mb-0">
-            <h4>Skala Penilaian</h4>
-            <div class="table-responsive">
-                <table class="table table-sm instrument-scale-table">
-                    <thead>
-                        <tr>
-                            <th>Nilai</th>
-                            <th>Kategori</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach (sivalid_scale_options($currentInstrument) as $option): ?>
-                            <tr>
-                                <td><?= esc((string) ($option['score'] ?? '-')) ?></td>
-                                <td><?= esc((string) ($option['label'] ?? '-')) ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="instrument-note">Bagian ini menampilkan naskah instrumen sebagaimana disiapkan peneliti sebelum digunakan pada proses validasi atau pengumpulan data.</div>
+        <div class="instrument-note">Bagian ini menampilkan pengantar dan petunjuk untuk instrumen yang siap disebarkan kepada responden.</div>
     </div>
 </div>
 

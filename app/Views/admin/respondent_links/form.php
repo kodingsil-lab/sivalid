@@ -110,28 +110,6 @@
             'justificationConfig' => $justificationConfig ?? [],
         ]) ?>
 
-        <div class="form-row">
-            <label class="form-label" for="pengantar_penyebaran">Pengantar Penyebaran</label>
-            <textarea
-                name="pengantar_penyebaran"
-                id="pengantar_penyebaran"
-                class="form-control rich-text-editor"
-                data-placeholder="Tuliskan pengantar yang akan dibaca responden sebelum mengisi instrumen."
-            ><?= esc((string) old('pengantar_penyebaran', $link['pengantar_penyebaran'] ?? '')) ?></textarea>
-            <small class="text-muted">Gunakan bagian ini untuk menjelaskan tujuan, sasaran, dan arahan awal pengisian.</small>
-        </div>
-
-        <div class="form-row">
-            <label class="form-label" for="petunjuk_penyebaran">Petunjuk Pengisian Angket</label>
-            <textarea
-                name="petunjuk_penyebaran"
-                id="petunjuk_penyebaran"
-                class="form-control rich-text-editor"
-                data-placeholder="Tuliskan petunjuk khusus untuk responden/pengisi angket."
-            ><?= esc((string) old('petunjuk_penyebaran', $link['petunjuk_penyebaran'] ?? '')) ?></textarea>
-            <small class="text-muted">Petunjuk ini khusus untuk angket/instrumen yang diisi responden, berbeda dari petunjuk validasi instrumen.</small>
-        </div>
-
         <div class="form-grid">
             <div class="form-row">
                 <label class="form-label" for="tanggal_mulai">Tanggal Mulai</label>
@@ -188,55 +166,5 @@
     </form>
     </div>
 </div>
-
-<style>
-    .respondent-link-form .tox-tinymce {
-        border-color: #cbd5e1;
-        border-radius: 6px;
-        overflow: hidden;
-    }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof tinymce === 'undefined') {
-            return;
-        }
-
-        tinymce.init({
-            selector: '.rich-text-editor',
-            height: 260,
-            menubar: false,
-            branding: false,
-            promotion: false,
-            plugins: 'lists table',
-            toolbar: 'blocks | bold italic underline | numlist bullist | table | removeformat',
-            block_formats: 'Paragraf=p;Judul 2=h2;Judul 3=h3',
-            table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
-            table_default_styles: {
-                width: '100%',
-                borderCollapse: 'collapse'
-            },
-            content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.55;color:#1e293b} table{width:100%;border-collapse:collapse;margin:.65rem 0} th,td{border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top} th{background:#f1f5f9;font-weight:700}',
-            setup: function (editor) {
-                editor.on('init', function () {
-                    var textarea = document.getElementById(editor.id);
-                    var placeholder = textarea ? textarea.getAttribute('data-placeholder') : '';
-                    if (placeholder) {
-                        editor.getBody().setAttribute('data-placeholder', placeholder);
-                    }
-                });
-            }
-        });
-
-        var form = document.querySelector('form[action]');
-        if (form) {
-            form.addEventListener('submit', function () {
-                tinymce.triggerSave();
-            });
-        }
-    });
-</script>
 
 <?= $this->endSection() ?>

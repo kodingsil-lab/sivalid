@@ -1144,19 +1144,19 @@ $text = static function (array $row, string $key, string $default = '-'): string
                 <div class="public-rich-text"><?= esc($text($instrumentEntry, 'judul')) ?></div>
             </div>
             <div class="public-modal-section">
-                <h3 class="public-modal-subtitle">Pengantar</h3>
+                <h3 class="public-modal-subtitle">Pengantar Instrumen Siap Disebar</h3>
                 <?php if ($masterPengantar !== ''): ?>
                     <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPengantar) ?></div>
                 <?php else: ?>
-                    <p class="public-muted">Pengantar belum tersedia.</p>
+                    <p class="public-muted">Pengantar instrumen siap disebar belum tersedia.</p>
                 <?php endif; ?>
             </div>
             <div class="public-modal-section">
-                <h3 class="public-modal-subtitle">Petunjuk</h3>
+                <h3 class="public-modal-subtitle">Petunjuk Pengisian Responden</h3>
                 <?php if ($masterPetunjuk !== ''): ?>
                     <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPetunjuk) ?></div>
                 <?php else: ?>
-                    <p class="public-muted">Petunjuk belum tersedia.</p>
+                    <p class="public-muted">Petunjuk pengisian responden belum tersedia.</p>
                 <?php endif; ?>
             </div>
             <div class="public-modal-section">

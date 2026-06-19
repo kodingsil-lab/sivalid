@@ -223,10 +223,12 @@ $scaleMin = isset($scale['min']) ? (int) $scale['min'] : (int) ($link['skala_min
 $scaleMax = isset($scale['max']) ? (int) $scale['max'] : (int) ($link['skala_max'] ?? 4);
 $rawScaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawScaleRange) ? $rawScaleRange : []);
+$pengantarPenyebaran = trim((string) ($link['pengantar_penyebaran'] ?? ''));
+$pengantarMaster = trim((string) ($link['pengantar'] ?? ''));
+$pengantar = $pengantarPenyebaran !== '' ? $pengantarPenyebaran : $pengantarMaster;
 $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
-$petunjuk = $petunjukPenyebaran !== ''
-    ? $petunjukPenyebaran
-    : 'Berikan tanggapan, catatan, atau rekomendasi secara jelas sesuai pengalaman dan keahlian Bapak/Ibu. Jika tersedia butir skala, pilih skor yang paling sesuai.';
+$petunjukMaster = trim((string) ($link['petunjuk'] ?? ''));
+$petunjuk = $petunjukPenyebaran !== '' ? $petunjukPenyebaran : $petunjukMaster;
 $linkToken = $text($link, 'token', '');
 ?>
 
@@ -278,13 +280,15 @@ $linkToken = $text($link, 'token', '');
 
         <div class="public-card">
             <h2 class="public-heading">B. Pengantar FGD</h2>
-            <div class="public-muted"><?= nl2br(esc($text($link, 'pengantar', 'Form ini digunakan untuk menghimpun masukan, catatan, dan rekomendasi peserta FGD terhadap instrumen atau produk yang sedang dikembangkan.'))) ?></div>
+            <div class="public-muted">
+                <?= $pengantar !== '' ? render_rich_text_content($pengantar) : '-' ?>
+            </div>
         </div>
 
         <div class="public-card">
             <h2 class="public-heading">C. Petunjuk Pengisian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= render_rich_text_content($petunjuk) ?>
+                <?= $petunjuk !== '' ? render_rich_text_content($petunjuk) : '-' ?>
             </div>
 
         </div>

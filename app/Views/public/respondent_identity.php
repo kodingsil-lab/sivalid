@@ -212,7 +212,8 @@ $link = isset($link) && is_array($link) ? $link : [];
 $identity = isset($respondentIdentity) && is_array($respondentIdentity) ? $respondentIdentity : [];
 $identityFields = isset($identityFields) && is_array($identityFields) ? $identityFields : [];
 $pengantarPenyebaran = trim((string) ($link['pengantar_penyebaran'] ?? ''));
-$pengantar = $pengantarPenyebaran;
+$pengantarMaster = trim((string) ($link['pengantar'] ?? ''));
+$pengantar = $pengantarPenyebaran !== '' ? $pengantarPenyebaran : $pengantarMaster;
 $instrumentTitle = trim((string) ($link['judul'] ?? ''));
 
 if ($instrumentTitle === '') {

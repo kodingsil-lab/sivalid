@@ -421,6 +421,10 @@ class InstrumentBundles extends BaseController
             $validationTexts[$instrumentId] = [
                 'pengantar_validasi' => trim((string) ($row['pengantar_validasi'] ?? '')),
                 'petunjuk_validasi'  => trim((string) ($row['petunjuk_validasi'] ?? '')),
+                'skala_min'          => (int) ($row['skala_min'] ?? 1),
+                'skala_max'          => (int) ($row['skala_max'] ?? 4),
+                'skala_labels'       => trim((string) ($row['skala_labels'] ?? '')),
+                'status_validasi'    => trim((string) ($row['status_validasi'] ?? 'Siap Divalidasi')),
             ];
         }
 
@@ -565,16 +569,31 @@ class InstrumentBundles extends BaseController
     {
         $pengantar = $this->request->getPost('pengantar_validasi');
         $petunjuk  = $this->request->getPost('petunjuk_validasi');
+        $skalaMin  = $this->request->getPost('skala_min_validasi');
+        $skalaMax  = $this->request->getPost('skala_max_validasi');
+        $skalaLabels = $this->request->getPost('skala_labels_validasi');
+        $statusValidasi = $this->request->getPost('status_validasi');
 
         $pengantar = is_array($pengantar) ? $pengantar : [];
         $petunjuk  = is_array($petunjuk) ? $petunjuk : [];
+        $skalaMin  = is_array($skalaMin) ? $skalaMin : [];
+        $skalaMax  = is_array($skalaMax) ? $skalaMax : [];
+        $skalaLabels = is_array($skalaLabels) ? $skalaLabels : [];
+        $statusValidasi = is_array($statusValidasi) ? $statusValidasi : [];
         $texts     = [];
 
         foreach ($instrumentIds as $instrumentId) {
             $instrumentId = (int) $instrumentId;
+            $min = max(1, (int) ($skalaMin[$instrumentId] ?? 1));
+            $max = max($min, (int) ($skalaMax[$instrumentId] ?? 4));
+
             $texts[$instrumentId] = [
                 'pengantar_validasi' => trim((string) ($pengantar[$instrumentId] ?? '')),
                 'petunjuk_validasi'  => trim((string) ($petunjuk[$instrumentId] ?? '')),
+                'skala_min'          => $min,
+                'skala_max'          => $max,
+                'skala_labels'       => trim((string) ($skalaLabels[$instrumentId] ?? '')),
+                'status_validasi'    => trim((string) ($statusValidasi[$instrumentId] ?? 'Siap Divalidasi')) ?: 'Siap Divalidasi',
             ];
         }
 

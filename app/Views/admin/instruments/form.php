@@ -155,11 +155,11 @@ if ($selectedScaleTemplate === '') {
 
     <div class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Pengantar dan Petunjuk</h3>
+            <h3 class="card-title">Pengantar dan Petunjuk Penyebaran</h3>
         </div>
         <div class="card-body">
             <div class="form-row">
-                <label class="form-label" for="pengantar">Pengantar</label>
+                <label class="form-label" for="pengantar">Pengantar Instrumen Siap Disebar</label>
                 <textarea
                     name="pengantar"
                     id="pengantar"
@@ -168,13 +168,13 @@ if ($selectedScaleTemplate === '') {
                 <div
                     id="pengantar-editor"
                     class="quill-editor"
-                    data-placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
+                    data-placeholder="Tuliskan pengantar yang tampil saat instrumen disebarkan kepada responden."
                     data-target-input="pengantar"
                 ></div>
             </div>
 
             <div class="form-row">
-                <label class="form-label" for="petunjuk">Petunjuk Pengisian</label>
+                <label class="form-label" for="petunjuk">Petunjuk Pengisian Responden</label>
                 <textarea
                     name="petunjuk"
                     id="petunjuk"
@@ -183,116 +183,17 @@ if ($selectedScaleTemplate === '') {
                 <div
                     id="petunjuk-editor"
                     class="quill-editor"
-                    data-placeholder="Tuliskan petunjuk pengisian instrumen."
+                    data-placeholder="Tuliskan petunjuk pengisian saat instrumen disebarkan kepada responden."
                     data-target-input="petunjuk"
                 ></div>
             </div>
         </div>
     </div>
 
-    <div class="card mb-3">
-        <div class="card-header">
-            <h3 class="card-title">Skala dan Status</h3>
-        </div>
-        <div class="card-body">
-
-            <div class="form-grid">
-                <div class="form-row">
-                    <label class="form-label" for="scale_template">Jenis Skala Validasi</label>
-                    <select name="scale_template" id="scale_template" class="form-control" required>
-                        <?php foreach ($scaleTemplates as $templateKey => $template): ?>
-                            <option
-                                value="<?= esc((string) $templateKey) ?>"
-                                data-min="<?= esc((string) $template['min']) ?>"
-                                data-max="<?= esc((string) $template['max']) ?>"
-                                data-labels="<?= esc(json_encode($template['labels'], JSON_UNESCAPED_UNICODE), 'attr') ?>"
-                                <?= $selectedScaleTemplate === $templateKey ? 'selected' : '' ?>
-                            >
-                                <?= esc((string) $template['label']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small class="text-muted">Pilih skala yang dipakai validator saat memvalidasi butir instrumen.</small>
-                </div>
-
-                <div class="form-row">
-                    <label class="form-label" for="status">Status</label>
-                    <?php
-                    $manualStatuses = ['Draft', 'Aktif', 'Perlu Revisi', 'Direvisi', 'Tidak Aktif'];
-                    $selectedStatus = old('status', $instrument['status'] ?? 'Draft');
-                    $selectedStatusLabel = status_display_label($selectedStatus);
-                    $isManualValid = (bool) ($isManualValid ?? false);
-                    $isWorkflowStatus = $isManualValid || !in_array($selectedStatus, $manualStatuses, true);
-                    ?>
-
-                    <?php if ($isCreateForm): ?>
-                        <input type="hidden" name="status" value="Draft">
-                        <div class="form-control" style="background-color: #f8f9fa;">Draft (otomatis saat instrumen dibuat)</div>
-                        <small class="text-muted">Status berikutnya akan berubah otomatis saat link validasi dibuat, analisis selesai, revisi, dan penetapan valid.</small>
-                    <?php elseif ($isManualValid): ?>
-                        <input type="hidden" name="status" value="<?= esc($selectedStatus, 'attr') ?>">
-                        <div class="form-control" style="background-color: #f8f9fa;"><?= esc($selectedStatusLabel) ?> (dikunci)</div>
-                        <small class="text-muted">Instrumen masih masuk daftar Instrumen Valid. Hapus dari daftar itu terlebih dahulu jika ingin mengubah status master.</small>
-                    <?php elseif ($isWorkflowStatus): ?>
-                        <input type="hidden" name="status" value="<?= esc($selectedStatus, 'attr') ?>">
-                        <div class="form-control" style="background-color: #f8f9fa;"><?= esc($selectedStatusLabel) ?> (otomatis dari alur validasi)</div>
-                        <small class="text-muted">Status ini dikontrol dari alur validasi instrumen.</small>
-                    <?php else: ?>
-                        <select name="status" id="status" class="form-control" required>
-                            <?php foreach ($manualStatuses as $status): ?>
-                                <option value="<?= esc($status) ?>" <?= $selectedStatus === $status ? 'selected' : '' ?>>
-                                    <?= esc($status) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-row">
-                    <label class="form-label" for="skala_min">Skala Minimal</label>
-                    <input
-                        type="number"
-                        name="skala_min"
-                        id="skala_min"
-                        class="form-control"
-                        value="<?= old('skala_min', $instrument['skala_min'] ?? 1) ?>"
-                        min="1"
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="form-grid">
-                <div class="form-row">
-                    <label class="form-label" for="skala_max">Skala Maksimal</label>
-                    <input
-                        type="number"
-                        name="skala_max"
-                        id="skala_max"
-                        class="form-control"
-                        value="<?= old('skala_max', $instrument['skala_max'] ?? 4) ?>"
-                        min="2"
-                        required
-                    >
-                </div>
-            </div>
-
-            <div class="form-row mb-0">
-                <label class="form-label">Kategori Pilihan</label>
-                <div class="table-responsive">
-                    <table class="table table-sm table-bordered mb-0" style="max-width: 520px;">
-                        <thead>
-                            <tr>
-                                <th style="width: 120px;">Nilai</th>
-                                <th>Kategori</th>
-                            </tr>
-                        </thead>
-                        <tbody id="scale-preview-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    <input type="hidden" name="scale_template" value="<?= esc($selectedScaleTemplate, 'attr') ?>">
+    <input type="hidden" name="skala_min" value="<?= esc((string) old('skala_min', $instrument['skala_min'] ?? 1), 'attr') ?>">
+    <input type="hidden" name="skala_max" value="<?= esc((string) old('skala_max', $instrument['skala_max'] ?? 4), 'attr') ?>">
+    <input type="hidden" name="status" value="<?= esc((string) old('status', $instrument['status'] ?? 'Draft'), 'attr') ?>">
 
     <div class="d-flex gap-2 mb-1">
         <button type="submit" class="btn btn-primary">Simpan</button>
@@ -326,10 +227,6 @@ if ($selectedScaleTemplate === '') {
         var form = document.querySelector('form[action]');
         var editors = [];
         var editorElements = document.querySelectorAll('.quill-editor');
-        var scaleTemplate = document.getElementById('scale_template');
-        var scaleMinInput = document.getElementById('skala_min');
-        var scaleMaxInput = document.getElementById('skala_max');
-        var scalePreviewBody = document.getElementById('scale-preview-body');
 
         function syncQuillEditor(item) {
             var text = item.quill.getText().replace(/\n$/, '').trim();
@@ -384,45 +281,6 @@ if ($selectedScaleTemplate === '') {
                 textarea.classList.add('form-control');
                 textarea.setAttribute('rows', '7');
             });
-        }
-
-        function refreshScaleTemplate() {
-            if (!scaleTemplate || !scaleMinInput || !scaleMaxInput || !scalePreviewBody) {
-                return;
-            }
-
-            var selected = scaleTemplate.options[scaleTemplate.selectedIndex];
-            if (!selected) {
-                return;
-            }
-
-            scaleMinInput.value = selected.getAttribute('data-min') || scaleMinInput.value;
-            scaleMaxInput.value = selected.getAttribute('data-max') || scaleMaxInput.value;
-
-            var labels = {};
-            try {
-                labels = JSON.parse(selected.getAttribute('data-labels') || '{}');
-            } catch (error) {
-                labels = {};
-            }
-
-            scalePreviewBody.innerHTML = '';
-            Object.keys(labels).forEach(function (score) {
-                var tr = document.createElement('tr');
-                var tdScore = document.createElement('td');
-                var tdLabel = document.createElement('td');
-
-                tdScore.textContent = score;
-                tdLabel.textContent = labels[score];
-                tr.appendChild(tdScore);
-                tr.appendChild(tdLabel);
-                scalePreviewBody.appendChild(tr);
-            });
-        }
-
-        if (scaleTemplate) {
-            scaleTemplate.addEventListener('change', refreshScaleTemplate);
-            refreshScaleTemplate();
         }
 
         if (form) {

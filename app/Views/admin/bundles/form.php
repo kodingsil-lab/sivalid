@@ -165,7 +165,7 @@
             <h3 class="card-title">Pilih Instrumen <span class="text-danger">*</span></h3>
         </div>
         <div class="card-body">
-            <p class="text-muted mb-3">Centang instrumen yang akan dimasukkan ke paket. Pengantar dan petunjuk validasi dapat diisi berbeda untuk setiap instrumen.</p>
+            <p class="text-muted mb-3">Centang instrumen yang akan dimasukkan ke paket. Pengantar, petunjuk, status, dan skala validasi dapat diatur berbeda untuk setiap instrumen.</p>
 
             <?php if (empty($instruments)): ?>
                 <div class="alert alert-warning mb-0">Belum ada instrumen yang tersedia. Tambahkan instrumen terlebih dahulu.</div>
@@ -176,8 +176,18 @@
                 $selectedDetails = isset($selectedDetails) && is_array($selectedDetails) ? $selectedDetails : [];
                 $oldPengantar = old('pengantar_validasi', []);
                 $oldPetunjuk = old('petunjuk_validasi', []);
+                $oldSkalaMin = old('skala_min_validasi', []);
+                $oldSkalaMax = old('skala_max_validasi', []);
+                $oldSkalaLabels = old('skala_labels_validasi', []);
+                $oldStatusValidasi = old('status_validasi', []);
                 $oldPengantar = is_array($oldPengantar) ? $oldPengantar : [];
                 $oldPetunjuk = is_array($oldPetunjuk) ? $oldPetunjuk : [];
+                $oldSkalaMin = is_array($oldSkalaMin) ? $oldSkalaMin : [];
+                $oldSkalaMax = is_array($oldSkalaMax) ? $oldSkalaMax : [];
+                $oldSkalaLabels = is_array($oldSkalaLabels) ? $oldSkalaLabels : [];
+                $oldStatusValidasi = is_array($oldStatusValidasi) ? $oldStatusValidasi : [];
+                $scaleTemplates = sivalid_scale_templates();
+                $validationStatusOptions = ['Siap Divalidasi', 'Draft', 'Perlu Revisi', 'Direvisi', 'Tidak Aktif'];
                 ?>
                 <div class="table-responsive">
                     <table class="table table-vcenter table-hover table-sm">
@@ -198,7 +208,8 @@
                                 $detail = $selectedDetails[$instrumentId] ?? [];
                                 $pengantarValue = (string) ($oldPengantar[$instrumentId] ?? ($detail['pengantar_validasi'] ?? ''));
                                 $petunjukValue = (string) ($oldPetunjuk[$instrumentId] ?? ($detail['petunjuk_validasi'] ?? ''));
-                                $isConfigured = trim($pengantarValue) !== '' || trim($petunjukValue) !== '';
+                                $statusValue = (string) ($oldStatusValidasi[$instrumentId] ?? ($detail['status_validasi'] ?? 'Siap Divalidasi'));
+                                $isConfigured = trim($pengantarValue) !== '' || trim($petunjukValue) !== '' || $statusValue !== 'Siap Divalidasi';
                                 ?>
                                 <tr>
                                     <td>
@@ -252,6 +263,17 @@
         $detail = $selectedDetails[$instrumentId] ?? [];
         $pengantarValue = (string) ($oldPengantar[$instrumentId] ?? ($detail['pengantar_validasi'] ?? ''));
         $petunjukValue = (string) ($oldPetunjuk[$instrumentId] ?? ($detail['petunjuk_validasi'] ?? ''));
+        $skalaMinValue = (int) ($oldSkalaMin[$instrumentId] ?? ($detail['skala_min'] ?? ($instrument['skala_min'] ?? 1)));
+        $skalaMaxValue = (int) ($oldSkalaMax[$instrumentId] ?? ($detail['skala_max'] ?? ($instrument['skala_max'] ?? 4)));
+        $skalaLabelsValue = (string) ($oldSkalaLabels[$instrumentId] ?? ($detail['skala_labels'] ?? ($instrument['skala_labels'] ?? '')));
+        $statusValue = (string) ($oldStatusValidasi[$instrumentId] ?? ($detail['status_validasi'] ?? 'Siap Divalidasi'));
+        $selectedScaleTemplate = 'relevance_4';
+        foreach ($scaleTemplates as $templateKey => $template) {
+            if ((int) $template['min'] === $skalaMinValue && (int) $template['max'] === $skalaMaxValue) {
+                $selectedScaleTemplate = (string) $templateKey;
+                break;
+            }
+        }
         ?>
         <div class="modal instrument-validation-modal" id="modalValidationText<?= $instrumentId ?>" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -263,7 +285,67 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <div class="fw-semibold"><?= esc((string) ($instrument['kode'] ?? '-')) ?> - <?= esc((string) ($instrument['judul'] ?? '-')) ?></div>
-                            <div class="text-muted small">Atur teks khusus untuk validator pada instrumen ini.</div>
+                            <div class="text-muted small">Atur teks, status, dan skala khusus untuk validator pada instrumen ini.</div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="status_validasi_<?= $instrumentId ?>">Status Validasi Instrumen</label>
+                                <select
+                                    class="form-control"
+                                    form="instrument-bundle-form"
+                                    name="status_validasi[<?= $instrumentId ?>]"
+                                    id="status_validasi_<?= $instrumentId ?>"
+                                >
+                                    <?php foreach ($validationStatusOptions as $statusOption): ?>
+                                        <option value="<?= esc($statusOption) ?>" <?= $statusValue === $statusOption ? 'selected' : '' ?>>
+                                            <?= esc($statusOption) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label" for="scale_template_validasi_<?= $instrumentId ?>">Jenis Skala Validasi</label>
+                                <select
+                                    class="form-control bundle-scale-template"
+                                    id="scale_template_validasi_<?= $instrumentId ?>"
+                                    data-target-min="skala_min_validasi_<?= $instrumentId ?>"
+                                    data-target-max="skala_max_validasi_<?= $instrumentId ?>"
+                                    data-target-labels="skala_labels_validasi_<?= $instrumentId ?>"
+                                    data-target-preview="scale_preview_validasi_<?= $instrumentId ?>"
+                                >
+                                    <?php foreach ($scaleTemplates as $templateKey => $template): ?>
+                                        <option
+                                            value="<?= esc((string) $templateKey) ?>"
+                                            data-min="<?= esc((string) $template['min']) ?>"
+                                            data-max="<?= esc((string) $template['max']) ?>"
+                                            data-labels="<?= esc(json_encode($template['labels'], JSON_UNESCAPED_UNICODE), 'attr') ?>"
+                                            <?= $selectedScaleTemplate === $templateKey ? 'selected' : '' ?>
+                                        >
+                                            <?= esc((string) $template['label']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <input type="hidden" form="instrument-bundle-form" name="skala_min_validasi[<?= $instrumentId ?>]" id="skala_min_validasi_<?= $instrumentId ?>" value="<?= esc((string) $skalaMinValue) ?>">
+                                <input type="hidden" form="instrument-bundle-form" name="skala_max_validasi[<?= $instrumentId ?>]" id="skala_max_validasi_<?= $instrumentId ?>" value="<?= esc((string) $skalaMaxValue) ?>">
+                                <input type="hidden" form="instrument-bundle-form" name="skala_labels_validasi[<?= $instrumentId ?>]" id="skala_labels_validasi_<?= $instrumentId ?>" value="<?= esc($skalaLabelsValue, 'attr') ?>">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Pilihan Validasi</label>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 120px;">Nilai</th>
+                                            <th>Kategori</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scale_preview_validasi_<?= $instrumentId ?>"></tbody>
+                                </table>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -424,13 +506,60 @@
             return item;
         }
 
+        function refreshScaleTemplate(selectElement) {
+            if (!selectElement) {
+                return;
+            }
+
+            var selected = selectElement.options[selectElement.selectedIndex];
+            var minInput = document.getElementById(selectElement.getAttribute('data-target-min'));
+            var maxInput = document.getElementById(selectElement.getAttribute('data-target-max'));
+            var labelsInput = document.getElementById(selectElement.getAttribute('data-target-labels'));
+            var previewBody = document.getElementById(selectElement.getAttribute('data-target-preview'));
+
+            if (!selected || !minInput || !maxInput || !labelsInput || !previewBody) {
+                return;
+            }
+
+            var labels = {};
+            try {
+                labels = JSON.parse(selected.getAttribute('data-labels') || '{}');
+            } catch (error) {
+                labels = {};
+            }
+
+            minInput.value = selected.getAttribute('data-min') || minInput.value;
+            maxInput.value = selected.getAttribute('data-max') || maxInput.value;
+            labelsInput.value = JSON.stringify(labels);
+            previewBody.innerHTML = '';
+
+            Object.keys(labels).forEach(function (score) {
+                var tr = document.createElement('tr');
+                var tdScore = document.createElement('td');
+                var tdLabel = document.createElement('td');
+
+                tdScore.textContent = score;
+                tdLabel.textContent = labels[score];
+                tr.appendChild(tdScore);
+                tr.appendChild(tdLabel);
+                previewBody.appendChild(tr);
+            });
+        }
+
         document.querySelectorAll('.instrument-validation-modal').forEach(function (modalElement) {
             modalElement.addEventListener('shown.bs.modal', function () {
                 modalElement.querySelectorAll('.bundle-quill-editor').forEach(initEditor);
+                modalElement.querySelectorAll('.bundle-scale-template').forEach(refreshScaleTemplate);
             });
         });
 
         form.querySelectorAll('.bundle-quill-editor').forEach(initEditor);
+        document.querySelectorAll('.bundle-scale-template').forEach(function (selectElement) {
+            selectElement.addEventListener('change', function () {
+                refreshScaleTemplate(selectElement);
+            });
+            refreshScaleTemplate(selectElement);
+        });
 
         form.addEventListener('submit', function () {
             editorMap.forEach(syncEditor);

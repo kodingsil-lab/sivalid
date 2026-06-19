@@ -326,7 +326,8 @@ $scaleMin = $scale['min'] ?? (int) ($link['skala_min'] ?? 1);
 $scaleMax = $scale['max'] ?? (int) ($link['skala_max'] ?? 4);
 $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
-$petunjuk = $petunjukPenyebaran;
+$petunjukMaster = trim((string) ($link['petunjuk'] ?? ''));
+$petunjuk = $petunjukPenyebaran !== '' ? $petunjukPenyebaran : $petunjukMaster;
 $jenisInstrumen = title_case_label((string) ($link['jenis'] ?? 'Instrumen'));
 ?>
 

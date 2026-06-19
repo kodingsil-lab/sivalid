@@ -265,7 +265,7 @@ $linkToken = $text($link, 'token', '');
         <div class="public-card">
             <h2 class="public-heading">Petunjuk Pengisian</h2>
             <div class="public-muted" style="margin-bottom: .7rem;">
-                <?= render_rich_text_content($text($link, 'petunjuk_penyebaran', $text($link, 'petunjuk', 'Petunjuk pengisian belum diisi.'))) ?>
+                <?= render_rich_text_content($text($link, 'petunjuk_penyebaran', $text($link, 'petunjuk', '-'))) ?>
             </div>
 
             <div class="public-table-wrap">

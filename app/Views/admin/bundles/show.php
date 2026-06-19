@@ -138,7 +138,8 @@
                             <th>Kode</th>
                             <th>Judul Instrumen</th>
                             <th>Jenis</th>
-                            <th>Status</th>
+                            <th>Skala Validasi</th>
+                            <th>Status Validasi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,9 +149,10 @@
                                 <td><code><?= esc($instr['kode']) ?></code></td>
                                 <td><?= esc($instr['judul']) ?></td>
                                 <td><?= esc(title_case_label((string) ($instr['jenis'] ?? '-'))) ?></td>
+                                <td><?= esc((string) ($instr['skala_min'] ?? 1)) ?> - <?= esc((string) ($instr['skala_max'] ?? 4)) ?></td>
                                 <td>
-                                    <span class="<?= esc(status_badge_class($instr['instrument_status'] ?? '')) ?>">
-                                        <?= esc(status_display_label((string) ($instr['instrument_status'] ?? ''))) ?>
+                                    <span class="<?= esc(status_badge_class($instr['status_validasi'] ?? '')) ?>">
+                                        <?= esc(status_display_label((string) ($instr['status_validasi'] ?? ''))) ?>
                                     </span>
                                 </td>
                             </tr>

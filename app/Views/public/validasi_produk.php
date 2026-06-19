@@ -95,7 +95,7 @@ $scaleOptions = isset($scale['options']) && is_array($scale['options'])
                 </table>
 
                 <h4>Petunjuk Pengisian</h4>
-                <div><?= render_rich_text_content($link['petunjuk_penyebaran'] ?: ($link['petunjuk'] ?: 'Petunjuk pengisian belum diisi.')) ?></div>
+                <div><?= render_rich_text_content($link['petunjuk_penyebaran'] ?: ($link['petunjuk'] ?: '-')) ?></div>
 
                 <div class="table-responsive mb-3">
                     <table class="table table-bordered table-sm">
