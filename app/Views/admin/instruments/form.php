@@ -278,13 +278,13 @@ if ($selectedScaleTemplate === '') {
             </div>
 
             <div class="form-row mb-0">
-                <label class="form-label">Label Pilihan</label>
+                <label class="form-label">Kategori Pilihan</label>
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered mb-0" style="max-width: 520px;">
                         <thead>
                             <tr>
                                 <th style="width: 120px;">Nilai</th>
-                                <th>Label</th>
+                                <th>Kategori</th>
                             </tr>
                         </thead>
                         <tbody id="scale-preview-body"></tbody>
