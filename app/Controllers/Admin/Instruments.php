@@ -214,7 +214,7 @@ class Instruments extends BaseController
         ]);
 
         return redirect()
-            ->to(base_url('admin/instruments'))
+            ->to(base_url('admin/instruments/' . (int) $id))
             ->with('success', 'Data instrumen berhasil diperbarui.');
     }
 
