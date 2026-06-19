@@ -160,12 +160,13 @@ if ($selectedScaleTemplate === '') {
         <div class="card-body">
             <div class="form-row">
                 <label class="form-label" for="pengantar">Pengantar</label>
-                <input
-                    type="hidden"
+                <textarea
                     name="pengantar"
                     id="pengantar"
-                    value="<?= esc((string) old('pengantar', $instrument['pengantar'] ?? ''), 'attr') ?>"
-                >
+                    class="form-control rich-text-fallback"
+                    rows="5"
+                    placeholder="Tuliskan pengantar yang akan tampil pada instrumen."
+                ><?= esc((string) old('pengantar', $instrument['pengantar'] ?? '')) ?></textarea>
                 <div
                     id="pengantar-editor"
                     class="quill-editor"
@@ -177,12 +178,13 @@ if ($selectedScaleTemplate === '') {
 
             <div class="form-row">
                 <label class="form-label" for="petunjuk">Petunjuk Pengisian</label>
-                <input
-                    type="hidden"
+                <textarea
                     name="petunjuk"
                     id="petunjuk"
-                    value="<?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? ''), 'attr') ?>"
-                >
+                    class="form-control rich-text-fallback"
+                    rows="5"
+                    placeholder="Tuliskan petunjuk pengisian instrumen."
+                ><?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? '')) ?></textarea>
                 <div
                     id="petunjuk-editor"
                     class="quill-editor"
@@ -307,8 +309,17 @@ if ($selectedScaleTemplate === '') {
 <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
     .quill-editor {
+        display: none;
         background: #fff;
         border-radius: 4px;
+    }
+
+    .quill-editor.is-ready {
+        display: block;
+    }
+
+    .rich-text-fallback.is-enhanced {
+        display: none;
     }
 
     .quill-editor.ql-container,
@@ -327,11 +338,6 @@ if ($selectedScaleTemplate === '') {
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var editorElements = document.querySelectorAll('.quill-editor');
-
-        if (editorElements.length === 0) {
-            return;
-        }
-
         var editors = [];
 
         editorElements.forEach(function (editorElement) {
@@ -343,31 +349,43 @@ if ($selectedScaleTemplate === '') {
                 return;
             }
 
-            var quill = new Quill(editorElement, {
-                theme: 'snow',
-                placeholder: editorElement.getAttribute('data-placeholder') || '',
-                modules: {
-                    toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        [{ indent: '-1' }, { indent: '+1' }],
-                        [{ align: [] }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            if (/<[a-z][\s\S]*>/i.test(initialContent)) {
-                quill.clipboard.dangerouslyPasteHTML(initialContent);
-            } else {
-                quill.setText(initialContent);
+            if (typeof Quill === 'undefined') {
+                return;
             }
 
-            editors.push({
-                quill: quill,
-                input: targetInput
-            });
+            try {
+                var quill = new Quill(editorElement, {
+                    theme: 'snow',
+                    placeholder: editorElement.getAttribute('data-placeholder') || '',
+                    modules: {
+                        toolbar: [
+                            [{ header: [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            [{ indent: '-1' }, { indent: '+1' }],
+                            [{ align: [] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                if (/<[a-z][\s\S]*>/i.test(initialContent)) {
+                    quill.clipboard.dangerouslyPasteHTML(initialContent);
+                } else {
+                    quill.setText(initialContent);
+                }
+
+                editorElement.classList.add('is-ready');
+                targetInput.classList.add('is-enhanced');
+
+                editors.push({
+                    quill: quill,
+                    input: targetInput
+                });
+            } catch (error) {
+                editorElement.classList.remove('is-ready');
+                targetInput.classList.remove('is-enhanced');
+            }
         });
 
         var form = document.querySelector('form[action]');
