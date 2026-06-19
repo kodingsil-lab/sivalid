@@ -326,9 +326,7 @@ $scaleMin = $scale['min'] ?? (int) ($link['skala_min'] ?? 1);
 $scaleMax = $scale['max'] ?? (int) ($link['skala_max'] ?? 4);
 $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
 $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
-$petunjuk = $petunjukPenyebaran !== ''
-    ? $petunjukPenyebaran
-    : 'Pilih skor ' . $scaleMin . ' sampai ' . $scaleMax . ' sesuai tingkat persetujuan Anda.';
+$petunjuk = $petunjukPenyebaran;
 $jenisInstrumen = title_case_label((string) ($link['jenis'] ?? 'Instrumen'));
 ?>
 
@@ -389,10 +387,12 @@ $jenisInstrumen = title_case_label((string) ($link['jenis'] ?? 'Instrumen'));
                 </tbody>
             </table>
 
-            <h2 class="section-title">Petunjuk Pengisian</h2>
-            <div class="section-intro">
-                <?= render_rich_text_content($petunjuk) ?>
-            </div>
+            <?php if ($petunjuk !== ''): ?>
+                <h2 class="section-title">Petunjuk Pengisian</h2>
+                <div class="section-intro">
+                    <?= render_rich_text_content($petunjuk) ?>
+                </div>
+            <?php endif; ?>
 
             <h2 class="section-title">Butir Instrumen</h2>
             <?php if (empty($items)): ?>

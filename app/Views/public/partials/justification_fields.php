@@ -1,5 +1,10 @@
 <?php
 $config = isset($justificationConfig) && is_array($justificationConfig) ? $justificationConfig : [];
+
+if (($config['template'] ?? '') === 'none') {
+    return;
+}
+
 $commentLabel = (string) ($config['comment_label'] ?? 'Komentar/Saran');
 $commentPlaceholder = (string) ($config['comment_placeholder'] ?? 'Tuliskan komentar atau saran.');
 $commentRequired = !empty($config['comment_required']);

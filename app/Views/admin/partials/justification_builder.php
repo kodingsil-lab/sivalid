@@ -7,12 +7,22 @@ if ($selectedTemplate === '' || !isset($templates[$selectedTemplate])) {
     $selectedTemplate = array_key_first($templates);
 }
 
+$isNoneTemplate = $selectedTemplate === 'none';
 $commentLabel = old('justification_comment_label', $config['comment_label'] ?? 'Komentar/Saran');
 $commentPlaceholder = old('justification_comment_placeholder', $config['comment_placeholder'] ?? '');
 $commentRequired = old('justification_comment_required', !empty($config['comment_required']) ? '1' : '');
 $conclusionLabel = old('justification_conclusion_label', $config['conclusion_label'] ?? 'Kesimpulan');
 $conclusionRequired = old('justification_conclusion_required', !empty($config['conclusion_required']) ? '1' : '1');
 $conclusionOptions = old('justification_conclusion_options', implode("\n", $config['conclusion_options'] ?? []));
+
+if ($isNoneTemplate && old('justification_template') === null) {
+    $commentLabel = '';
+    $commentPlaceholder = '';
+    $commentRequired = '';
+    $conclusionLabel = '';
+    $conclusionRequired = '';
+    $conclusionOptions = '';
+}
 ?>
 
 <div class="justification-builder" data-templates="<?= esc(json_encode($templates, JSON_UNESCAPED_UNICODE), 'attr') ?>">
@@ -28,7 +38,7 @@ $conclusionOptions = old('justification_conclusion_options', implode("\n", $conf
         <small class="text-muted">Bagian ini mengatur komentar/saran dan kesimpulan akhir yang muncul di halaman publik.</small>
     </div>
 
-    <div class="justification-panel">
+    <div class="justification-panel <?= $isNoneTemplate ? 'd-none' : '' ?>">
         <div class="form-grid">
             <div class="form-row">
                 <label class="form-label" for="justification_comment_label">Label Komentar/Saran</label>
@@ -98,13 +108,16 @@ $conclusionOptions = old('justification_conclusion_options', implode("\n", $conf
                 var conclusionOptions = builder.querySelector('#justification_conclusion_options');
                 var commentRequired = builder.querySelector('input[name="justification_comment_required"]');
                 var conclusionRequired = builder.querySelector('input[name="justification_conclusion_required"]');
+                var panel = builder.querySelector('.justification-panel');
+                var isNone = select.value === 'none';
 
                 if (commentLabel) commentLabel.value = selected.comment_label || '';
                 if (commentPlaceholder) commentPlaceholder.value = selected.comment_placeholder || '';
                 if (conclusionLabel) conclusionLabel.value = selected.conclusion_label || '';
                 if (conclusionOptions) conclusionOptions.value = Array.isArray(selected.conclusion_options) ? selected.conclusion_options.join("\n") : '';
-                if (commentRequired) commentRequired.checked = !!selected.comment_required;
-                if (conclusionRequired) conclusionRequired.checked = selected.conclusion_required !== false;
+                if (commentRequired) commentRequired.checked = isNone ? false : !!selected.comment_required;
+                if (conclusionRequired) conclusionRequired.checked = isNone ? false : selected.conclusion_required !== false;
+                if (panel) panel.classList.toggle('d-none', isNone);
             });
         });
     });

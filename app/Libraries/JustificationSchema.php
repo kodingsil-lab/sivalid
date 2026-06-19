@@ -7,6 +7,15 @@ class JustificationSchema
     public static function templates(): array
     {
         return [
+            'none' => [
+                'label' => 'Tidak ada',
+                'comment_label' => '',
+                'comment_placeholder' => '',
+                'comment_required' => false,
+                'conclusion_label' => '',
+                'conclusion_required' => false,
+                'conclusion_options' => [],
+            ],
             'validasi_instrumen' => [
                 'label' => 'Validasi Instrumen',
                 'comment_label' => 'Komentar/Saran Umum Validator',
@@ -142,6 +151,21 @@ class JustificationSchema
 
     public static function normalizeConfig(array $config): array
     {
+        $template = trim((string) ($config['template'] ?? 'custom')) ?: 'custom';
+
+        if ($template === 'none') {
+            return [
+                'template' => 'none',
+                'label' => 'Tidak ada',
+                'comment_label' => '',
+                'comment_placeholder' => '',
+                'comment_required' => false,
+                'conclusion_label' => '',
+                'conclusion_required' => false,
+                'conclusion_options' => [],
+            ];
+        }
+
         $options = $config['conclusion_options'] ?? [];
 
         if (is_string($options)) {
@@ -157,7 +181,7 @@ class JustificationSchema
         }
 
         return [
-            'template' => trim((string) ($config['template'] ?? 'custom')) ?: 'custom',
+            'template' => $template,
             'label' => trim((string) ($config['label'] ?? 'Custom')) ?: 'Custom',
             'comment_label' => trim((string) ($config['comment_label'] ?? 'Komentar/Saran')) ?: 'Komentar/Saran',
             'comment_placeholder' => trim((string) ($config['comment_placeholder'] ?? 'Tuliskan komentar atau saran.')),
