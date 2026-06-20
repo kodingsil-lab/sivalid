@@ -5,6 +5,13 @@ if (($config['template'] ?? '') === 'none') {
     return;
 }
 
+$showComment = !array_key_exists('show_comment', $config) || !empty($config['show_comment']);
+$showConclusion = !array_key_exists('show_conclusion', $config) || !empty($config['show_conclusion']);
+
+if (!$showComment && !$showConclusion) {
+    return;
+}
+
 $commentLabel = (string) ($config['comment_label'] ?? 'Komentar/Saran');
 $commentPlaceholder = (string) ($config['comment_placeholder'] ?? 'Tuliskan komentar atau saran.');
 $commentRequired = !empty($config['comment_required']);
@@ -16,6 +23,7 @@ $conclusionOptions = isset($config['conclusion_options']) && is_array($config['c
 $selectedConclusion = old('kesimpulan');
 ?>
 
+<?php if ($showComment): ?>
 <div class="public-card">
     <h2 class="public-heading"><?= esc($commentLabel) ?><?= $commentRequired ? ' <span class="public-required-note">*</span>' : '' ?></h2>
     <textarea
@@ -25,7 +33,9 @@ $selectedConclusion = old('kesimpulan');
         <?= $commentRequired ? 'required' : '' ?>
     ><?= esc(old('komentar_umum')) ?></textarea>
 </div>
+<?php endif; ?>
 
+<?php if ($showConclusion): ?>
 <div class="public-card">
     <h2 class="public-heading"><?= esc($conclusionLabel) ?><?= $conclusionRequired ? ' <span class="public-required-note">*</span>' : '' ?></h2>
 
@@ -48,6 +58,7 @@ $selectedConclusion = old('kesimpulan');
         <?php endforeach; ?>
     </div>
 </div>
+<?php endif; ?>
 
 <style>
     .public-card {

@@ -219,3 +219,59 @@ if (! function_exists('instrument_item_entry_layout')) {
         ];
     }
 }
+
+if (! function_exists('instrument_public_justification_config')) {
+    function instrument_public_justification_config(?string $jenis): array
+    {
+        return match (instrument_type_key($jenis)) {
+            'angket_validasi_produk' => [
+                'template' => 'instrument_type',
+                'label' => 'Angket Validasi Produk',
+                'show_comment' => true,
+                'comment_label' => 'Komentar/Saran',
+                'comment_placeholder' => 'Tuliskan komentar atau saran.',
+                'comment_required' => false,
+                'show_conclusion' => true,
+                'conclusion_label' => 'Kesimpulan Validasi',
+                'conclusion_required' => true,
+                'conclusion_options' => ['Sangat Layak', 'Layak', 'Kurang Layak', 'Tidak Layak'],
+            ],
+            'angket_respon_pengguna' => [
+                'template' => 'instrument_type',
+                'label' => 'Angket Respon Pengguna',
+                'show_comment' => true,
+                'comment_label' => 'Catatan/Saran Pengguna',
+                'comment_placeholder' => 'Tuliskan catatan atau saran pengguna.',
+                'comment_required' => false,
+                'show_conclusion' => false,
+                'conclusion_label' => '',
+                'conclusion_required' => false,
+                'conclusion_options' => [],
+            ],
+            'rubrik_penilaian' => [
+                'template' => 'instrument_type',
+                'label' => 'Rubrik Penilaian',
+                'show_comment' => true,
+                'comment_label' => 'Catatan Penilai',
+                'comment_placeholder' => 'Tuliskan catatan penilai.',
+                'comment_required' => false,
+                'show_conclusion' => true,
+                'conclusion_label' => 'Kesimpulan Penilaian',
+                'conclusion_required' => true,
+                'conclusion_options' => ['Sangat Baik', 'Baik', 'Cukup', 'Kurang', 'Sangat Kurang'],
+            ],
+            default => [
+                'template' => 'none',
+                'label' => 'Tidak ada',
+                'show_comment' => false,
+                'comment_label' => '',
+                'comment_placeholder' => '',
+                'comment_required' => false,
+                'show_conclusion' => false,
+                'conclusion_label' => '',
+                'conclusion_required' => false,
+                'conclusion_options' => [],
+            ],
+        };
+    }
+}

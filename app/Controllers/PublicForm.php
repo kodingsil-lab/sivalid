@@ -27,6 +27,8 @@ class PublicForm extends BaseController
 
     public function __construct()
     {
+        helper('instrument_layout');
+
         $this->linkModel       = new InstrumentLinkModel();
         $this->aspectModel     = new InstrumentAspectModel();
         $this->indicatorModel  = new InstrumentIndicatorModel();
@@ -115,7 +117,7 @@ class PublicForm extends BaseController
             'scale'      => $scale,
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
-            'justificationConfig' => JustificationSchema::configForLink($link),
+            'justificationConfig' => $this->justificationConfigForPublicForm($link),
         ];
 
         return view('public/validasi_instrumen', $data);
@@ -154,7 +156,7 @@ class PublicForm extends BaseController
             'scale'   => $scale,
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
-            'justificationConfig' => JustificationSchema::configForLink($link),
+            'justificationConfig' => $this->justificationConfigForPublicForm($link),
         ];
 
         return view('public/validasi_produk', $data);
@@ -206,7 +208,7 @@ class PublicForm extends BaseController
             'scale'   => $scale,
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
-            'justificationConfig' => JustificationSchema::configForLink($link),
+            'justificationConfig' => $this->justificationConfigForPublicForm($link),
         ]);
     }
 
@@ -258,10 +260,12 @@ class PublicForm extends BaseController
         }
 
         $identityFields = RespondentIdentitySchema::fieldsForLink($link);
-        $justificationConfig = JustificationSchema::configForLink($link);
+        $justificationConfig = $this->justificationConfigForPublicForm($link);
+        $showComment = !array_key_exists('show_comment', $justificationConfig) || !empty($justificationConfig['show_comment']);
+        $showConclusion = !array_key_exists('show_conclusion', $justificationConfig) || !empty($justificationConfig['show_conclusion']);
         $rules = $this->identityValidationRules($identityFields) + [
-            'komentar_umum'    => !empty($justificationConfig['comment_required']) ? 'required' : 'permit_empty',
-            'kesimpulan'       => !empty($justificationConfig['conclusion_required']) ? 'required|max_length[150]' : 'permit_empty|max_length[150]',
+            'komentar_umum'    => $showComment && !empty($justificationConfig['comment_required']) ? 'required' : 'permit_empty',
+            'kesimpulan'       => $showConclusion && !empty($justificationConfig['conclusion_required']) ? 'required|max_length[150]' : 'permit_empty|max_length[150]',
         ];
 
         if (!$this->validate($rules)) {
@@ -794,5 +798,14 @@ class PublicForm extends BaseController
             'komentar_umum' => trim((string) $this->request->getPost('komentar_umum')),
             'kesimpulan' => trim((string) $this->request->getPost('kesimpulan')),
         ];
+    }
+
+    private function justificationConfigForPublicForm(array $link): array
+    {
+        if (in_array((string) ($link['mode'] ?? ''), ['validasi_instrumen', 'validasi_produk'], true)) {
+            return JustificationSchema::configForLink($link);
+        }
+
+        return instrument_public_justification_config($link['jenis'] ?? '');
     }
 }

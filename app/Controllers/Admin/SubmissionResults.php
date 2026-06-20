@@ -39,6 +39,8 @@ class SubmissionResults extends BaseController
 
     public function __construct()
     {
+        helper('instrument_layout');
+
         $this->responseModel   = new ResponseModel();
         $this->answerModel     = new ResponseAnswerModel();
         $this->instrumentModel = new InstrumentModel();
@@ -268,7 +270,7 @@ class SubmissionResults extends BaseController
             return $this->exportTypedWordReport($filters, $jenis);
         }
 
-        return $this->exportExcel();
+        return $this->exportTypedExcelReport($filters, $jenis);
     }
 
     public function show($id = null)
@@ -543,6 +545,11 @@ class SubmissionResults extends BaseController
                  instrument_items.wajib,
                  instrument_items.pernyataan,
                  instrument_items.sumber_dokumen,
+                 instrument_items.skor_1_deskripsi,
+                 instrument_items.skor_2_deskripsi,
+                 instrument_items.skor_3_deskripsi,
+                 instrument_items.skor_4_deskripsi,
+                 instrument_items.skor_5_deskripsi,
                  response_answers.skor,
                  response_answers.jawaban_teks,
                  response_answers.komentar'
@@ -1051,6 +1058,168 @@ class SubmissionResults extends BaseController
         <?php
 
         return (string) ob_get_clean();
+    }
+
+    private function exportTypedExcelReport(array $filters, string $jenis)
+    {
+        $layout = instrument_preview_layout($jenis);
+        $rows = $this->buildTypedExcelRows($this->getExportRows($filters), $jenis);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle(substr((string) ($layout['title'] ?? 'Laporan'), 0, 31));
+
+        $sheet->fromArray($rows['headers'], null, 'A1');
+        $rowNumber = 2;
+
+        foreach ($rows['rows'] as $row) {
+            $sheet->fromArray($row, null, 'A' . $rowNumber);
+            $rowNumber++;
+        }
+
+        $highestColumn = $sheet->getHighestColumn();
+        $highestRow = max(1, $sheet->getHighestRow());
+        $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
+            'font' => ['bold' => true],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'EAF2F8'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ]);
+        $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => 'D9E2EC'],
+                ],
+            ],
+            'alignment' => [
+                'vertical' => Alignment::VERTICAL_TOP,
+                'wrapText' => true,
+            ],
+        ]);
+
+        $highestColumnIndex = Coordinate::columnIndexFromString($highestColumn);
+        for ($columnIndex = 1; $columnIndex <= $highestColumnIndex; $columnIndex++) {
+            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setAutoSize(true);
+        }
+
+        $sheet->freezePane('A2');
+        $sheet->setAutoFilter('A1:' . $highestColumn . '1');
+        $sheet->getPageSetup()
+            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+
+        $filename = $this->safeExportFileName('laporan-' . ($layout['title'] ?? 'instrumen')) . '-' . date('Ymd-His') . '.xlsx';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($this->spreadsheetToString($spreadsheet));
+    }
+
+    private function buildTypedExcelRows(array $sourceRows, string $jenis): array
+    {
+        $layout = instrument_preview_layout($jenis);
+        $layoutType = (string) ($layout['type'] ?? 'standard');
+        $justification = instrument_public_justification_config($jenis);
+        $headers = [
+            'Response ID',
+            'Waktu Submit',
+            'Nama',
+            'Email',
+            'NIM/No. Identitas',
+            'Program Studi',
+            'Kelas',
+            'Semester',
+            'Instansi',
+            'Bidang/Jabatan',
+            'Judul Link',
+            'Kode Instrumen',
+            'Instrumen',
+            'Produk',
+            'No Butir',
+            (string) ($layout['aspect'] ?? 'Aspek'),
+            (string) ($layout['item'] ?? 'Butir'),
+        ];
+
+        if ($layoutType === 'rubric_assessment') {
+            foreach (range(1, 5) as $score) {
+                $headers[] = 'Deskripsi Skor ' . $score;
+            }
+            $headers[] = 'Skor yang Diperoleh';
+        } elseif (in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire', 'performance_test'], true)) {
+            $headers[] = 'Skor';
+        } else {
+            $headers[] = 'Jawaban';
+        }
+
+        $headers[] = 'Komentar Butir';
+
+        if (!empty($justification['show_comment'])) {
+            $headers[] = (string) ($justification['comment_label'] ?? 'Komentar/Saran');
+        }
+
+        if (!empty($justification['show_conclusion'])) {
+            $headers[] = (string) ($justification['conclusion_label'] ?? 'Kesimpulan');
+        }
+
+        $rows = [];
+
+        foreach ($sourceRows as $sourceRow) {
+            $row = [
+                $sourceRow['response_id'] ?? '',
+                $sourceRow['submitted_at'] ?? '',
+                $sourceRow['nama'] ?? '',
+                $sourceRow['email'] ?? '',
+                $sourceRow['nim'] ?? '',
+                $sourceRow['program_studi'] ?? '',
+                $sourceRow['kelas'] ?? '',
+                $sourceRow['semester'] ?? '',
+                $sourceRow['instansi'] ?? '',
+                $sourceRow['bidang_keahlian'] ?? '',
+                $sourceRow['judul_link'] ?? '',
+                $sourceRow['instrument_kode'] ?? '',
+                $sourceRow['instrument_judul'] ?? '',
+                $sourceRow['nama_produk'] ?? '',
+                $sourceRow['nomor'] ?? '',
+                $sourceRow['nama_aspek'] ?? '',
+                $sourceRow['pernyataan'] ?? '',
+            ];
+
+            if ($layoutType === 'rubric_assessment') {
+                foreach (range(1, 5) as $score) {
+                    $row[] = $sourceRow['skor_' . $score . '_deskripsi'] ?? '';
+                }
+                $row[] = $sourceRow['skor'] ?? '';
+            } elseif (in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire', 'performance_test'], true)) {
+                $row[] = $sourceRow['skor'] ?? '';
+            } else {
+                $row[] = trim((string) (($sourceRow['jawaban_teks'] ?? '') ?: ($sourceRow['skor'] ?? '')));
+            }
+
+            $row[] = $sourceRow['komentar'] ?? '';
+
+            if (!empty($justification['show_comment'])) {
+                $row[] = $sourceRow['komentar_umum'] ?? '';
+            }
+
+            if (!empty($justification['show_conclusion'])) {
+                $row[] = $sourceRow['kesimpulan'] ?? '';
+            }
+
+            $rows[] = $row;
+        }
+
+        return [
+            'headers' => $headers,
+            'rows' => $rows,
+        ];
     }
 
     private function safeExportFileName(string $name): string

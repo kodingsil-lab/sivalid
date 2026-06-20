@@ -604,7 +604,7 @@ class InstrumentItems extends BaseController
 
             if (in_array($key, ['no', 'nomor', 'nomor butir'], true)) {
                 $map['number'] = $index;
-            } elseif (in_array($key, ['aspek', 'nama aspek'], true)) {
+            } elseif (in_array($key, ['aspek', 'nama aspek'], true) || strpos($key, 'aspek yang ') === 0) {
                 $map['aspect_name'] = $index;
             } elseif (in_array($key, $statementHeaders, true)) {
                 $map['statement'] = $index;
