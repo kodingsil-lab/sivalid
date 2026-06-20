@@ -115,10 +115,6 @@
             </form>
         </div>
     </div>
-
-    <div class="text-center text-muted mt-3" style="font-size:12px;">
-        Login awal: <code>admin@sivalid.test</code> / <code>admin123</code>
-    </div>
 </div>
 
 </body>
