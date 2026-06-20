@@ -760,6 +760,67 @@ tbody tr:hover td {
     background: #f8fbff;
 }
 
+/* Rich text output from TinyMCE: lists and tables should read like document prose. */
+.rich-text-content {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.rich-text-content p,
+.rich-text-content ol,
+.rich-text-content ul,
+.rich-text-content table {
+    margin-top: 0;
+    margin-bottom: .75rem;
+}
+
+.rich-text-content ol,
+.rich-text-content ul {
+    padding-left: 1.65rem;
+}
+
+.rich-text-content ol ol {
+    list-style-type: lower-alpha;
+}
+
+.rich-text-content ol ol ol {
+    list-style-type: lower-roman;
+}
+
+.rich-text-content li {
+    padding-left: .18rem;
+    margin-bottom: .35rem;
+}
+
+.rich-text-content li::marker {
+    font-weight: 500;
+}
+
+.rich-text-content table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    font-size: inherit;
+}
+
+.rich-text-content th,
+.rich-text-content td {
+    min-width: 120px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    vertical-align: top;
+}
+
+.rich-text-content th:first-child,
+.rich-text-content td:first-child {
+    min-width: 72px;
+}
+
+.rich-text-content > :last-child {
+    margin-bottom: 0;
+}
+
 .page-body .table-no-hover > tbody > tr:hover {
     background: transparent !important;
 }
