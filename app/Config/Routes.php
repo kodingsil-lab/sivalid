@@ -26,9 +26,6 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('instrument-items/import', 'Admin\InstrumentItems::import');
     $routes->get('instrument-items/import-template', 'Admin\InstrumentItems::importTemplate');
     $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
-    $routes->get('product-types', 'Admin\ProductTypes::index');
-    $routes->post('product-types', 'Admin\ProductTypes::create');
-    $routes->delete('product-types/(:num)', 'Admin\ProductTypes::delete/$1');
     $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->get('instrument-bundles/(:num)/sessions', 'Admin\InstrumentBundles::sessions/$1');
     $routes->get('instrument-bundles/(:num)/sessions/(:num)', 'Admin\InstrumentBundles::sessionDetail/$1/$2');

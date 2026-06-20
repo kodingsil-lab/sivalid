@@ -58,7 +58,6 @@
                 <div class="settings-nav-group">
                     <div class="settings-nav-label">Data Referensi</div>
                     <a href="<?= base_url('admin/settings?tab=instrument-types') ?>" class="settings-nav-link <?= $activeTab === 'instrument-types' ? 'active' : '' ?>">Jenis Instrumen</a>
-                    <a href="<?= base_url('admin/settings?tab=product-types') ?>" class="settings-nav-link <?= $activeTab === 'product-types' ? 'active' : '' ?>">Jenis Produk</a>
                 </div>
 
                 <div class="settings-nav-group">
@@ -201,87 +200,6 @@
                                                     <td class="table-actions-cell">
                                                         <?php if ($usedCount === 0): ?>
                                                             <form action="<?= base_url('admin/instrument-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis instrumen ini?');">
-                                                                <?= csrf_field() ?>
-                                                                <input type="hidden" name="_method" value="DELETE">
-                                                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                                            </form>
-                                                        <?php else: ?>
-                                                            <span class="text-muted small">Tidak bisa dihapus</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <?php elseif ($activeTab === 'product-types'): ?>
-
-                <section id="section-product-types" class="settings-section settings-section-last">
-                    <div class="settings-section-header">
-                        <h3>Jenis Produk</h3>
-                        <p>Kelola daftar jenis yang muncul pada dropdown Jenis Produk di form Produk Penelitian.</p>
-                    </div>
-
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h3 class="card-title">Tambah Jenis Baru</h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="<?= base_url('admin/product-types') ?>" method="post" class="search-form">
-                                <?= csrf_field() ?>
-                                <input
-                                    type="text"
-                                    name="jenis"
-                                    class="form-control"
-                                    placeholder="Contoh: Modul Interaktif"
-                                    value="<?= old('jenis') ?>"
-                                    maxlength="100"
-                                    required
-                                >
-                                <button type="submit" class="btn btn-primary">Tambah</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="card mb-0">
-                        <div class="card-header">
-                            <h3 class="card-title">Daftar Jenis Produk</h3>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-vcenter table-hover table-sm mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 70px;">No</th>
-                                            <th>Nama Jenis</th>
-                                            <th style="width: 200px;">Dipakai di Produk</th>
-                                            <th class="table-actions-cell">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if (empty($productTypes)): ?>
-                                            <tr>
-                                                <td colspan="4" class="text-center text-muted py-4">Belum ada jenis produk.</td>
-                                            </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($productTypes as $index => $type): ?>
-                                                <?php
-                                                $label = (string) ($type['setting_value'] ?? '');
-                                                $usedCount = (int) ($productTypeUsage[$label] ?? 0);
-                                                ?>
-                                                <tr>
-                                                    <td><?= $index + 1 ?></td>
-                                                    <td><?= esc($label) ?></td>
-                                                    <td>
-                                                        <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
-                                                    </td>
-                                                    <td class="table-actions-cell">
-                                                        <?php if ($usedCount === 0): ?>
-                                                            <form action="<?= base_url('admin/product-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis produk ini?');">
                                                                 <?= csrf_field() ?>
                                                                 <input type="hidden" name="_method" value="DELETE">
                                                                 <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
