@@ -155,28 +155,28 @@ if ($selectedScaleTemplate === '') {
 
     <div class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Pengantar dan Petunjuk Penyebaran</h3>
+            <h3 class="card-title">Pengantar dan Petunjuk</h3>
         </div>
         <div class="card-body">
             <div class="form-row">
-                <label class="form-label" for="pengantar">Pengantar Instrumen Siap Disebar</label>
+                <label class="form-label" for="pengantar">Pengantar</label>
                 <textarea
                     name="pengantar"
                     id="pengantar"
                     class="form-control rich-text-editor"
                     rows="10"
-                    data-placeholder="Tuliskan pengantar yang tampil saat instrumen disebarkan kepada responden."
+                    data-placeholder="Tuliskan pengantar instrumen."
                 ><?= esc((string) old('pengantar', $instrument['pengantar'] ?? '')) ?></textarea>
             </div>
 
             <div class="form-row">
-                <label class="form-label" for="petunjuk">Petunjuk Pengisian Responden</label>
+                <label class="form-label" for="petunjuk">Petunjuk</label>
                 <textarea
                     name="petunjuk"
                     id="petunjuk"
                     class="form-control rich-text-editor"
                     rows="10"
-                    data-placeholder="Tuliskan petunjuk pengisian saat instrumen disebarkan kepada responden."
+                    data-placeholder="Tuliskan petunjuk pengisian instrumen."
                 ><?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? '')) ?></textarea>
             </div>
         </div>
