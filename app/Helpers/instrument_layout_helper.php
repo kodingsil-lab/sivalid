@@ -26,11 +26,11 @@ if (! function_exists('instrument_type_key')) {
             return 'panduan_analisis_perangkat_pembelajaran';
         }
 
-        if (str_contains($jenis, 'pedoman wawancara')) {
+        if (str_contains($jenis, 'pedoman wawancara') || $jenis === 'wawancara') {
             return 'pedoman_wawancara';
         }
 
-        if (str_contains($jenis, 'pedoman observasi')) {
+        if (str_contains($jenis, 'pedoman observasi') || $jenis === 'observasi') {
             return 'pedoman_observasi';
         }
 
@@ -214,6 +214,7 @@ if (! function_exists('instrument_item_entry_layout')) {
                 'questionnaire',
                 'product_validation_questionnaire',
                 'user_response_questionnaire',
+                'performance_test',
             ], true) ? 'skala' : 'isian',
             'excel_item_header' => (string) ($preview['item'] ?? 'Butir Pernyataan'),
         ];

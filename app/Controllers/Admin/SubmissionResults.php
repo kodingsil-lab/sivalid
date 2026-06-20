@@ -291,6 +291,12 @@ class SubmissionResults extends BaseController
                  instrument_items.pernyataan,
                  instrument_items.tipe_butir,
                  instrument_items.wajib,
+                 instrument_items.sumber_dokumen,
+                 instrument_items.skor_1_deskripsi,
+                 instrument_items.skor_2_deskripsi,
+                 instrument_items.skor_3_deskripsi,
+                 instrument_items.skor_4_deskripsi,
+                 instrument_items.skor_5_deskripsi,
                  instrument_aspects.nama_aspek'
             )
             ->join('instrument_items', 'instrument_items.id = response_answers.instrument_item_id')

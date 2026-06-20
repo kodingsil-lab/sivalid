@@ -169,17 +169,17 @@ class PublicForm extends BaseController
 
     private function showObservasi(array $link)
     {
-        return $this->showGenericRespondentForm($link, 'public/observasi', 'Observasi');
+        return $this->showGenericRespondentForm($link, 'public/pengisian_instrumen', 'Observasi');
     }
 
     private function showFgd(array $link)
     {
-        return $this->showGenericRespondentForm($link, 'public/fgd', 'FGD');
+        return $this->showGenericRespondentForm($link, 'public/pengisian_instrumen', 'FGD');
     }
 
     private function showTesKinerja(array $link)
     {
-        return $this->showGenericRespondentForm($link, 'public/tes_kinerja', 'Tes Kinerja');
+        return $this->showGenericRespondentForm($link, 'public/pengisian_instrumen', 'Tes Kinerja');
     }
 
     private function showGenericRespondentForm(array $link, string $view, string $title)
@@ -322,7 +322,7 @@ class PublicForm extends BaseController
 
         foreach ($items as $item) {
             $itemId    = (int) $item['id'];
-            $tipeButir = $item['tipe_butir'] ?? 'skala';
+            $answerKind = $this->publicAnswerKind($link, $item);
             $wajib     = (int) ($item['wajib'] ?? 1) === 1;
 
             $answer = $answers[$itemId] ?? [];
@@ -331,7 +331,7 @@ class PublicForm extends BaseController
                 $answer = [];
             }
 
-            if ($tipeButir === 'skala') {
+            if ($answerKind === 'skala') {
                 if ($wajib && !isset($answer['skor'])) {
                     return redirect()
                         ->back()
@@ -455,7 +455,7 @@ class PublicForm extends BaseController
 
         foreach ($items as $item) {
             $itemId    = (int) $item['id'];
-            $tipeButir = $item['tipe_butir'] ?? 'skala';
+            $answerKind = $this->publicAnswerKind($link, $item);
 
             $answer = $answers[$itemId] ?? [];
 
@@ -466,7 +466,7 @@ class PublicForm extends BaseController
             $score = null;
             $jawabanTeks = null;
 
-            if ($tipeButir === 'skala') {
+            if ($answerKind === 'skala') {
                 if (isset($answer['skor']) && $answer['skor'] !== '') {
                     $score = (int) $answer['skor'];
                 }
@@ -807,5 +807,31 @@ class PublicForm extends BaseController
         }
 
         return instrument_public_justification_config($link['jenis'] ?? '');
+    }
+
+    private function publicAnswerKind(array $link, array $item): string
+    {
+        if (in_array((string) ($link['mode'] ?? ''), ['validasi_instrumen', 'validasi_produk'], true)) {
+            return ($item['tipe_butir'] ?? 'skala') === 'skala' ? 'skala' : 'isian';
+        }
+
+        $layoutType = (string) (instrument_preview_layout($link['jenis'] ?? '')['type'] ?? 'standard');
+
+        if (in_array($layoutType, ['interview_guide', 'observation_guide'], true)) {
+            return 'isian';
+        }
+
+        if (in_array($layoutType, [
+            'document_review',
+            'questionnaire',
+            'product_validation_questionnaire',
+            'user_response_questionnaire',
+            'performance_test',
+            'rubric_assessment',
+        ], true)) {
+            return 'skala';
+        }
+
+        return ($item['tipe_butir'] ?? 'skala') === 'skala' ? 'skala' : 'isian';
     }
 }

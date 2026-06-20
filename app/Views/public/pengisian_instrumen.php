@@ -162,6 +162,12 @@
             font-size: .92rem;
         }
 
+        .items-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .instrument-info-table th,
         .instrument-info-table td,
         .scale-table th,
@@ -329,6 +335,14 @@ $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
 $petunjukMaster = trim((string) ($link['petunjuk'] ?? ''));
 $petunjuk = $petunjukPenyebaran !== '' ? $petunjukPenyebaran : $petunjukMaster;
 $jenisInstrumen = title_case_label((string) ($link['jenis'] ?? 'Instrumen'));
+$previewLayout = instrument_preview_layout($link['jenis'] ?? '');
+$layoutType = (string) ($previewLayout['type'] ?? 'standard');
+$usesDocumentReview = $layoutType === 'document_review';
+$usesInterview = $layoutType === 'interview_guide';
+$usesObservation = $layoutType === 'observation_guide';
+$usesRubric = $layoutType === 'rubric_assessment';
+$usesQuestionnaire = in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire'], true);
+$usesPerformanceTest = $layoutType === 'performance_test';
 ?>
 
 <div class="public-shell">
@@ -400,52 +414,110 @@ $jenisInstrumen = title_case_label((string) ($link['jenis'] ?? 'Instrumen'));
                 <p class="section-intro">Butir instrumen belum tersedia.</p>
             <?php else: ?>
                 <?= view('public/partials/fill_progress') ?>
-                <table class="items-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 64px;">No</th>
-                            <th>Pernyataan</th>
-                            <th style="width: 250px;">Jawaban</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($items as $index => $item): ?>
-                            <?php
-                            $aspectName = '-';
-                            foreach ($aspects as $aspect) {
-                                if ((int) $aspect['id'] === (int) $item['aspect_id']) {
-                                    $aspectName = $aspect['nama_aspek'];
-                                    break;
-                                }
-                            }
-                            $tipeButir = $item['tipe_butir'] ?? 'skala';
-                            $isRequired = (int) ($item['wajib'] ?? 1) === 1 ? 'required' : '';
-                            ?>
-                            <tr class="instrument-item-row">
-                                <td><span class="item-number"><?= $index + 1 ?></span></td>
-                                <td>
-                                    <div class="item-aspect"><?= esc($aspectName) ?></div>
-                                    <?= nl2br(esc($item['pernyataan'])) ?>
-                                    <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
-                                </td>
-                                <td>
-                                    <?php if ($tipeButir === 'skala'): ?>
-                                        <div class="score-options">
-                                            <?php foreach ($scaleRange as $score): ?>
-                                                <label class="score-option">
-                                                    <input type="radio" name="answers[<?= $item['id'] ?>][skor]" value="<?= esc((string) $score) ?>" <?= $isRequired ?>>
-                                                    <?= esc((string) $score) ?>
-                                                </label>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php else: ?>
-                                        <textarea class="text-answer" name="answers[<?= $item['id'] ?>][jawaban_teks]" placeholder="Tuliskan jawaban" <?= $isRequired ?>><?= esc(old('answers.' . $item['id'] . '.jawaban_teks')) ?></textarea>
+                <div class="items-table-wrap">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 64px;">No</th>
+                                <th style="width: 180px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek')) ?></th>
+                                <th><?= esc((string) ($previewLayout['item'] ?? 'Butir Pernyataan')) ?></th>
+                                <?php if ($usesDocumentReview): ?>
+                                    <th style="width: 150px;">Sumber Dokumen</th>
+                                    <th style="width: 230px;">Skor</th>
+                                    <th style="width: 220px;">Komentar</th>
+                                <?php elseif ($usesRubric): ?>
+                                    <?php foreach (range(1, 5) as $score): ?>
+                                        <th style="width: 190px;">Skor <?= $score ?></th>
+                                    <?php endforeach; ?>
+                                    <th style="width: 230px;">Skor yang Diperoleh</th>
+                                    <th style="width: 220px;">Catatan</th>
+                                <?php elseif ($usesInterview): ?>
+                                    <th style="width: 300px;"><?= esc((string) ($previewLayout['answer'] ?? 'Jawaban')) ?></th>
+                                <?php elseif ($usesObservation): ?>
+                                    <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Hasil Pengamatan')) ?></th>
+                                <?php else: ?>
+                                    <th style="width: 250px;"><?= $usesQuestionnaire || $usesPerformanceTest ? 'Skor' : 'Jawaban' ?></th>
+                                    <?php if ($usesPerformanceTest): ?>
+                                        <th style="width: 220px;">Catatan</th>
                                     <?php endif; ?>
-                                </td>
+                                <?php endif; ?>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $index => $item): ?>
+                                <?php
+                                $aspectName = '-';
+                                foreach ($aspects as $aspect) {
+                                    if ((int) $aspect['id'] === (int) $item['aspect_id']) {
+                                        $aspectName = $aspect['nama_aspek'];
+                                        break;
+                                    }
+                                }
+                                $tipeButir = $item['tipe_butir'] ?? 'skala';
+                                $isRequired = (int) ($item['wajib'] ?? 1) === 1 ? 'required' : '';
+                                $renderScoreInput = static function (array $scaleRange, array $item, string $isRequired): string {
+                                    ob_start();
+                                    ?>
+                                    <div class="score-options">
+                                        <?php foreach ($scaleRange as $score): ?>
+                                            <label class="score-option">
+                                                <input type="radio" name="answers[<?= $item['id'] ?>][skor]" value="<?= esc((string) $score) ?>" <?= $isRequired ?>>
+                                                <?= esc((string) $score) ?>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php
+                                    return (string) ob_get_clean();
+                                };
+                                $renderTextInput = static function (array $item, string $isRequired, string $placeholder): string {
+                                    return '<textarea class="text-answer" name="answers[' . esc((string) $item['id'], 'attr') . '][jawaban_teks]" placeholder="' . esc($placeholder, 'attr') . '" ' . $isRequired . '>' . esc(old('answers.' . $item['id'] . '.jawaban_teks')) . '</textarea>';
+                                };
+                                ?>
+                                <tr class="instrument-item-row">
+                                    <td><span class="item-number"><?= esc((string) ($item['nomor'] ?? ($index + 1))) ?></span></td>
+                                    <td><?= esc($aspectName) ?></td>
+                                    <td>
+                                        <?= nl2br(esc($item['pernyataan'])) ?>
+                                        <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
+                                    </td>
+
+                                    <?php if ($usesDocumentReview): ?>
+                                        <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
+                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired) ?></td>
+                                        <td>
+                                            <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan komentar"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                        </td>
+                                    <?php elseif ($usesRubric): ?>
+                                        <?php foreach (range(1, 5) as $score): ?>
+                                            <td><?= nl2br(esc((string) ($item['skor_' . $score . '_deskripsi'] ?? '-'))) ?></td>
+                                        <?php endforeach; ?>
+                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired) ?></td>
+                                        <td>
+                                            <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                        </td>
+                                    <?php elseif ($usesInterview): ?>
+                                        <td><?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban wawancara') ?></td>
+                                    <?php elseif ($usesObservation): ?>
+                                        <td><?= $renderTextInput($item, $isRequired, 'Tuliskan hasil pengamatan') ?></td>
+                                    <?php else: ?>
+                                        <td>
+                                            <?php if ($usesQuestionnaire || $usesPerformanceTest || $tipeButir === 'skala'): ?>
+                                                <?= $renderScoreInput($scaleRange, $item, $isRequired) ?>
+                                            <?php else: ?>
+                                                <?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban') ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <?php if ($usesPerformanceTest): ?>
+                                            <td>
+                                                <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                            </td>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php endif; ?>
 
             <?= view('public/partials/justification_fields', compact('justificationConfig')) ?>

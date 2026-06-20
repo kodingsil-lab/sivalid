@@ -18,18 +18,6 @@ if ($modeValue === 'validasi_instrumen') {
     $modeBadgeClass = 'badge bg-green text-green-fg';
 }
 
-$scoreAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
-    return isset($answer['skor']) && $answer['skor'] !== null && $answer['skor'] !== '';
-}));
-
-$textAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
-    return !empty($answer['jawaban_teks']);
-}));
-
-$commentAnswers = array_values(array_filter($safeAnswers, static function ($answer) {
-    return !empty($answer['komentar']);
-}));
-
 $identityData = [];
 if (!empty($currentResponse['identity_data'])) {
     $decodedIdentity = json_decode((string) $currentResponse['identity_data'], true);
@@ -75,6 +63,14 @@ if (!empty($currentResponse['justification_config'])) {
 
 $commentLabel = (string) ($justificationData['comment_label'] ?? $justificationConfig['comment_label'] ?? 'Komentar Umum');
 $conclusionLabel = (string) ($justificationData['conclusion_label'] ?? $justificationConfig['conclusion_label'] ?? 'Kesimpulan');
+$previewLayout = instrument_preview_layout($currentResponse['jenis'] ?? '');
+$layoutType = (string) ($previewLayout['type'] ?? 'standard');
+$usesDocumentReview = $layoutType === 'document_review';
+$usesInterview = $layoutType === 'interview_guide';
+$usesObservation = $layoutType === 'observation_guide';
+$usesRubric = $layoutType === 'rubric_assessment';
+$usesQuestionnaire = in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire'], true);
+$usesPerformanceTest = $layoutType === 'performance_test';
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -176,107 +172,73 @@ $conclusionLabel = (string) ($justificationData['conclusion_label'] ?? $justific
 
 <div class="card mb-3">
     <div class="card-body">
-    <h3 class="card-title mb-3">Jawaban Skor</h3>
+        <h3 class="card-title mb-3">Hasil Pengisian</h3>
 
-    <?php if (empty($scoreAnswers)): ?>
-        <div class="empty-state">Belum ada jawaban skor.</div>
-    <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-vcenter table-hover table-sm">
-                <thead>
-                    <tr>
-                        <th style="width: 70px;">No</th>
-                        <th style="width: 180px;">Aspek</th>
-                        <th>Butir</th>
-                        <th style="width: 120px;">Tipe</th>
-                        <th style="width: 100px;">Skor</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($scoreAnswers as $answer): ?>
+        <?php if (empty($safeAnswers)): ?>
+            <div class="empty-state">Belum ada jawaban.</div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-hover table-sm">
+                    <thead>
                         <tr>
-                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
-                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
-                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
-                            <td><?= esc(title_case_label((string) ($answer['tipe_butir'] ?? '-'))) ?></td>
-                            <td><span class="fw-semibold"><?= esc((string) ($answer['skor'] ?? '-')) ?></span></td>
+                            <th style="width: 70px;">No</th>
+                            <th style="width: 180px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek')) ?></th>
+                            <th><?= esc((string) ($previewLayout['item'] ?? 'Butir')) ?></th>
+                            <?php if ($usesDocumentReview): ?>
+                                <th style="width: 150px;">Sumber Dokumen</th>
+                                <th style="width: 100px;">Skor</th>
+                                <th style="width: 220px;">Komentar</th>
+                            <?php elseif ($usesRubric): ?>
+                                <?php foreach (range(1, 5) as $score): ?>
+                                    <th style="width: 190px;">Skor <?= $score ?></th>
+                                <?php endforeach; ?>
+                                <th style="width: 120px;">Skor Diperoleh</th>
+                                <th style="width: 220px;">Catatan</th>
+                            <?php elseif ($usesInterview): ?>
+                                <th style="width: 300px;"><?= esc((string) ($previewLayout['answer'] ?? 'Jawaban')) ?></th>
+                            <?php elseif ($usesObservation): ?>
+                                <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Hasil Pengamatan')) ?></th>
+                            <?php else: ?>
+                                <th style="width: 120px;"><?= $usesQuestionnaire || $usesPerformanceTest ? 'Skor' : 'Jawaban' ?></th>
+                                <th style="width: 220px;">Komentar/Catatan</th>
+                            <?php endif; ?>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($safeAnswers as $answer): ?>
+                            <tr>
+                                <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
+                                <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
+                                <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
+                                <?php if ($usesDocumentReview): ?>
+                                    <td><?= esc(document_review_source_label($answer['sumber_dokumen'] ?? '')) ?></td>
+                                    <td><span class="fw-semibold"><?= esc((string) ($answer['skor'] ?? '-')) ?></span></td>
+                                    <td><?= nl2br(esc((string) (!empty($answer['komentar']) ? $answer['komentar'] : '-'))) ?></td>
+                                <?php elseif ($usesRubric): ?>
+                                    <?php foreach (range(1, 5) as $score): ?>
+                                        <td><?= nl2br(esc((string) ($answer['skor_' . $score . '_deskripsi'] ?? '-'))) ?></td>
+                                    <?php endforeach; ?>
+                                    <td><span class="fw-semibold"><?= esc((string) ($answer['skor'] ?? '-')) ?></span></td>
+                                    <td><?= nl2br(esc((string) (!empty($answer['komentar']) ? $answer['komentar'] : '-'))) ?></td>
+                                <?php elseif ($usesInterview || $usesObservation): ?>
+                                    <td><?= nl2br(esc((string) (!empty($answer['jawaban_teks']) ? $answer['jawaban_teks'] : '-'))) ?></td>
+                                <?php else: ?>
+                                    <td><span class="fw-semibold"><?= esc((string) (($answer['skor'] ?? '') !== '' ? $answer['skor'] : ($answer['jawaban_teks'] ?? '-'))) ?></span></td>
+                                    <td><?= nl2br(esc((string) (!empty($answer['komentar']) ? $answer['komentar'] : '-'))) ?></td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
 <div class="card mb-3">
     <div class="card-body">
-    <h3 class="card-title mb-3">Jawaban Teks</h3>
-
-    <?php if (empty($textAnswers)): ?>
-        <div class="empty-state">Belum ada jawaban teks.</div>
-    <?php else: ?>
-        <div class="table-responsive">
-            <table class="table table-vcenter table-hover table-sm">
-                <thead>
-                    <tr>
-                        <th style="width: 70px;">No</th>
-                        <th style="width: 180px;">Aspek</th>
-                        <th>Butir</th>
-                        <th>Jawaban Teks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($textAnswers as $answer): ?>
-                        <tr>
-                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
-                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
-                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
-                            <td><?= nl2br(esc((string) (!empty($answer['jawaban_teks']) ? $answer['jawaban_teks'] : '-'))) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
-    </div>
-</div>
-
-<div class="card mb-3">
-    <div class="card-body">
-    <h3 class="card-title mb-3">Komentar</h3>
-
-    <?php if (empty($commentAnswers)): ?>
-        <div class="text-muted mb-3">Tidak ada komentar per butir.</div>
-    <?php else: ?>
-        <div class="table-responsive mb-3">
-            <table class="table table-vcenter table-hover table-sm">
-                <thead>
-                    <tr>
-                        <th style="width: 70px;">No</th>
-                        <th style="width: 180px;">Aspek</th>
-                        <th>Butir</th>
-                        <th>Komentar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($commentAnswers as $answer): ?>
-                        <tr>
-                            <td class="text-muted"><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
-                            <td><?= esc((string) (!empty($answer['nama_aspek']) ? $answer['nama_aspek'] : '-')) ?></td>
-                            <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
-                            <td><?= nl2br(esc((string) (!empty($answer['komentar']) ? $answer['komentar'] : '-'))) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif; ?>
-
-    <div>
-        <div class="fw-semibold mb-1"><?= esc($commentLabel) ?></div>
+        <h3 class="card-title mb-2"><?= esc($commentLabel) ?></h3>
         <div class="text-muted"><?= nl2br(esc((string) (!empty($currentResponse['komentar_umum']) ? $currentResponse['komentar_umum'] : '-'))) ?></div>
-    </div>
     </div>
 </div>
 
