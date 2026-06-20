@@ -42,6 +42,7 @@ class RespondentLinks extends BaseController
         $perPage = config('Pager')->perPage;
 
         $links = $this->linkModel
+            ->scopeOwned('instrument_links.user_id')
             ->select(
                 'instrument_links.*,
                  instruments.kode,
@@ -96,7 +97,7 @@ class RespondentLinks extends BaseController
         }
 
         $instrumentId = (int) $this->request->getPost('instrument_id');
-        $instrument = $this->instrumentModel->find($instrumentId);
+        $instrument = $this->findOwnedInstrument($instrumentId);
 
         if (!$instrument) {
             return redirect()
@@ -119,6 +120,7 @@ class RespondentLinks extends BaseController
         $justificationConfig = $this->justificationConfigFromRequest();
 
         $this->linkModel->insert([
+            'user_id'         => $this->ownerIdFromInstrument($instrument),
             'instrument_id'   => $instrumentId,
             'product_id'      => null,
             'token'           => $token,
@@ -145,7 +147,7 @@ class RespondentLinks extends BaseController
 
     public function edit($id = null)
     {
-        $link = $this->linkModel->find($id);
+        $link = $this->findOwnedRespondentLink($id);
 
         if (!$link || !in_array($link['mode'], $this->respondentModes, true)) {
             return redirect()
@@ -172,7 +174,7 @@ class RespondentLinks extends BaseController
 
     public function update($id = null)
     {
-        $link = $this->linkModel->find($id);
+        $link = $this->findOwnedRespondentLink($id);
 
         if (!$link || !in_array($link['mode'], $this->respondentModes, true)) {
             return redirect()
@@ -188,7 +190,7 @@ class RespondentLinks extends BaseController
         }
 
         $instrumentId = (int) $this->request->getPost('instrument_id');
-        $instrument = $this->instrumentModel->find($instrumentId);
+        $instrument = $this->findOwnedInstrument($instrumentId);
 
         if (!$instrument || !$this->isManualValidInstrument($instrumentId)) {
             return redirect()
@@ -202,6 +204,7 @@ class RespondentLinks extends BaseController
         $justificationConfig = $this->justificationConfigFromRequest();
 
         $this->linkModel->update($id, [
+            'user_id'         => $this->ownerIdFromInstrument($instrument),
             'instrument_id'   => $instrumentId,
             'mode'            => self::GENERAL_RESPONDENT_MODE,
             'judul_link'      => trim((string) $this->request->getPost('judul_link')),
@@ -224,7 +227,7 @@ class RespondentLinks extends BaseController
 
     public function delete($id = null)
     {
-        $link = $this->linkModel->find($id);
+        $link = $this->findOwnedRespondentLink($id);
 
         if (!$link || !in_array($link['mode'], $this->respondentModes, true)) {
             return redirect()
@@ -259,6 +262,7 @@ class RespondentLinks extends BaseController
     {
         return $this->manualValidInstrumentModel
             ->select('instruments.*')
+            ->scopeOwned('manual_valid_instruments.user_id')
             ->join('instruments', 'instruments.id = manual_valid_instruments.instrument_id')
             ->orderBy('instruments.judul', 'ASC')
             ->findAll();
@@ -267,6 +271,7 @@ class RespondentLinks extends BaseController
     private function isManualValidInstrument(int $instrumentId): bool
     {
         return $this->manualValidInstrumentModel
+            ->scopeOwned('manual_valid_instruments.user_id')
             ->where('instrument_id', $instrumentId)
             ->first() !== null;
     }
@@ -334,5 +339,34 @@ class RespondentLinks extends BaseController
             'conclusion_required' => (bool) $this->request->getPost('justification_conclusion_required'),
             'conclusion_options' => $this->request->getPost('justification_conclusion_options'),
         ]);
+    }
+
+    private function findOwnedInstrument(int $instrumentId): ?array
+    {
+        if ($instrumentId <= 0) {
+            return null;
+        }
+
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->where('instruments.id', $instrumentId)
+            ->first();
+    }
+
+    private function findOwnedRespondentLink($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->linkModel
+            ->scopeOwned('instrument_links.user_id')
+            ->where('instrument_links.id', (int) $id)
+            ->first();
+    }
+
+    private function ownerIdFromInstrument(array $instrument): int
+    {
+        return (int) ($instrument['user_id'] ?? $this->currentUserId());
     }
 }

@@ -283,7 +283,7 @@ class SubmissionResults extends BaseController
     public function delete($id = null)
     {
         $responseId = (int) $id;
-        $response = $this->responseModel->find($responseId);
+        $response = $this->findOwnedResponse($responseId);
 
         if (!$response) {
             return redirect()
@@ -353,7 +353,7 @@ class SubmissionResults extends BaseController
 
     private function getResponsesQuery()
     {
-        return $this->responseModel
+        $builder = $this->responseModel
             ->select(
                 'responses.*,
                  respondents.nama,
@@ -378,6 +378,10 @@ class SubmissionResults extends BaseController
             ->join('instrument_links', 'instrument_links.id = responses.instrument_link_id')
             ->join('instruments', 'instruments.id = responses.instrument_id')
             ->join('research_products', 'research_products.id = responses.product_id', 'left');
+
+        $this->applyOwnerScope($builder, 'responses.user_id');
+
+        return $builder;
     }
 
     private function applyResponseFilters($builder, array $filters): void
@@ -409,7 +413,7 @@ class SubmissionResults extends BaseController
 
     private function getResponseDetail(int $responseId): ?array
     {
-        return $this->responseModel
+        $builder = $this->responseModel
             ->select(
                 'responses.*,
                  respondents.nama,
@@ -435,7 +439,11 @@ class SubmissionResults extends BaseController
             ->join('respondents', 'respondents.id = responses.respondent_id')
             ->join('instrument_links', 'instrument_links.id = responses.instrument_link_id')
             ->join('instruments', 'instruments.id = responses.instrument_id')
-            ->join('research_products', 'research_products.id = responses.product_id', 'left')
+            ->join('research_products', 'research_products.id = responses.product_id', 'left');
+
+        $this->applyOwnerScope($builder, 'responses.user_id');
+
+        return $builder
             ->where('responses.id', $responseId)
             ->first();
     }
@@ -443,6 +451,7 @@ class SubmissionResults extends BaseController
     private function getInstrumentOptions(): array
     {
         return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
             ->select('id, kode, judul')
             ->orderBy('judul', 'ASC')
             ->findAll();
@@ -451,6 +460,7 @@ class SubmissionResults extends BaseController
     private function getLinkOptions(): array
     {
         return $this->linkModel
+            ->scopeOwned('instrument_links.user_id')
             ->select(
                 'instrument_links.id,
                  instrument_links.judul_link,
@@ -467,6 +477,7 @@ class SubmissionResults extends BaseController
     private function getProductOptions(): array
     {
         return $this->productModel
+            ->scopeOwned('research_products.user_id')
             ->select('id, kode, nama_produk')
             ->orderBy('nama_produk', 'ASC')
             ->findAll();
@@ -515,6 +526,7 @@ class SubmissionResults extends BaseController
             ->join('instrument_items', 'instrument_items.id = response_answers.instrument_item_id')
             ->join('instrument_aspects', 'instrument_aspects.id = instrument_items.aspect_id', 'left');
 
+        $this->applyOwnerScope($builder, 'responses.user_id');
         $this->applyResponseFilters($builder, $filters);
 
         return $builder
@@ -700,6 +712,8 @@ class SubmissionResults extends BaseController
                  instruments.kode AS instrument_kode'
             )
             ->join('instruments', 'instruments.id = instrument_items.instrument_id');
+
+        $this->applyOwnerScope($builder, 'instrument_items.user_id');
 
         if ($filters['instrument_id'] !== '') {
             $builder->where('instrument_items.instrument_id', (int) $filters['instrument_id']);
@@ -907,5 +921,17 @@ class SubmissionResults extends BaseController
         fclose($handle);
 
         return "\xEF\xBB\xBF" . $csv;
+    }
+
+    private function findOwnedResponse(int $responseId): ?array
+    {
+        if ($responseId <= 0) {
+            return null;
+        }
+
+        return $this->responseModel
+            ->scopeOwned('responses.user_id')
+            ->where('responses.id', $responseId)
+            ->first();
     }
 }

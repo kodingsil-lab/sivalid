@@ -1,6 +1,7 @@
 <?php
 $adminName = (string) (session()->get('user_name') ?? 'Admin SIVALID');
 $adminEmail = (string) (session()->get('user_email') ?? 'Administrator');
+$adminRole = current_user_role() === 'superadmin' ? 'Superadmin' : 'Admin';
 $nameParts = preg_split('/\s+/', trim($adminName));
 $avatarInitials = strtoupper(substr($nameParts[0] ?? 'A', 0, 1) . substr($nameParts[1] ?? 'S', 0, 1));
 ?>
@@ -30,7 +31,7 @@ $avatarInitials = strtoupper(substr($nameParts[0] ?? 'A', 0, 1) . substr($namePa
                     </span>
                     <div class="d-none d-xl-block ps-2 text-start">
                         <div class="topbar-user-name"><?= esc($adminName) ?></div>
-                        <div class="topbar-user-role">Administrator</div>
+                        <div class="topbar-user-role"><?= esc($adminRole) ?></div>
                     </div>
                 </a>
 

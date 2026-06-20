@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\Concerns\BelongsToUser;
 
 class RespondentModel extends Model
 {
+    use BelongsToUser;
+
     protected $table            = 'respondents';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
 
     protected $allowedFields = [
+        'user_id',
         'instrument_link_id',
         'bundle_id',
         'nama',

@@ -2,14 +2,14 @@
 
 <?= $this->section('content') ?>
 
-<?php $activeTab = isset($activeTab) ? (string) $activeTab : 'profile'; ?>
+<?php $activeTab = isset($activeTab) ? (string) $activeTab : 'category'; ?>
 
 <div class="page-header d-print-none mb-3">
     <div class="container-xl">
         <div class="row align-items-center">
             <div class="col">
                 <h2 class="page-title">Pengaturan</h2>
-                <div class="text-muted mt-1">Konfigurasi profil penelitian, kategori kelayakan, dan pengelolaan akun admin.</div>
+                <div class="text-muted mt-1">Konfigurasi kategori kelayakan, data referensi, dan pengelolaan akun admin.</div>
             </div>
         </div>
     </div>
@@ -52,7 +52,6 @@
             <aside class="settings-sidebar">
                 <div class="settings-nav-group">
                     <div class="settings-nav-label">Konfigurasi Penelitian</div>
-                    <a href="<?= base_url('admin/settings?tab=profile') ?>" class="settings-nav-link <?= $activeTab === 'profile' ? 'active' : '' ?>">Profil Penelitian</a>
                     <a href="<?= base_url('admin/settings?tab=category') ?>" class="settings-nav-link <?= $activeTab === 'category' ? 'active' : '' ?>">Kategori Kelayakan</a>
                 </div>
 
@@ -72,118 +71,7 @@
 
         <div class="col-lg-9 col-xl-9">
             <div class="settings-content">
-                <?php if ($activeTab === 'profile'): ?>
-                <section id="section-profile" class="settings-section">
-                    <div class="settings-section-header">
-                        <h3>Profil Penelitian</h3>
-                        <p>Informasi dasar penelitian yang dipakai di berbagai halaman dan laporan.</p>
-                    </div>
-
-                    <form action="<?= base_url('admin/settings/profile?tab=profile') ?>" method="post" enctype="multipart/form-data">
-                        <?= csrf_field() ?>
-
-                        <div class="mb-3">
-                            <label for="nama_penelitian" class="form-label">Judul Penelitian <span class="text-danger">*</span></label>
-                            <input
-                                type="text"
-                                name="nama_penelitian"
-                                id="nama_penelitian"
-                                class="form-control"
-                                placeholder="Contoh: Pengembangan Bahan Ajar IPA Berbasis PBL"
-                                value="<?= old('nama_penelitian', esc($profile['nama_penelitian'] ?? '')) ?>"
-                                required
-                            >
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nama_peneliti" class="form-label">Nama Peneliti</label>
-                                <input
-                                    type="text"
-                                    name="nama_peneliti"
-                                    id="nama_peneliti"
-                                    class="form-control"
-                                    placeholder="Nama lengkap peneliti"
-                                    value="<?= old('nama_peneliti', esc($profile['nama_peneliti'] ?? '')) ?>"
-                                >
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="nim" class="form-label">NIM</label>
-                                <input
-                                    type="text"
-                                    name="nim"
-                                    id="nim"
-                                    class="form-control"
-                                    placeholder="Nomor Induk Mahasiswa"
-                                    value="<?= old('nim', esc($profile['nim'] ?? '')) ?>"
-                                >
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="program_studi" class="form-label">Program Studi</label>
-                                <input
-                                    type="text"
-                                    name="program_studi"
-                                    id="program_studi"
-                                    class="form-control"
-                                    placeholder="Contoh: Pendidikan Matematika"
-                                    value="<?= old('program_studi', esc($profile['program_studi'] ?? '')) ?>"
-                                >
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="institusi" class="form-label">Perguruan Tinggi</label>
-                                <input
-                                    type="text"
-                                    name="institusi"
-                                    id="institusi"
-                                    class="form-control"
-                                    placeholder="Nama perguruan tinggi"
-                                    value="<?= old('institusi', esc($profile['institusi'] ?? '')) ?>"
-                                >
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="tahun_penelitian" class="form-label">Tahun Penelitian</label>
-                                <input
-                                    type="text"
-                                    name="tahun_penelitian"
-                                    id="tahun_penelitian"
-                                    class="form-control"
-                                    placeholder="<?= date('Y') ?>"
-                                    value="<?= old('tahun_penelitian', esc($profile['tahun_penelitian'] ?? date('Y'))) ?>"
-                                >
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="ringkasan_penelitian_pdf" class="form-label">Ringkasan Penelitian</label>
-                                <input
-                                    type="file"
-                                    name="ringkasan_penelitian_pdf"
-                                    id="ringkasan_penelitian_pdf"
-                                    class="form-control"
-                                    accept="application/pdf,.pdf"
-                                >
-                                <div class="form-hint">Unggah file PDF ringkasan penelitian. Maksimal 10 MB.</div>
-                                <?php if (!empty($profile['ringkasan_penelitian_pdf'])): ?>
-                                    <div class="mt-2">
-                                        <a href="<?= base_url($profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
-                                            Lihat PDF Tersimpan
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="settings-actions">
-                            <button type="submit" class="btn btn-primary">Simpan Profil</button>
-                        </div>
-                    </form>
-                </section>
-                <?php elseif ($activeTab === 'category'): ?>
-
+                <?php if ($activeTab === 'category'): ?>
                 <section id="section-category" class="settings-section">
                     <div class="settings-section-header">
                         <h3>Kategori Kelayakan</h3>
@@ -476,16 +364,22 @@
                         Kelola akun yang dapat mengakses panel admin SIVALID. Tambah admin baru, perbarui nama atau kata sandi, atau nonaktifkan akun yang tidak lagi digunakan.
                     </p>
 
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 11h6m-3 -3v6" /></svg>
-                            Manajemen User Admin
-                        </a>
-                        <a href="<?= base_url('admin/backup') ?>" class="btn btn-light">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
-                            Backup &amp; Restore
-                        </a>
-                    </div>
+                    <?php if (is_superadmin()): ?>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="<?= base_url('admin/admin-users') ?>" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 11h6m-3 -3v6" /></svg>
+                                Manajemen User Admin
+                            </a>
+                            <a href="<?= base_url('admin/backup') ?>" class="btn btn-light">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></svg>
+                                Backup &amp; Restore
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-info mb-0">
+                            Pengelolaan user dan backup hanya tersedia untuk superadmin.
+                        </div>
+                    <?php endif; ?>
                 </section>
                 <?php endif; ?>
             </div>

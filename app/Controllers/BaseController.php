@@ -42,4 +42,29 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+
+    protected function currentUserId(): int
+    {
+        return current_user_id();
+    }
+
+    protected function isSuperadmin(): bool
+    {
+        return is_superadmin();
+    }
+
+    protected function applyOwnerScope($builder, string $column = 'user_id')
+    {
+        return apply_owner_scope($builder, $column);
+    }
+
+    protected function withOwner(array $data): array
+    {
+        return owned_create_data($data);
+    }
+
+    protected function ownsRow(?array $row, string $key = 'user_id'): bool
+    {
+        return user_owns_row($row, $key);
+    }
 }

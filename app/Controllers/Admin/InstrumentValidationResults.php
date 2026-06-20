@@ -53,6 +53,8 @@ class InstrumentValidationResults extends BaseController
             ->orderBy('last_saved_at', 'DESC')
             ->orderBy('validation_bundle_sessions.id', 'DESC');
 
+        $this->applyOwnerScope($builder, 'validation_bundles.user_id');
+
         $sessions = $builder->paginate($perPage, 'validation_results');
 
         return view('admin/validation_results/index', [
@@ -182,7 +184,10 @@ class InstrumentValidationResults extends BaseController
             return null;
         }
 
-        $bundle = $bundleModel->find((int) $validatorSession['bundle_id']);
+        $bundle = $bundleModel
+            ->scopeOwned('validation_bundles.user_id')
+            ->where('validation_bundles.id', (int) $validatorSession['bundle_id'])
+            ->first();
 
         if (!$bundle) {
             return null;
@@ -208,6 +213,7 @@ class InstrumentValidationResults extends BaseController
             }
 
             $aspects = $aspectModel
+                ->scopeOwned('instrument_aspects.user_id')
                 ->where('instrument_id', $instrumentId)
                 ->orderBy('urutan', 'ASC')
                 ->findAll();
@@ -218,6 +224,7 @@ class InstrumentValidationResults extends BaseController
             }
 
             $items = $itemModel
+                ->scopeOwned('instrument_items.user_id')
                 ->where('instrument_id', $instrumentId)
                 ->orderBy('urutan', 'ASC')
                 ->orderBy('nomor', 'ASC')

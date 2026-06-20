@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\Concerns\BelongsToUser;
 
 class InstrumentAspectModel extends Model
 {
+    use BelongsToUser;
+
     protected $table            = 'instrument_aspects';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
 
     protected $allowedFields = [
+        'user_id',
         'instrument_id',
         'nama_aspek',
         'deskripsi',
@@ -24,6 +28,8 @@ class InstrumentAspectModel extends Model
     {
         $builder = $this->select('instrument_aspects.*, instruments.kode, instruments.judul')
             ->join('instruments', 'instruments.id = instrument_aspects.instrument_id');
+
+        $this->applyOwnerToBuilder($builder, 'instrument_aspects.user_id');
 
         if ($instrumentId !== null) {
             $builder->where('instrument_aspects.instrument_id', $instrumentId);
@@ -39,6 +45,8 @@ class InstrumentAspectModel extends Model
     {
         $builder = $this->select('instrument_aspects.*, instruments.kode, instruments.judul')
             ->join('instruments', 'instruments.id = instrument_aspects.instrument_id');
+
+        $this->applyOwnerToBuilder($builder, 'instrument_aspects.user_id');
 
         if ($instrumentId !== null) {
             $builder->where('instrument_aspects.instrument_id', $instrumentId);

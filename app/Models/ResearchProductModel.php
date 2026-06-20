@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\Concerns\BelongsToUser;
 
 class ResearchProductModel extends Model
 {
+    use BelongsToUser;
+
     protected $table            = 'research_products';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
 
     protected $allowedFields = [
+        'user_id',
         'kode',
         'nama_produk',
         'jenis_produk',

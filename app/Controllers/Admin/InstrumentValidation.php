@@ -20,11 +20,13 @@ class InstrumentValidation extends BaseController
     public function valid()
     {
         $selectedRows = $this->manualValidInstrumentModel
+            ->scopeOwned('manual_valid_instruments.user_id')
             ->select('instrument_id')
             ->findAll();
         $selectedIds = array_map(static fn(array $row): int => (int) $row['instrument_id'], $selectedRows);
 
         $masterQuery = $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
             ->orderBy('kode', 'ASC')
             ->orderBy('judul', 'ASC');
 
@@ -44,7 +46,7 @@ class InstrumentValidation extends BaseController
     public function chooseFromMaster()
     {
         $instrumentId = (int) $this->request->getPost('instrument_id');
-        $instrument = $this->instrumentModel->find($instrumentId);
+        $instrument = $this->findOwnedInstrument($instrumentId);
 
         if (!$instrument) {
             return redirect()
@@ -53,6 +55,7 @@ class InstrumentValidation extends BaseController
         }
 
         $alreadySelected = $this->manualValidInstrumentModel
+            ->scopeOwned('manual_valid_instruments.user_id')
             ->where('instrument_id', $instrumentId)
             ->first();
 
@@ -66,6 +69,7 @@ class InstrumentValidation extends BaseController
         $db->transStart();
 
         $this->manualValidInstrumentModel->insert([
+            'user_id'       => $this->ownerIdFromInstrument($instrument),
             'instrument_id' => $instrumentId,
             'source'        => 'master',
         ]);
@@ -89,7 +93,7 @@ class InstrumentValidation extends BaseController
 
     public function delete($id = null)
     {
-        $manualValidInstrument = $this->manualValidInstrumentModel->find($id);
+        $manualValidInstrument = $this->findOwnedManualValidInstrument($id);
 
         if (!$manualValidInstrument) {
             return redirect()
@@ -106,11 +110,12 @@ class InstrumentValidation extends BaseController
 
         if ($instrumentId > 0) {
             $stillMarkedValid = $this->manualValidInstrumentModel
+                ->scopeOwned('manual_valid_instruments.user_id')
                 ->where('instrument_id', $instrumentId)
                 ->first();
 
             if (!$stillMarkedValid) {
-                $instrument = $this->instrumentModel->find($instrumentId);
+                $instrument = $this->findOwnedInstrument($instrumentId);
                 $currentStatus = (string) ($instrument['status'] ?? '');
 
                 if (in_array($currentStatus, ['Valid', 'Siap Disebar'], true)) {
@@ -132,5 +137,34 @@ class InstrumentValidation extends BaseController
         return redirect()
             ->to(base_url('admin/instrumen-valid'))
             ->with('success', 'Instrumen berhasil dihapus dari daftar Instrumen Valid dan status master dikembalikan.');
+    }
+
+    private function findOwnedInstrument(int $instrumentId): ?array
+    {
+        if ($instrumentId <= 0) {
+            return null;
+        }
+
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->where('instruments.id', $instrumentId)
+            ->first();
+    }
+
+    private function findOwnedManualValidInstrument($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->manualValidInstrumentModel
+            ->scopeOwned('manual_valid_instruments.user_id')
+            ->where('manual_valid_instruments.id', (int) $id)
+            ->first();
+    }
+
+    private function ownerIdFromInstrument(array $instrument): int
+    {
+        return (int) ($instrument['user_id'] ?? $this->currentUserId());
     }
 }

@@ -25,23 +25,31 @@ class Dashboard extends BaseController
 
     public function index()
     {
-        $totalInstrumen = $this->instrumentModel->countAllResults();
+        $totalInstrumen = $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->countAllResults();
 
-        $instrumenValid = $this->manualValidInstrumentModel->countAllResults();
+        $instrumenValid = $this->manualValidInstrumentModel
+            ->scopeOwned('manual_valid_instruments.user_id')
+            ->countAllResults();
 
         $linkAktif = $this->linkModel
+            ->scopeOwned('instrument_links.user_id')
             ->where('status', 'Aktif')
             ->countAllResults();
 
-        $totalRespon = $this->responseModel->countAllResults();
+        $totalRespon = $this->responseModel
+            ->scopeOwned('responses.user_id')
+            ->countAllResults();
 
         $responByMode = $this->responseModel
+            ->scopeOwned('responses.user_id')
             ->select('mode, COUNT(id) AS total')
             ->groupBy('mode')
             ->orderBy('mode', 'ASC')
             ->findAll();
 
-        $latestResponses = $this->responseModel
+        $latestResponseQuery = $this->responseModel
             ->select(
                 'responses.*,
                  respondents.nama,
@@ -52,7 +60,11 @@ class Dashboard extends BaseController
             )
             ->join('respondents', 'respondents.id = responses.respondent_id')
             ->join('instrument_links', 'instrument_links.id = responses.instrument_link_id')
-            ->join('instruments', 'instruments.id = responses.instrument_id')
+            ->join('instruments', 'instruments.id = responses.instrument_id');
+
+        $this->applyOwnerScope($latestResponseQuery, 'responses.user_id');
+
+        $latestResponses = $latestResponseQuery
             ->orderBy('responses.id', 'DESC')
             ->limit(10)
             ->findAll();

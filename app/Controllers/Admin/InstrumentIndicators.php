@@ -26,10 +26,16 @@ class InstrumentIndicators extends BaseController
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
         $perPage = config('Pager')->perPage;
 
+        if ($instrumentId !== null && ! $this->findOwnedInstrument($instrumentId)) {
+            return redirect()
+                ->to(base_url('admin/instrument-indicators'))
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $data = [
             'title'        => 'Indikator Kisi-Kisi Instrumen',
             'instrumentId' => $instrumentId,
-            'instruments'  => $this->instrumentModel->orderBy('judul', 'ASC')->findAll(),
+            'instruments'  => $this->instrumentModel->scopeOwned('instruments.user_id')->orderBy('judul', 'ASC')->findAll(),
             'indicators'   => $this->indicatorModel->paginateWithRelations($instrumentId, $perPage, 'instrument_indicators'),
             'pager'        => $this->indicatorModel->pager,
             'pagerGroup'   => 'instrument_indicators',
@@ -66,7 +72,16 @@ class InstrumentIndicators extends BaseController
         $instrumentId = (int) $this->request->getPost('instrument_id');
         $aspectId     = (int) $this->request->getPost('aspect_id');
 
-        $aspect = $this->aspectModel->where([
+        $instrument = $this->findOwnedInstrument($instrumentId);
+
+        if (! $instrument) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $aspect = $this->aspectModel->scopeOwned('instrument_aspects.user_id')->where([
             'id'            => $aspectId,
             'instrument_id' => $instrumentId,
         ])->first();
@@ -79,6 +94,7 @@ class InstrumentIndicators extends BaseController
         }
 
         $this->indicatorModel->insert([
+            'user_id'       => $this->ownerIdFromInstrument($instrument),
             'instrument_id' => $instrumentId,
             'aspect_id'     => $aspectId,
             'indikator'     => trim((string) $this->request->getPost('indikator')),
@@ -92,7 +108,7 @@ class InstrumentIndicators extends BaseController
 
     public function edit($id = null)
     {
-        $indicator = $this->indicatorModel->find($id);
+        $indicator = $this->findOwnedIndicator($id);
 
         if (!$indicator) {
             return redirect()
@@ -107,7 +123,7 @@ class InstrumentIndicators extends BaseController
 
     public function update($id = null)
     {
-        $indicator = $this->indicatorModel->find($id);
+        $indicator = $this->findOwnedIndicator($id);
 
         if (!$indicator) {
             return redirect()
@@ -132,7 +148,16 @@ class InstrumentIndicators extends BaseController
         $instrumentId = (int) $this->request->getPost('instrument_id');
         $aspectId     = (int) $this->request->getPost('aspect_id');
 
-        $aspect = $this->aspectModel->where([
+        $instrument = $this->findOwnedInstrument($instrumentId);
+
+        if (! $instrument) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $aspect = $this->aspectModel->scopeOwned('instrument_aspects.user_id')->where([
             'id'            => $aspectId,
             'instrument_id' => $instrumentId,
         ])->first();
@@ -145,6 +170,7 @@ class InstrumentIndicators extends BaseController
         }
 
         $this->indicatorModel->update($id, [
+            'user_id'       => $this->ownerIdFromInstrument($instrument),
             'instrument_id' => $instrumentId,
             'aspect_id'     => $aspectId,
             'indikator'     => trim((string) $this->request->getPost('indikator')),
@@ -158,7 +184,7 @@ class InstrumentIndicators extends BaseController
 
     public function delete($id = null)
     {
-        $indicator = $this->indicatorModel->find($id);
+        $indicator = $this->findOwnedIndicator($id);
 
         if (!$indicator) {
             return redirect()
@@ -173,5 +199,34 @@ class InstrumentIndicators extends BaseController
         return redirect()
             ->to(base_url('admin/instrument-aspects?instrument_id=' . $instrumentId))
             ->with('success', 'Indikator berhasil dihapus.');
+    }
+
+    private function findOwnedInstrument(int $instrumentId): ?array
+    {
+        if ($instrumentId <= 0) {
+            return null;
+        }
+
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->where('instruments.id', $instrumentId)
+            ->first();
+    }
+
+    private function findOwnedIndicator($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->indicatorModel
+            ->scopeOwned('instrument_indicators.user_id')
+            ->where('instrument_indicators.id', (int) $id)
+            ->first();
+    }
+
+    private function ownerIdFromInstrument(array $instrument): int
+    {
+        return (int) ($instrument['user_id'] ?? $this->currentUserId());
     }
 }

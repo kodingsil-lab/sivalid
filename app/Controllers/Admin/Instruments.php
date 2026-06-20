@@ -22,7 +22,7 @@ class Instruments extends BaseController
         $keyword = trim((string) $this->request->getGet('keyword'));
         $perPage = config('Pager')->perPage;
 
-        $query = $this->instrumentModel;
+        $query = $this->instrumentModel->scopeOwned('instruments.user_id');
 
         if ($keyword !== '') {
             $query = $query
@@ -64,7 +64,7 @@ class Instruments extends BaseController
     public function create()
     {
         $rules = [
-            'kode'      => 'required|max_length[50]|is_unique[instruments.kode]',
+            'kode'      => 'required|max_length[50]',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
             'keterangan' => 'permit_empty|max_length[255]',
@@ -92,7 +92,14 @@ class Instruments extends BaseController
 
         $kode = trim((string) $this->request->getPost('kode'));
 
-        $this->instrumentModel->insert([
+        if ($this->codeExistsForOwner($kode)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', ['kode' => 'Kode instrumen sudah digunakan pada akun ini.']);
+        }
+
+        $this->instrumentModel->insert($this->instrumentModel->withOwner([
             'kode'      => $kode,
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
@@ -105,7 +112,7 @@ class Instruments extends BaseController
             'skala_labels' => $scaleConfig['labels_json'],
             'sort_order' => $this->getNextSortOrder(),
             'status'    => 'Draft',
-        ]);
+        ]));
 
         return redirect()
             ->to(base_url('admin/instruments'))
@@ -114,7 +121,7 @@ class Instruments extends BaseController
 
     public function show($id = null)
     {
-        $instrument = $this->instrumentModel->find($id);
+        $instrument = $this->findOwnedInstrument($id);
 
         if (!$instrument) {
             return redirect()
@@ -132,7 +139,7 @@ class Instruments extends BaseController
 
     public function edit($id = null)
     {
-        $instrument = $this->instrumentModel->find($id);
+        $instrument = $this->findOwnedInstrument($id);
 
         if (!$instrument) {
             return redirect()
@@ -154,7 +161,7 @@ class Instruments extends BaseController
 
     public function update($id = null)
     {
-        $instrument = $this->instrumentModel->find($id);
+        $instrument = $this->findOwnedInstrument($id);
 
         if (!$instrument) {
             return redirect()
@@ -163,7 +170,7 @@ class Instruments extends BaseController
         }
 
         $rules = [
-            'kode'      => 'required|max_length[50]|is_unique[instruments.kode,id,' . (int) $id . ']',
+            'kode'      => 'required|max_length[50]',
             'judul'     => 'required|min_length[5]|max_length[255]',
             'jenis'     => 'required',
             'keterangan' => 'permit_empty|max_length[255]',
@@ -177,6 +184,15 @@ class Instruments extends BaseController
                 ->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
+        }
+
+        $kode = trim((string) $this->request->getPost('kode'));
+
+        if ($this->codeExistsForOwner($kode, (int) $id, (int) ($instrument['user_id'] ?? 0))) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', ['kode' => 'Kode instrumen sudah digunakan pada akun ini.']);
         }
 
         $scaleConfig = $this->scaleConfigFromRequest();
@@ -200,7 +216,7 @@ class Instruments extends BaseController
         }
 
         $this->instrumentModel->update($id, [
-            'kode'      => trim((string) $this->request->getPost('kode')),
+            'kode'      => $kode,
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
             'sasaran'   => trim((string) $this->request->getPost('sasaran')),
@@ -220,7 +236,7 @@ class Instruments extends BaseController
 
     public function move($id = null, ?string $direction = null)
     {
-        $instrument = $this->instrumentModel->find($id);
+        $instrument = $this->findOwnedInstrument($id);
 
         if (!$instrument) {
             return redirect()
@@ -238,6 +254,7 @@ class Instruments extends BaseController
 
         $rows = $this->instrumentModel
             ->select('id, sort_order')
+            ->scopeOwned('instruments.user_id')
             ->orderBy('sort_order', 'ASC')
             ->orderBy('id', 'DESC')
             ->findAll();
@@ -306,6 +323,7 @@ class Instruments extends BaseController
 
         $existingIds = $this->instrumentModel
             ->select('id')
+            ->scopeOwned('instruments.user_id')
             ->whereIn('id', $ids)
             ->findAll();
         $existingIds = array_map(static fn(array $row): int => (int) $row['id'], $existingIds);
@@ -337,7 +355,7 @@ class Instruments extends BaseController
 
     public function delete($id = null)
     {
-        $instrument = $this->instrumentModel->find($id);
+        $instrument = $this->findOwnedInstrument($id);
 
         if (!$instrument) {
             return redirect()
@@ -444,7 +462,7 @@ class Instruments extends BaseController
 
     private function generateNextCode(): string
     {
-        $codes = $this->instrumentModel->select('kode')->findAll();
+        $codes = $this->instrumentModel->scopeOwned('instruments.user_id')->select('kode')->findAll();
         $max = 0;
 
         foreach ($codes as $row) {
@@ -463,9 +481,9 @@ class Instruments extends BaseController
 
         do {
             $candidate = 'INS-' . str_pad((string) $next, 3, '0', STR_PAD_LEFT);
-            $exists = $this->instrumentModel->where('kode', $candidate)->first();
+            $exists = $this->codeExistsForOwner($candidate);
             $next++;
-        } while ($exists !== null);
+        } while ($exists);
 
         return $candidate;
     }
@@ -474,6 +492,7 @@ class Instruments extends BaseController
     {
         $row = $this->instrumentModel
             ->selectMax('sort_order')
+            ->scopeOwned('instruments.user_id')
             ->first();
 
         return ((int) ($row['sort_order'] ?? 0)) + 1;
@@ -511,6 +530,7 @@ class Instruments extends BaseController
     {
         $rows = $this->instrumentModel
             ->select('id, sort_order')
+            ->scopeOwned('instruments.user_id')
             ->orderBy('sort_order', 'ASC')
             ->orderBy('id', 'DESC')
             ->findAll();
@@ -524,5 +544,36 @@ class Instruments extends BaseController
 
             $this->instrumentModel->update((int) $row['id'], ['sort_order' => $expected]);
         }
+    }
+
+    private function findOwnedInstrument($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->where('instruments.id', (int) $id)
+            ->first();
+    }
+
+    private function codeExistsForOwner(string $kode, ?int $excludeId = null, ?int $ownerId = null): bool
+    {
+        $ownerId = $ownerId !== null && $ownerId > 0 ? $ownerId : $this->currentUserId();
+
+        $query = $this->instrumentModel->where('kode', $kode);
+
+        if ($ownerId > 0) {
+            $query->where('user_id', $ownerId);
+        } else {
+            $query->where('user_id', -1);
+        }
+
+        if ($excludeId !== null) {
+            $query->where('id !=', $excludeId);
+        }
+
+        return $query->first() !== null;
     }
 }

@@ -12,7 +12,7 @@ class UserSeeder extends Seeder
             'name'       => 'Admin SIVALID',
             'email'      => 'admin@sivalid.test',
             'password'   => password_hash('admin123', PASSWORD_DEFAULT),
-            'role'       => 'admin',
+            'role'       => 'superadmin',
             'status'     => 'aktif',
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),

@@ -48,7 +48,7 @@ class InstrumentBundles extends BaseController
             'bundle'      => [],
             'selected'    => [],
             'selectedDetails' => [],
-            'instruments' => $this->instrumentModel->orderBy('kode', 'ASC')->orderBy('judul', 'ASC')->findAll(),
+            'instruments' => $this->getOwnedInstrumentOptions(),
             'action'      => base_url('admin/instrument-bundles'),
             'method'      => 'post',
         ]);
@@ -95,9 +95,19 @@ class InstrumentBundles extends BaseController
                 ->with('error', 'Pilih minimal satu instrumen untuk paket.');
         }
 
+        $submittedInstrumentIds = $this->normalizeInstrumentIds($instrumentIds);
+        $instrumentIds = $this->filterOwnedInstrumentIds($instrumentIds);
+
+        if ($instrumentIds === [] || count($instrumentIds) !== count($submittedInstrumentIds)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen yang dipilih tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $token = $customToken !== '' ? $customToken : $this->generateUniqueToken();
 
-        $bundleId = $this->bundleModel->insert([
+        $bundleId = $this->bundleModel->insert($this->bundleModel->withOwner([
             'token'           => $token,
             'token_access_mode' => 'single_use',
             'judul'           => trim((string) $this->request->getPost('judul')),
@@ -109,7 +119,7 @@ class InstrumentBundles extends BaseController
             'token_revoked_at' => null,
             'status'          => trim((string) $this->request->getPost('status')),
             'maksimal_respon' => 1,
-        ]);
+        ]));
 
         $this->bundleInstrumentModel->syncBundle((int) $bundleId, $instrumentIds, $this->collectValidationTexts($instrumentIds));
 
@@ -127,7 +137,7 @@ class InstrumentBundles extends BaseController
 
     public function show($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -146,7 +156,7 @@ class InstrumentBundles extends BaseController
 
     public function sessions($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -181,7 +191,7 @@ class InstrumentBundles extends BaseController
 
     public function sessionDetail($id = null, $sessionId = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -213,6 +223,7 @@ class InstrumentBundles extends BaseController
             $instrumentId = (int) $instr['instrument_id'];
 
             $aspects = $aspectModel
+                ->scopeOwned('instrument_aspects.user_id')
                 ->where('instrument_id', $instrumentId)
                 ->orderBy('urutan', 'ASC')
                 ->findAll();
@@ -223,6 +234,7 @@ class InstrumentBundles extends BaseController
             }
 
             $items = $itemModel
+                ->scopeOwned('instrument_items.user_id')
                 ->where('instrument_id', $instrumentId)
                 ->orderBy('urutan', 'ASC')
                 ->orderBy('nomor', 'ASC')
@@ -277,7 +289,7 @@ class InstrumentBundles extends BaseController
 
     public function edit($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -298,7 +310,7 @@ class InstrumentBundles extends BaseController
             'bundle'      => $bundle,
             'selected'    => $selected,
             'selectedDetails' => $selectedDetails,
-            'instruments' => $this->instrumentModel->orderBy('kode', 'ASC')->orderBy('judul', 'ASC')->findAll(),
+            'instruments' => $this->getOwnedInstrumentOptions(),
             'action'      => base_url('admin/instrument-bundles/' . $id),
             'method'      => 'put',
         ]);
@@ -306,7 +318,7 @@ class InstrumentBundles extends BaseController
 
     public function update($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -354,6 +366,16 @@ class InstrumentBundles extends BaseController
                 ->with('error', 'Pilih minimal satu instrumen untuk paket.');
         }
 
+        $submittedInstrumentIds = $this->normalizeInstrumentIds($instrumentIds);
+        $instrumentIds = $this->filterOwnedInstrumentIds($instrumentIds);
+
+        if ($instrumentIds === [] || count($instrumentIds) !== count($submittedInstrumentIds)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen yang dipilih tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $this->bundleModel->update($id, [
             'token'           => $customToken,
             'token_access_mode' => 'single_use',
@@ -383,7 +405,7 @@ class InstrumentBundles extends BaseController
 
     public function duplicate($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -400,7 +422,7 @@ class InstrumentBundles extends BaseController
         }
 
         $newToken = $this->generateUniqueToken();
-        $newBundleId = $this->bundleModel->insert([
+        $newBundleId = $this->bundleModel->insert($this->bundleModel->withOwner([
             'token'              => $newToken,
             'token_access_mode'  => 'single_use',
             'judul'              => $this->generateDuplicateTitle((string) ($bundle['judul'] ?? 'Paket Validasi Instrumen')),
@@ -412,7 +434,7 @@ class InstrumentBundles extends BaseController
             'token_revoked_at'    => null,
             'status'             => 'Aktif',
             'maksimal_respon'    => 1,
-        ], true);
+        ]), true);
 
         $instrumentIds = array_map(static fn(array $row): int => (int) $row['instrument_id'], $bundleInstruments);
         $validationTexts = [];
@@ -444,7 +466,7 @@ class InstrumentBundles extends BaseController
 
     public function delete($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -468,7 +490,7 @@ class InstrumentBundles extends BaseController
 
     public function revokeToken($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -494,7 +516,7 @@ class InstrumentBundles extends BaseController
 
     public function activateToken($id = null)
     {
-        $bundle = $this->bundleModel->find($id);
+        $bundle = $this->findOwnedBundle($id);
 
         if (!$bundle) {
             return redirect()
@@ -613,5 +635,48 @@ class InstrumentBundles extends BaseController
         }
 
         return date('Y-m-d H:i:s', $timestamp);
+    }
+
+    private function findOwnedBundle($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->bundleModel
+            ->scopeOwned('validation_bundles.user_id')
+            ->where('validation_bundles.id', (int) $id)
+            ->first();
+    }
+
+    private function getOwnedInstrumentOptions(): array
+    {
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->orderBy('kode', 'ASC')
+            ->orderBy('judul', 'ASC')
+            ->findAll();
+    }
+
+    private function filterOwnedInstrumentIds(array $instrumentIds): array
+    {
+        $ids = $this->normalizeInstrumentIds($instrumentIds);
+
+        if ($ids === []) {
+            return [];
+        }
+
+        $rows = $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->select('id')
+            ->whereIn('id', $ids)
+            ->findAll();
+
+        return array_map(static fn(array $row): int => (int) $row['id'], $rows);
+    }
+
+    private function normalizeInstrumentIds(array $instrumentIds): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', $instrumentIds), static fn(int $id): bool => $id > 0)));
     }
 }

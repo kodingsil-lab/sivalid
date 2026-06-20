@@ -417,7 +417,10 @@ class PublicForm extends BaseController
         }
 
         $now = date('Y-m-d H:i:s');
+        $ownerId = (int) ($link['user_id'] ?? 0);
+
         $respondentId = $this->respondentModel->insert([
+            'user_id'            => $ownerId > 0 ? $ownerId : null,
             'instrument_link_id' => (int) $link['id'],
             'nama'               => $identity['nama'],
             'email'              => $identity['email'],
@@ -433,6 +436,7 @@ class PublicForm extends BaseController
         ], true);
 
         $responseId = $this->responseModel->insert([
+            'user_id'            => $ownerId > 0 ? $ownerId : null,
             'instrument_id'      => $instrumentId,
             'instrument_link_id' => (int) $link['id'],
             'product_id'         => !empty($link['product_id']) ? (int) $link['product_id'] : null,

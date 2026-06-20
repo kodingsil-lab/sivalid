@@ -27,6 +27,12 @@ class InstrumentAspects extends BaseController
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
         $perPage = config('Pager')->perPage;
 
+        if ($instrumentId !== null && ! $this->findOwnedInstrument($instrumentId)) {
+            return redirect()
+                ->to(base_url('admin/instrument-aspects'))
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $data = [
             'title'        => 'Kisi-Kisi Instrumen',
             'instrumentId' => $instrumentId,
@@ -65,21 +71,32 @@ class InstrumentAspects extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
+        $instrumentId = (int) $this->request->getPost('instrument_id');
+        $instrument = $this->findOwnedInstrument($instrumentId);
+
+        if (! $instrument) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $this->aspectModel->insert([
-            'instrument_id' => (int) $this->request->getPost('instrument_id'),
+            'user_id'       => $this->ownerIdFromInstrument($instrument),
+            'instrument_id' => $instrumentId,
             'nama_aspek'    => trim((string) $this->request->getPost('nama_aspek')),
             'deskripsi'     => trim((string) $this->request->getPost('deskripsi')),
             'urutan'        => (int) $this->request->getPost('urutan'),
         ]);
 
         return redirect()
-            ->to(base_url('admin/instrument-aspects?instrument_id=' . $this->request->getPost('instrument_id')))
+            ->to(base_url('admin/instrument-aspects?instrument_id=' . $instrumentId))
             ->with('success', 'Aspek instrumen berhasil ditambahkan.');
     }
 
     public function edit($id = null)
     {
-        $aspect = $this->aspectModel->find($id);
+        $aspect = $this->findOwnedAspect($id);
 
         if (!$aspect) {
             return redirect()
@@ -94,7 +111,7 @@ class InstrumentAspects extends BaseController
 
     public function update($id = null)
     {
-        $aspect = $this->aspectModel->find($id);
+        $aspect = $this->findOwnedAspect($id);
 
         if (!$aspect) {
             return redirect()
@@ -115,21 +132,32 @@ class InstrumentAspects extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
+        $instrumentId = (int) $this->request->getPost('instrument_id');
+        $instrument = $this->findOwnedInstrument($instrumentId);
+
+        if (! $instrument) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
         $this->aspectModel->update($id, [
-            'instrument_id' => (int) $this->request->getPost('instrument_id'),
+            'user_id'       => $this->ownerIdFromInstrument($instrument),
+            'instrument_id' => $instrumentId,
             'nama_aspek'    => trim((string) $this->request->getPost('nama_aspek')),
             'deskripsi'     => trim((string) $this->request->getPost('deskripsi')),
             'urutan'        => (int) $this->request->getPost('urutan'),
         ]);
 
         return redirect()
-            ->to(base_url('admin/instrument-aspects?instrument_id=' . $this->request->getPost('instrument_id')))
+            ->to(base_url('admin/instrument-aspects?instrument_id=' . $instrumentId))
             ->with('success', 'Aspek instrumen berhasil diperbarui.');
     }
 
     public function delete($id = null)
     {
-        $aspect = $this->aspectModel->find($id);
+        $aspect = $this->findOwnedAspect($id);
 
         if (!$aspect) {
             return redirect()
@@ -149,7 +177,7 @@ class InstrumentAspects extends BaseController
     public function import()
     {
         $instrumentId = (int) $this->request->getPost('instrument_id');
-        $instrument   = $this->instrumentModel->find($instrumentId);
+        $instrument   = $this->findOwnedInstrument($instrumentId);
 
         if (!$instrument) {
             return redirect()
@@ -176,7 +204,7 @@ class InstrumentAspects extends BaseController
 
         try {
             $rows = $this->readXlsxRows($file->getTempName());
-            $result = $this->importRows($instrumentId, $rows);
+            $result = $this->importRows($instrumentId, $this->ownerIdFromInstrument($instrument), $rows);
         } catch (\Throwable $exception) {
             return redirect()
                 ->to(base_url('admin/instrument-aspects?instrument_id=' . $instrumentId))
@@ -239,7 +267,7 @@ class InstrumentAspects extends BaseController
             ->setFileName($fileName);
     }
 
-    private function importRows(int $instrumentId, array $rows): array
+    private function importRows(int $instrumentId, int $ownerId, array $rows): array
     {
         if (count($rows) < 2) {
             throw new \RuntimeException('File tidak berisi data.');
@@ -254,6 +282,7 @@ class InstrumentAspects extends BaseController
         }
 
         $existingAspects = $this->aspectModel
+            ->scopeOwned('instrument_aspects.user_id')
             ->where('instrument_id', $instrumentId)
             ->orderBy('urutan', 'ASC')
             ->findAll();
@@ -266,6 +295,7 @@ class InstrumentAspects extends BaseController
         }
 
         $existingIndicators = $this->indicatorModel
+            ->scopeOwned('instrument_indicators.user_id')
             ->where('instrument_id', $instrumentId)
             ->findAll();
 
@@ -302,6 +332,7 @@ class InstrumentAspects extends BaseController
                 $aspectDescription = trim((string) ($row[$headers['aspect_description'] ?? -1] ?? ''));
 
                 $aspectId = $this->aspectModel->insert([
+                    'user_id'       => $ownerId,
                     'instrument_id' => $instrumentId,
                     'nama_aspek'    => $aspectName,
                     'deskripsi'     => $aspectDescription,
@@ -335,6 +366,7 @@ class InstrumentAspects extends BaseController
                 ?? ($nextIndicatorOrders[$aspectId] ?? 1);
 
             $this->indicatorModel->insert([
+                'user_id'       => $ownerId,
                 'instrument_id' => $instrumentId,
                 'aspect_id'     => $aspectId,
                 'indikator'     => $indicatorText,
@@ -611,5 +643,34 @@ class InstrumentAspects extends BaseController
             . '<row r="4"><c r="A4"><v>2</v></c><c r="B4" t="s"><v>9</v></c><c r="C4" t="s"><v>6</v></c><c r="D4"><v>1</v></c><c r="E4" t="s"><v>10</v></c></row>'
             . '</sheetData>'
             . '</worksheet>';
+    }
+
+    private function findOwnedInstrument(int $instrumentId): ?array
+    {
+        if ($instrumentId <= 0) {
+            return null;
+        }
+
+        return $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->where('instruments.id', $instrumentId)
+            ->first();
+    }
+
+    private function findOwnedAspect($id): ?array
+    {
+        if ((int) $id <= 0) {
+            return null;
+        }
+
+        return $this->aspectModel
+            ->scopeOwned('instrument_aspects.user_id')
+            ->where('instrument_aspects.id', (int) $id)
+            ->first();
+    }
+
+    private function ownerIdFromInstrument(array $instrument): int
+    {
+        return (int) ($instrument['user_id'] ?? $this->currentUserId());
     }
 }

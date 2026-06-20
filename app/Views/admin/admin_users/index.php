@@ -70,6 +70,7 @@
                         <td><?= esc($user['created_at'] ?? '-') ?></td>
                         <td class="table-actions-cell">
                             <div class="table-actions">
+                                <a href="<?= base_url('admin/admin-users/' . $user['id']) ?>" class="btn btn-sm btn-light">Detail</a>
                                 <a href="<?= base_url('admin/admin-users/' . $user['id'] . '/edit') ?>" class="btn btn-sm btn-light">Edit</a>
 
                                 <form method="post" action="<?= base_url('admin/admin-users/' . $user['id'] . '/toggle-status') ?>" class="action-inline" onsubmit="return confirm('Ubah status user ini?')">

@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\Concerns\BelongsToUser;
 
 class InstrumentModel extends Model
 {
+    use BelongsToUser;
+
     protected $table            = 'instruments';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
 
     protected $allowedFields = [
+        'user_id',
         'kode',
         'judul',
         'jenis',
@@ -33,7 +37,7 @@ class InstrumentModel extends Model
      */
     public function getOrderedByCodeSequence(): array
     {
-        $rows = $this->orderBy('sort_order', 'ASC')->orderBy('id', 'DESC')->findAll();
+        $rows = $this->scopeOwned()->orderBy('sort_order', 'ASC')->orderBy('id', 'DESC')->findAll();
 
         usort($rows, static function (array $left, array $right): int {
             $leftCode = trim((string) ($left['kode'] ?? ''));

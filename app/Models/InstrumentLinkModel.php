@@ -3,15 +3,19 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Models\Concerns\BelongsToUser;
 
 class InstrumentLinkModel extends Model
 {
+    use BelongsToUser;
+
     protected $table            = 'instrument_links';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
 
     protected $allowedFields = [
+        'user_id',
         'instrument_id',
         'product_id',
         'token',
@@ -46,6 +50,8 @@ class InstrumentLinkModel extends Model
             ->join('instruments', 'instruments.id = instrument_links.instrument_id')
             ->join('research_products', 'research_products.id = instrument_links.product_id', 'left');
 
+        $this->applyOwnerToBuilder($builder, 'instrument_links.user_id');
+
         if ($mode !== null) {
             $builder->where('instrument_links.mode', $mode);
         }
@@ -69,6 +75,8 @@ class InstrumentLinkModel extends Model
         )
             ->join('instruments', 'instruments.id = instrument_links.instrument_id')
             ->join('research_products', 'research_products.id = instrument_links.product_id', 'left');
+
+        $this->applyOwnerToBuilder($builder, 'instrument_links.user_id');
 
         if ($mode !== null) {
             $builder->where('instrument_links.mode', $mode);
