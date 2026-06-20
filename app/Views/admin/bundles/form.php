@@ -476,7 +476,7 @@
                 menubar: false,
                 branding: false,
                 promotion: false,
-                plugins: 'lists table',
+                plugins: 'advlist lists table',
                 toolbar: 'blocks | bold italic underline strikethrough | numlist bullist | outdent indent | alignleft aligncenter alignright alignjustify | table | removeformat',
                 block_formats: 'Normal=p;Judul 1=h1;Judul 2=h2;Judul 3=h3',
                 table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
@@ -484,7 +484,9 @@
                     width: '100%',
                     borderCollapse: 'collapse'
                 },
-                content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.6;color:#1e293b} table{width:100%;border-collapse:collapse;margin:.65rem 0} th,td{border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top} th{background:#f1f5f9;font-weight:700}',
+                advlist_number_styles: 'default,lower-alpha,lower-roman,upper-alpha,upper-roman',
+                advlist_bullet_styles: 'default,circle,square',
+                content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.6;color:#1e293b} ol,ul{padding-left:1.65rem} ol ol{list-style-type:lower-alpha} ol ol ol{list-style-type:lower-roman} li{margin-bottom:.35rem;padding-left:.18rem} table{width:100%;table-layout:auto;border-collapse:collapse;margin:.65rem 0} th,td{min-width:120px;border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top;white-space:normal;overflow-wrap:anywhere} th:first-child,td:first-child{min-width:72px} th{background:#f1f5f9;font-weight:700}',
                 setup: function (editor) {
                     editor.on('init', function () {
                         var textarea = document.getElementById(editor.id);
