@@ -124,19 +124,19 @@ $renderDetailText = static function (?string $value): string {
 
 <div class="card mb-3 instrument-detail-card">
     <div class="card-body">
-        <h3 class="card-title mb-3">Pengantar dan Petunjuk Penyebaran</h3>
+        <h3 class="card-title mb-3">Pengantar dan Petunjuk</h3>
 
         <div class="instrument-document-section">
-            <h4>1. Pengantar Instrumen Siap Disebar</h4>
+            <h4>Pengantar</h4>
             <?= $renderDetailText($currentInstrument['pengantar'] ?? '') ?>
         </div>
 
         <div class="instrument-document-section">
-            <h4>2. Petunjuk Pengisian Responden</h4>
+            <h4>Petunjuk</h4>
             <?= $renderDetailText($currentInstrument['petunjuk'] ?? '') ?>
         </div>
 
-        <div class="instrument-note">Bagian ini menampilkan pengantar dan petunjuk untuk instrumen yang siap disebarkan kepada responden.</div>
+        <div class="instrument-note">Bagian ini menampilkan pengantar dan petunjuk instrumen.</div>
     </div>
 </div>
 
