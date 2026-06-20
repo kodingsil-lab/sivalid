@@ -45,7 +45,7 @@
                 type="text"
                 name="jenis"
                 class="form-control"
-                placeholder="Contoh: Angket, Wawancara, Rubrik Penilaian"
+                placeholder="Contoh: Pedoman Wawancara, Angket, Rubrik Penilaian"
                 value="<?= old('jenis') ?>"
                 maxlength="100"
                 required
@@ -77,10 +77,11 @@
                         </tr>
                     <?php else: ?>
                         <?php foreach ($types as $index => $type): ?>
-                            <?php
-                            $label = (string) ($type['setting_value'] ?? '');
-                            $usedCount = (int) ($usage[$label] ?? 0);
-                            ?>
+                                        <?php
+                                        $label = (string) ($type['setting_value'] ?? '');
+                                        $usedCount = (int) ($usage[$label] ?? 0);
+                                        $isDefaultType = in_array(mb_strtolower($label), array_map('mb_strtolower', sivalid_default_instrument_types()), true);
+                                        ?>
                             <tr>
                                 <td><?= $index + 1 ?></td>
                                 <td><?= esc($label) ?></td>
@@ -88,14 +89,14 @@
                                     <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                 </td>
                                 <td class="table-actions-cell">
-                                    <?php if ($usedCount === 0): ?>
-                                        <form action="<?= base_url('admin/instrument-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis instrumen ini?');">
-                                            <?= csrf_field() ?>
-                                            <input type="hidden" name="_method" value="DELETE">
-                                            <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                                        </form>
-                                    <?php else: ?>
-                                        <span class="text-muted small">Tidak bisa dihapus</span>
+                                                <?php if ($usedCount === 0 && ! $isDefaultType): ?>
+                                                    <form action="<?= base_url('admin/instrument-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis instrumen ini?');">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <span class="text-muted small">Tidak bisa dihapus</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>

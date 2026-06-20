@@ -30,15 +30,21 @@ class InstrumentItems extends BaseController
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
         $perPage = config('Pager')->perPage;
 
-        if ($instrumentId !== null && ! $this->findOwnedInstrument($instrumentId)) {
+        $selectedInstrument = $instrumentId !== null ? $this->findOwnedInstrument($instrumentId) : null;
+
+        if ($instrumentId !== null && ! $selectedInstrument) {
             return redirect()
                 ->to(base_url('admin/instrument-items'))
                 ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
         }
 
+        $itemLayout = instrument_item_entry_layout($selectedInstrument['jenis'] ?? '');
+
         $data = [
-            'title'        => 'Butir Pernyataan Instrumen',
+            'title'        => ($itemLayout['item_label'] ?? 'Butir') . ' Instrumen',
             'instrumentId' => $instrumentId,
+            'selectedInstrument' => $selectedInstrument,
+            'itemLayout'   => $itemLayout,
             'instruments'  => $this->instrumentModel->getOrderedByCodeSequence(),
             'items'        => $this->itemModel->paginateWithRelations($instrumentId, $perPage, 'instrument_items'),
             'pager'        => $this->itemModel->pager,
@@ -53,11 +59,14 @@ class InstrumentItems extends BaseController
         $instrumentId = $this->request->getGet('instrument_id');
         $instrumentId = $instrumentId !== null && $instrumentId !== '' ? (int) $instrumentId : null;
 
+        $selectedInstrument = null;
         $aspects = [];
         $indicators = [];
 
         if ($instrumentId !== null) {
-            if (! $this->findOwnedInstrument($instrumentId)) {
+            $selectedInstrument = $this->findOwnedInstrument($instrumentId);
+
+            if (! $selectedInstrument) {
                 return redirect()
                     ->to(base_url('admin/instrument-items'))
                     ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
@@ -90,10 +99,14 @@ class InstrumentItems extends BaseController
             }
         }
 
+        $itemLayout = instrument_item_entry_layout($selectedInstrument['jenis'] ?? '');
+
         $data = [
-            'title'        => 'Tambah Butir Pernyataan',
+            'title'        => 'Tambah ' . ($itemLayout['item_label'] ?? 'Butir'),
             'item'         => null,
             'instrumentId' => $instrumentId,
+            'selectedInstrument' => $selectedInstrument,
+            'itemLayout'   => $itemLayout,
             'instruments'  => $this->instrumentModel->getOrderedByCodeSequence(),
             'aspects'      => $aspects,
             'indicators'   => $indicators,
@@ -112,6 +125,12 @@ class InstrumentItems extends BaseController
             'aspect_id'     => 'required|integer',
             'nomor'         => 'required|integer',
             'pernyataan'    => 'required|min_length[5]',
+            'sumber_dokumen'=> 'permit_empty|max_length[150]',
+            'skor_1_deskripsi' => 'permit_empty',
+            'skor_2_deskripsi' => 'permit_empty',
+            'skor_3_deskripsi' => 'permit_empty',
+            'skor_4_deskripsi' => 'permit_empty',
+            'skor_5_deskripsi' => 'permit_empty',
             'tipe_butir'    => 'required',
             'urutan'        => 'required|integer',
             'status'        => 'required',
@@ -171,6 +190,12 @@ class InstrumentItems extends BaseController
             'indicator_id'  => !empty($indicatorId) ? (int) $indicatorId : null,
             'nomor'         => (int) $this->request->getPost('nomor'),
             'pernyataan'    => trim((string) $this->request->getPost('pernyataan')),
+            'sumber_dokumen'=> trim((string) $this->request->getPost('sumber_dokumen')),
+            'skor_1_deskripsi' => trim((string) $this->request->getPost('skor_1_deskripsi')),
+            'skor_2_deskripsi' => trim((string) $this->request->getPost('skor_2_deskripsi')),
+            'skor_3_deskripsi' => trim((string) $this->request->getPost('skor_3_deskripsi')),
+            'skor_4_deskripsi' => trim((string) $this->request->getPost('skor_4_deskripsi')),
+            'skor_5_deskripsi' => trim((string) $this->request->getPost('skor_5_deskripsi')),
             'tipe_butir'    => trim((string) $this->request->getPost('tipe_butir')),
             'wajib'         => (int) $this->request->getPost('wajib'),
             'urutan'        => (int) $this->request->getPost('urutan'),
@@ -203,11 +228,14 @@ class InstrumentItems extends BaseController
             ->where('instrument_id', $item['instrument_id'])
             ->orderBy('urutan', 'ASC')
             ->findAll();
+        $selectedInstrument = $this->findOwnedInstrument((int) $item['instrument_id']);
 
         $data = [
-            'title'        => 'Edit Butir Pernyataan',
+            'title'        => 'Edit ' . (($selectedInstrument ? instrument_item_entry_layout($selectedInstrument['jenis'] ?? '') : [])['item_label'] ?? 'Butir'),
             'item'         => $item,
             'instrumentId' => $item['instrument_id'],
+            'selectedInstrument' => $selectedInstrument,
+            'itemLayout'   => instrument_item_entry_layout($selectedInstrument['jenis'] ?? ''),
             'instruments'  => $this->instrumentModel->getOrderedByCodeSequence(),
             'aspects'      => $aspects,
             'indicators'   => $indicators,
@@ -234,6 +262,12 @@ class InstrumentItems extends BaseController
             'aspect_id'     => 'required|integer',
             'nomor'         => 'required|integer',
             'pernyataan'    => 'required|min_length[5]',
+            'sumber_dokumen'=> 'permit_empty|max_length[150]',
+            'skor_1_deskripsi' => 'permit_empty',
+            'skor_2_deskripsi' => 'permit_empty',
+            'skor_3_deskripsi' => 'permit_empty',
+            'skor_4_deskripsi' => 'permit_empty',
+            'skor_5_deskripsi' => 'permit_empty',
             'tipe_butir'    => 'required',
             'urutan'        => 'required|integer',
             'status'        => 'required',
@@ -293,6 +327,12 @@ class InstrumentItems extends BaseController
             'indicator_id'  => !empty($indicatorId) ? (int) $indicatorId : null,
             'nomor'         => (int) $this->request->getPost('nomor'),
             'pernyataan'    => trim((string) $this->request->getPost('pernyataan')),
+            'sumber_dokumen'=> trim((string) $this->request->getPost('sumber_dokumen')),
+            'skor_1_deskripsi' => trim((string) $this->request->getPost('skor_1_deskripsi')),
+            'skor_2_deskripsi' => trim((string) $this->request->getPost('skor_2_deskripsi')),
+            'skor_3_deskripsi' => trim((string) $this->request->getPost('skor_3_deskripsi')),
+            'skor_4_deskripsi' => trim((string) $this->request->getPost('skor_4_deskripsi')),
+            'skor_5_deskripsi' => trim((string) $this->request->getPost('skor_5_deskripsi')),
             'tipe_butir'    => trim((string) $this->request->getPost('tipe_butir')),
             'wajib'         => (int) $this->request->getPost('wajib'),
             'urutan'        => (int) $this->request->getPost('urutan'),
@@ -353,7 +393,7 @@ class InstrumentItems extends BaseController
 
         try {
             $rows = $this->readXlsxRows($file->getTempName());
-            $result = $this->importRows($instrumentId, $this->ownerIdFromInstrument($instrument), $rows);
+            $result = $this->importRows($instrumentId, $this->ownerIdFromInstrument($instrument), $rows, instrument_item_entry_layout($instrument['jenis'] ?? ''));
         } catch (\Throwable $exception) {
             return redirect()
                 ->to(base_url('admin/instrument-items?instrument_id=' . $instrumentId))
@@ -371,7 +411,12 @@ class InstrumentItems extends BaseController
 
     public function importTemplate()
     {
-        $fileName = 'template-import-butir-instrumen.xlsx';
+        $instrumentId = (int) $this->request->getGet('instrument_id');
+        $instrument = $this->findOwnedInstrument($instrumentId);
+        $itemLayout = instrument_item_entry_layout($instrument['jenis'] ?? '');
+        $safeTitle = preg_replace('/[^a-z0-9]+/i', '-', strtolower($itemLayout['title'] ?? 'instrumen')) ?? 'instrumen';
+        $safeTitle = trim($safeTitle, '-') ?: 'instrumen';
+        $fileName = 'template-import-butir-' . $safeTitle . '.xlsx';
         $tempPath = tempnam(sys_get_temp_dir(), 'butir_template_');
 
         if ($tempPath === false) {
@@ -387,23 +432,8 @@ class InstrumentItems extends BaseController
                 ->with('error', 'Template gagal dibuat.');
         }
 
-        $sharedStrings = [
-            'No',
-            'Aspek',
-            'Indikator',
-            'Pernyataan',
-            'Tipe Butir',
-            'Wajib',
-            'Urutan',
-            'Status',
-            'Pendahuluan',
-            'Kejelasan latar belakang dan urgensi pengembangan model pembelajaran.',
-            'Model pembelajaran memiliki latar belakang pengembangan yang jelas.',
-            'skala',
-            'Ya',
-            'Aktif',
-            'Model pembelajaran sesuai dengan kebutuhan pembelajaran.',
-        ];
+        $templateRows = $this->importTemplateRows($itemLayout);
+        $sharedStrings = $this->xlsxSharedStringsFromRows($templateRows);
 
         $zip->addFromString('[Content_Types].xml', $this->xlsxContentTypesXml());
         $zip->addFromString('_rels/.rels', $this->xlsxRootRelsXml());
@@ -411,7 +441,7 @@ class InstrumentItems extends BaseController
         $zip->addFromString('xl/_rels/workbook.xml.rels', $this->xlsxWorkbookRelsXml());
         $zip->addFromString('xl/styles.xml', $this->xlsxStylesXml());
         $zip->addFromString('xl/sharedStrings.xml', $this->xlsxSharedStringsXml($sharedStrings));
-        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxTemplateSheetXml());
+        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxTemplateSheetXml($templateRows, $sharedStrings));
         $zip->close();
 
         return $this->response
@@ -419,14 +449,14 @@ class InstrumentItems extends BaseController
             ->setFileName($fileName);
     }
 
-    private function importRows(int $instrumentId, int $ownerId, array $rows): array
+    private function importRows(int $instrumentId, int $ownerId, array $rows, array $itemLayout): array
     {
         if (count($rows) < 2) {
             throw new \RuntimeException('File tidak berisi data.');
         }
 
-        $headers = $this->mapImportHeaders($rows[0]);
-        foreach (['aspect_name' => 'Aspek', 'statement' => 'Pernyataan'] as $key => $label) {
+        $headers = $this->mapImportHeaders($rows[0], (string) ($itemLayout['type'] ?? 'standard'));
+        foreach (['aspect_name' => $itemLayout['aspect_label'] ?? 'Aspek', 'statement' => $itemLayout['item_label'] ?? 'Butir'] as $key => $label) {
             if (!isset($headers[$key])) {
                 throw new \RuntimeException('Kolom "' . $label . '" wajib ada.');
             }
@@ -511,6 +541,11 @@ class InstrumentItems extends BaseController
 
             $number = $this->readImportNumber($row[$headers['number'] ?? -1] ?? null) ?? $nextNumber++;
             $order = $this->readImportNumber($row[$headers['order'] ?? -1] ?? null) ?? $nextOrder++;
+            $sourceDocument = trim((string) ($row[$headers['source_document'] ?? -1] ?? ''));
+            $rubricScores = [];
+            for ($score = 1; $score <= 5; $score++) {
+                $rubricScores['skor_' . $score . '_deskripsi'] = trim((string) ($row[$headers['score_' . $score] ?? -1] ?? ''));
+            }
             $type = $this->normalizeItemType((string) ($row[$headers['item_type'] ?? -1] ?? 'skala'));
             $required = $this->normalizeRequired((string) ($row[$headers['required'] ?? -1] ?? 'Ya'));
             $status = $this->normalizeItemStatus((string) ($row[$headers['status'] ?? -1] ?? 'Aktif'));
@@ -522,6 +557,12 @@ class InstrumentItems extends BaseController
                 'indicator_id'  => $indicatorId,
                 'nomor'         => $number,
                 'pernyataan'    => $statement,
+                'sumber_dokumen'=> $sourceDocument,
+                'skor_1_deskripsi' => $rubricScores['skor_1_deskripsi'],
+                'skor_2_deskripsi' => $rubricScores['skor_2_deskripsi'],
+                'skor_3_deskripsi' => $rubricScores['skor_3_deskripsi'],
+                'skor_4_deskripsi' => $rubricScores['skor_4_deskripsi'],
+                'skor_5_deskripsi' => $rubricScores['skor_5_deskripsi'],
                 'tipe_butir'    => $type,
                 'wajib'         => $required,
                 'urutan'        => $order,
@@ -546,9 +587,17 @@ class InstrumentItems extends BaseController
         ];
     }
 
-    private function mapImportHeaders(array $headerRow): array
+    private function mapImportHeaders(array $headerRow, string $layoutType = 'standard'): array
     {
         $map = [];
+        $statementHeaders = match ($layoutType) {
+            'document_review' => ['item telaah', 'pernyataan', 'butir', 'butir pernyataan'],
+            'interview_guide' => ['pertanyaan wawancara', 'pertanyaan', 'pernyataan', 'butir', 'butir pernyataan'],
+            'observation_guide' => ['indikator', 'indikator yang diamati', 'pernyataan', 'butir', 'butir pernyataan'],
+            'performance_test' => ['fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
+            'rubric_assessment' => ['indikator', 'fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
+            default => ['pernyataan', 'butir', 'butir pernyataan'],
+        };
 
         foreach ($headerRow as $index => $header) {
             $key = $this->normalizeImportText((string) $header);
@@ -557,10 +606,14 @@ class InstrumentItems extends BaseController
                 $map['number'] = $index;
             } elseif (in_array($key, ['aspek', 'nama aspek'], true)) {
                 $map['aspect_name'] = $index;
-            } elseif (in_array($key, ['indikator', 'nama indikator'], true)) {
-                $map['indicator_text'] = $index;
-            } elseif (in_array($key, ['pernyataan', 'butir', 'butir pernyataan'], true)) {
+            } elseif (in_array($key, $statementHeaders, true)) {
                 $map['statement'] = $index;
+            } elseif (in_array($key, ['indikator', 'indikator kisi kisi', 'indikator kisi-kisi', 'nama indikator'], true)) {
+                $map['indicator_text'] = $index;
+            } elseif (in_array($key, ['sumber dokumen', 'sumber', 'dokumen'], true)) {
+                $map['source_document'] = $index;
+            } elseif (preg_match('/^skor\s*([1-5])$/', $key, $matches) === 1) {
+                $map['score_' . $matches[1]] = $index;
             } elseif (in_array($key, ['tipe', 'tipe butir'], true)) {
                 $map['item_type'] = $index;
             } elseif (in_array($key, ['wajib', 'wajib diisi'], true)) {
@@ -820,17 +873,118 @@ class InstrumentItems extends BaseController
             . '</sst>';
     }
 
-    private function xlsxTemplateSheetXml(): string
+    private function importTemplateRows(array $itemLayout): array
     {
+        $type = (string) ($itemLayout['type'] ?? 'standard');
+        $itemHeader = (string) ($itemLayout['excel_item_header'] ?? 'Butir Pernyataan');
+        $headers = ['No', (string) ($itemLayout['aspect_label'] ?? 'Aspek')];
+
+        if ($type === 'standard' || str_contains($type, 'questionnaire')) {
+            $headers[] = 'Indikator Kisi-Kisi';
+        }
+
+        $headers[] = $itemHeader;
+
+        if (! empty($itemLayout['show_source_document'])) {
+            $headers[] = 'Sumber Dokumen';
+        }
+
+        if (! empty($itemLayout['show_rubric_scores'])) {
+            foreach (range(1, 5) as $score) {
+                $headers[] = 'Skor ' . $score;
+            }
+        }
+
+        $headers = array_merge($headers, ['Tipe Butir', 'Wajib', 'Urutan', 'Status']);
+
+        $sampleOne = match ($type) {
+            'document_review' => ['1', 'Pendekatan Pembelajaran', 'RPS mencantumkan pendekatan pembelajaran.', 'RPS', 'skala', 'Ya', '1', 'Aktif'],
+            'interview_guide' => ['1', 'Perencanaan Pembelajaran', 'Bagaimana Bapak/Ibu merencanakan pembelajaran?', 'isian', 'Ya', '1', 'Aktif'],
+            'observation_guide' => ['1', 'Kondisi Pembelajaran', 'Pengamatan terhadap proses pembelajaran.', 'isian', 'Ya', '1', 'Aktif'],
+            'performance_test' => ['1', 'Kelayakan topik dan fokus artikel', 'Kejelasan topik, relevansi isu, batasan masalah, tujuan artikel, dan kesesuaian dengan bidang kajian.', 'skala', 'Ya', '1', 'Aktif'],
+            'rubric_assessment' => [
+                '1',
+                'Isi Tulisan',
+                'Kejelasan topik, argumentasi yang kuat, dan kelengkapan isi sesuai tujuan.',
+                'Topik tidak jelas dan isi tidak sesuai.',
+                'Topik kurang jelas dan argumentasi lemah.',
+                'Topik cukup jelas dan argumentasi mulai tampak.',
+                'Topik jelas dan argumentasi cukup kuat.',
+                'Topik sangat jelas, argumentasi kuat, dan isi lengkap.',
+                'skala',
+                'Ya',
+                '1',
+                'Aktif',
+            ],
+            default => ['1', 'Isi', 'Indikator kisi-kisi contoh', 'Butir pernyataan contoh.', 'skala', 'Ya', '1', 'Aktif'],
+        };
+
+        $sampleTwo = $sampleOne;
+        $sampleTwo[0] = '2';
+        $sampleTwo[count($sampleTwo) - 2] = '2';
+
+        return [$headers, $sampleOne, $sampleTwo];
+    }
+
+    private function xlsxSharedStringsFromRows(array $rows): array
+    {
+        $strings = [];
+
+        foreach ($rows as $row) {
+            foreach ($row as $value) {
+                $value = (string) $value;
+                if ($value !== '' && !in_array($value, $strings, true)) {
+                    $strings[] = $value;
+                }
+            }
+        }
+
+        return $strings;
+    }
+
+    private function xlsxTemplateSheetXml(array $rows, array $sharedStrings): string
+    {
+        $stringIndex = array_flip($sharedStrings);
+        $maxColumns = max(array_map('count', $rows));
+        $columns = '';
+
+        for ($column = 1; $column <= $maxColumns; $column++) {
+            $width = $column === 1 ? 8 : ($column <= 3 ? 28 : 22);
+            $columns .= '<col min="' . $column . '" max="' . $column . '" width="' . $width . '" customWidth="1"/>';
+        }
+
+        $sheetData = '';
+        foreach ($rows as $rowIndex => $row) {
+            $rowNumber = $rowIndex + 1;
+            $sheetData .= '<row r="' . $rowNumber . '">';
+
+            foreach ($row as $columnIndex => $value) {
+                $cellRef = $this->xlsxColumnName($columnIndex + 1) . $rowNumber;
+                $style = $rowIndex === 0 ? ' s="1"' : '';
+                $sheetData .= '<c r="' . $cellRef . '" t="s"' . $style . '><v>' . ($stringIndex[(string) $value] ?? 0) . '</v></c>';
+            }
+
+            $sheetData .= '</row>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8"?>'
             . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-            . '<cols><col min="1" max="1" width="8" customWidth="1"/><col min="2" max="2" width="24" customWidth="1"/><col min="3" max="3" width="56" customWidth="1"/><col min="4" max="4" width="64" customWidth="1"/><col min="5" max="5" width="14" customWidth="1"/><col min="6" max="6" width="10" customWidth="1"/><col min="7" max="7" width="10" customWidth="1"/><col min="8" max="8" width="14" customWidth="1"/></cols>'
-            . '<sheetData>'
-            . '<row r="1"><c r="A1" t="s" s="1"><v>0</v></c><c r="B1" t="s" s="1"><v>1</v></c><c r="C1" t="s" s="1"><v>2</v></c><c r="D1" t="s" s="1"><v>3</v></c><c r="E1" t="s" s="1"><v>4</v></c><c r="F1" t="s" s="1"><v>5</v></c><c r="G1" t="s" s="1"><v>6</v></c><c r="H1" t="s" s="1"><v>7</v></c></row>'
-            . '<row r="2"><c r="A2"><v>1</v></c><c r="B2" t="s"><v>8</v></c><c r="C2" t="s"><v>9</v></c><c r="D2" t="s"><v>10</v></c><c r="E2" t="s"><v>11</v></c><c r="F2" t="s"><v>12</v></c><c r="G2"><v>1</v></c><c r="H2" t="s"><v>13</v></c></row>'
-            . '<row r="3"><c r="A3"><v>2</v></c><c r="B3" t="s"><v>8</v></c><c r="C3" t="s"><v>9</v></c><c r="D3" t="s"><v>14</v></c><c r="E3" t="s"><v>11</v></c><c r="F3" t="s"><v>12</v></c><c r="G3"><v>2</v></c><c r="H3" t="s"><v>13</v></c></row>'
-            . '</sheetData>'
+            . '<cols>' . $columns . '</cols>'
+            . '<sheetData>' . $sheetData . '</sheetData>'
             . '</worksheet>';
+    }
+
+    private function xlsxColumnName(int $number): string
+    {
+        $name = '';
+
+        while ($number > 0) {
+            $number--;
+            $name = chr(65 + ($number % 26)) . $name;
+            $number = intdiv($number, 26);
+        }
+
+        return $name;
     }
 
     private function findOwnedInstrument(int $instrumentId): ?array

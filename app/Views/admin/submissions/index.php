@@ -99,6 +99,7 @@ $modeBadgeClass = static function (?string $mode): string {
     $exportExcelUrl = base_url('admin/submissions/export/excel');
     $exportWordUrl = base_url('admin/submissions/export/word');
     $exportPdfUrl = base_url('admin/submissions/export/pdf');
+    $exportReportUrl = base_url('admin/submissions/export/report');
 
     if (!empty($activeFilters)) {
         $queryString = '?' . http_build_query($activeFilters);
@@ -106,6 +107,7 @@ $modeBadgeClass = static function (?string $mode): string {
         $exportExcelUrl .= $queryString;
         $exportWordUrl .= $queryString;
         $exportPdfUrl .= $queryString;
+        $exportReportUrl .= $queryString;
     }
     ?>
 
@@ -189,6 +191,7 @@ $modeBadgeClass = static function (?string $mode): string {
             </div>
 
             <div class="d-flex flex-wrap gap-2">
+                <a href="<?= esc($exportReportUrl) ?>" class="btn btn-primary btn-sm">Export Laporan Sesuai Jenis</a>
                 <a href="<?= esc($exportExcelUrl) ?>" class="btn btn-light btn-sm">Export Excel</a>
                 <a href="<?= esc($exportWordUrl) ?>" class="btn btn-light btn-sm">Export Word</a>
                 <a href="<?= esc($exportPdfUrl) ?>" class="btn btn-light btn-sm">Export PDF</a>

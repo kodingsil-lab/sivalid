@@ -3,7 +3,6 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Libraries\JustificationSchema;
 use App\Libraries\RespondentIdentitySchema;
 use App\Libraries\WorkflowStatusService;
 use App\Models\InstrumentLinkModel;
@@ -80,8 +79,6 @@ class RespondentLinks extends BaseController
             'instruments' => $this->getValidInstruments(),
             'identityTemplates' => RespondentIdentitySchema::templates(),
             'identityFields' => RespondentIdentitySchema::fieldsForTemplate('mahasiswa'),
-            'justificationTemplates' => JustificationSchema::templates(),
-            'justificationConfig' => ['template' => 'responden'] + JustificationSchema::configForTemplate('responden'),
             'action'      => base_url('admin/respondent-links'),
             'method'      => 'post',
         ]);
@@ -117,7 +114,6 @@ class RespondentLinks extends BaseController
 
         $identityTemplate = $this->identityTemplateFromRequest();
         $identityFields = $this->identityFieldsFromRequest($identityTemplate);
-        $justificationConfig = $this->justificationConfigFromRequest();
 
         $this->linkModel->insert([
             'user_id'         => $this->ownerIdFromInstrument($instrument),
@@ -129,7 +125,7 @@ class RespondentLinks extends BaseController
             'sasaran'         => trim((string) $this->request->getPost('sasaran')),
             'identity_template' => $identityTemplate,
             'identity_fields'  => json_encode($identityFields, JSON_UNESCAPED_UNICODE),
-            'justification_config' => json_encode($justificationConfig, JSON_UNESCAPED_UNICODE),
+            'justification_config' => null,
             'pengantar_penyebaran' => trim((string) $this->request->getPost('pengantar_penyebaran')),
             'petunjuk_penyebaran' => trim((string) $this->request->getPost('petunjuk_penyebaran')),
             'tanggal_mulai'   => $this->emptyToNull($this->request->getPost('tanggal_mulai')),
@@ -165,8 +161,6 @@ class RespondentLinks extends BaseController
             'instruments' => $this->getValidInstruments(),
             'identityTemplates' => RespondentIdentitySchema::templates(),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
-            'justificationTemplates' => JustificationSchema::templates(),
-            'justificationConfig' => ['template' => JustificationSchema::defaultTemplateForLink($link)] + JustificationSchema::configForLink($link),
             'action'      => base_url('admin/respondent-links/' . $id),
             'method'      => 'put',
         ]);
@@ -201,7 +195,6 @@ class RespondentLinks extends BaseController
 
         $identityTemplate = $this->identityTemplateFromRequest();
         $identityFields = $this->identityFieldsFromRequest($identityTemplate);
-        $justificationConfig = $this->justificationConfigFromRequest();
 
         $this->linkModel->update($id, [
             'user_id'         => $this->ownerIdFromInstrument($instrument),
@@ -211,7 +204,7 @@ class RespondentLinks extends BaseController
             'sasaran'         => trim((string) $this->request->getPost('sasaran')),
             'identity_template' => $identityTemplate,
             'identity_fields'  => json_encode($identityFields, JSON_UNESCAPED_UNICODE),
-            'justification_config' => json_encode($justificationConfig, JSON_UNESCAPED_UNICODE),
+            'justification_config' => null,
             'pengantar_penyebaran' => trim((string) $this->request->getPost('pengantar_penyebaran')),
             'petunjuk_penyebaran' => trim((string) $this->request->getPost('petunjuk_penyebaran')),
             'tanggal_mulai'   => $this->emptyToNull($this->request->getPost('tanggal_mulai')),
@@ -322,23 +315,6 @@ class RespondentLinks extends BaseController
         }
 
         return RespondentIdentitySchema::normalizeFields($fields);
-    }
-
-    private function justificationConfigFromRequest(): array
-    {
-        $template = trim((string) $this->request->getPost('justification_template'));
-        $base = JustificationSchema::configForTemplate($template);
-
-        return JustificationSchema::normalizeConfig([
-            'label' => $base['label'] ?? 'Custom',
-            'template' => $template,
-            'comment_label' => $this->request->getPost('justification_comment_label'),
-            'comment_placeholder' => $this->request->getPost('justification_comment_placeholder'),
-            'comment_required' => (bool) $this->request->getPost('justification_comment_required'),
-            'conclusion_label' => $this->request->getPost('justification_conclusion_label'),
-            'conclusion_required' => (bool) $this->request->getPost('justification_conclusion_required'),
-            'conclusion_options' => $this->request->getPost('justification_conclusion_options'),
-        ]);
     }
 
     private function findOwnedInstrument(int $instrumentId): ?array

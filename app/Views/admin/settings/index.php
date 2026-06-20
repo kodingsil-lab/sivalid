@@ -141,7 +141,7 @@
                 <section id="section-instrument-types" class="settings-section settings-section-last">
                     <div class="settings-section-header">
                         <h3>Jenis/Bentuk Instrumen</h3>
-                        <p>Kelola daftar jenis/bentuk instrumen yang muncul di Master Instrumen, misalnya Angket, Wawancara, Observasi, FGD, atau Tes Kinerja.</p>
+                        <p>Daftar referensi jenis instrumen yang muncul di Master Instrumen dan menentukan layout instrumen siap sebar.</p>
                     </div>
 
                     <div class="card mb-3">
@@ -155,7 +155,7 @@
                                     type="text"
                                     name="jenis"
                                     class="form-control"
-                                    placeholder="Contoh: Angket, Wawancara, Rubrik Penilaian"
+                                    placeholder="Contoh: Pedoman Wawancara, Angket, Rubrik Penilaian"
                                     value="<?= old('jenis') ?>"
                                     maxlength="100"
                                     required
@@ -190,6 +190,7 @@
                                                 <?php
                                                 $label = (string) ($type['setting_value'] ?? '');
                                                 $usedCount = (int) ($instrumentTypeUsage[$label] ?? 0);
+                                                $isDefaultType = in_array(mb_strtolower($label), array_map('mb_strtolower', sivalid_default_instrument_types()), true);
                                                 ?>
                                                 <tr>
                                                     <td><?= $index + 1 ?></td>
@@ -198,7 +199,7 @@
                                                         <span class="badge bg-blue text-blue-fg"><?= $usedCount ?> data</span>
                                                     </td>
                                                     <td class="table-actions-cell">
-                                                        <?php if ($usedCount === 0): ?>
+                                                        <?php if ($usedCount === 0 && ! $isDefaultType): ?>
                                                             <form action="<?= base_url('admin/instrument-types/' . (int) $type['id']) ?>" method="post" onsubmit="return confirm('Hapus jenis instrumen ini?');">
                                                                 <?= csrf_field() ?>
                                                                 <input type="hidden" name="_method" value="DELETE">

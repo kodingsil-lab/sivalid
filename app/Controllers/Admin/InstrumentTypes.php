@@ -19,11 +19,11 @@ class InstrumentTypes extends BaseController
 
     public function index()
     {
-        $types = $this->settingModel->getGroupRows('instrument_type');
+        $types = sivalid_sort_instrument_type_rows($this->settingModel->getGroupRows('instrument_type'));
 
         if ($types === []) {
             $this->seedDefaultTypes();
-            $types = $this->settingModel->getGroupRows('instrument_type');
+            $types = sivalid_sort_instrument_type_rows($this->settingModel->getGroupRows('instrument_type'));
         }
 
         $usage = [];
@@ -87,6 +87,14 @@ class InstrumentTypes extends BaseController
         }
 
         $label = trim((string) ($type['setting_value'] ?? ''));
+        $defaultTypes = array_map('mb_strtolower', sivalid_default_instrument_types());
+
+        if (in_array(mb_strtolower($label), $defaultTypes, true)) {
+            return redirect()
+                ->to(base_url('admin/settings?tab=instrument-types'))
+                ->with('error', 'Jenis instrumen dasar tidak bisa dihapus karena menjadi patokan layout Master Instrumen.');
+        }
+
         $used = $this->instrumentModel->where('jenis', $label)->countAllResults();
 
         if ($used > 0) {
@@ -104,15 +112,7 @@ class InstrumentTypes extends BaseController
 
     private function seedDefaultTypes(): void
     {
-        $defaults = [
-            'Angket',
-            'Wawancara',
-            'Observasi',
-            'FGD',
-            'Tes Kinerja',
-            'Rubrik Penilaian',
-            'Dokumentasi',
-        ];
+        $defaults = sivalid_default_instrument_types();
 
         foreach ($defaults as $index => $label) {
             $this->settingModel->insert([

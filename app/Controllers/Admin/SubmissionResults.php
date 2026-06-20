@@ -244,6 +244,33 @@ class SubmissionResults extends BaseController
             ->setBody($dompdf->output());
     }
 
+    public function exportReport()
+    {
+        $filters = $this->getFilters();
+        $types = $this->getReportInstrumentTypes($filters);
+
+        if ($types === []) {
+            return redirect()
+                ->to(base_url('admin/submissions?' . http_build_query(array_filter($filters))))
+                ->with('error', 'Belum ada hasil pengisian untuk diekspor.');
+        }
+
+        if (count($types) > 1) {
+            return redirect()
+                ->to(base_url('admin/submissions?' . http_build_query(array_filter($filters))))
+                ->with('error', 'Filter dulu satu instrumen atau satu link pengisian agar format laporan tidak bercampur.');
+        }
+
+        $jenis = array_values($types)[0];
+        $format = $this->reportFormatForInstrumentType($jenis);
+
+        if ($format === 'word') {
+            return $this->exportTypedWordReport($filters, $jenis);
+        }
+
+        return $this->exportExcel();
+    }
+
     public function show($id = null)
     {
         $responseId = (int) $id;
@@ -507,6 +534,7 @@ class SubmissionResults extends BaseController
                  instrument_links.judul_link,
                  instruments.kode AS instrument_kode,
                  instruments.judul AS instrument_judul,
+                 instruments.jenis AS instrument_jenis,
                  research_products.kode AS product_kode,
                  research_products.nama_produk,
                  instrument_aspects.nama_aspek,
@@ -514,6 +542,7 @@ class SubmissionResults extends BaseController
                  instrument_items.tipe_butir,
                  instrument_items.wajib,
                  instrument_items.pernyataan,
+                 instrument_items.sumber_dokumen,
                  response_answers.skor,
                  response_answers.jawaban_teks,
                  response_answers.komentar'
@@ -842,6 +871,195 @@ class SubmissionResults extends BaseController
         <?php
 
         return (string) ob_get_clean();
+    }
+
+    private function getReportInstrumentTypes(array $filters): array
+    {
+        $builder = $this->responseModel
+            ->select('instruments.jenis')
+            ->join('respondents', 'respondents.id = responses.respondent_id')
+            ->join('instrument_links', 'instrument_links.id = responses.instrument_link_id')
+            ->join('instruments', 'instruments.id = responses.instrument_id')
+            ->join('research_products', 'research_products.id = responses.product_id', 'left');
+
+        $this->applyOwnerScope($builder, 'responses.user_id');
+        $this->applyResponseFilters($builder, $filters);
+        $rows = $builder
+            ->groupBy('instruments.jenis')
+            ->findAll();
+
+        $types = [];
+
+        foreach ($rows as $row) {
+            $jenis = trim((string) ($row['jenis'] ?? ''));
+
+            if ($jenis !== '') {
+                $types[$jenis] = $jenis;
+            }
+        }
+
+        return $types;
+    }
+
+    private function reportFormatForInstrumentType(string $jenis): string
+    {
+        return in_array(instrument_type_key($jenis), [
+            'panduan_analisis_perangkat_pembelajaran',
+            'pedoman_wawancara',
+            'pedoman_observasi',
+        ], true) ? 'word' : 'excel';
+    }
+
+    private function exportTypedWordReport(array $filters, string $jenis)
+    {
+        $rows = $this->getExportRows($filters);
+        $html = $this->buildTypedWordReportHtml($rows, $jenis);
+        $filename = $this->safeExportFileName('laporan-' . instrument_preview_layout($jenis)['title']) . '-' . date('Ymd-His') . '.doc';
+
+        return $this->response
+            ->setHeader('Content-Type', 'application/msword; charset=UTF-8')
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->setBody($html);
+    }
+
+    private function buildTypedWordReportHtml(array $rows, string $jenis): string
+    {
+        $layout = instrument_preview_layout($jenis);
+        $layoutType = (string) ($layout['type'] ?? 'standard');
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $responseId = (int) ($row['response_id'] ?? 0);
+            if (!isset($grouped[$responseId])) {
+                $grouped[$responseId] = [
+                    'meta' => $row,
+                    'answers' => [],
+                ];
+            }
+
+            $grouped[$responseId]['answers'][] = $row;
+        }
+
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                @page { size: A4 portrait; margin: 16mm; }
+                body { font-family: "Times New Roman", serif; font-size: 12pt; color: #111; }
+                h1 { font-size: 16pt; text-align: center; margin: 0 0 14pt; }
+                h2 { font-size: 13pt; margin: 14pt 0 7pt; }
+                table { width: 100%; border-collapse: collapse; margin: 8pt 0 14pt; }
+                th, td { border: 1px solid #111; padding: 5pt; vertical-align: top; }
+                th { font-weight: bold; text-align: center; }
+                .meta th { width: 160px; text-align: left; }
+                .page-break { page-break-before: always; }
+                .muted { color: #555; }
+            </style>
+        </head>
+        <body>
+        <?php if (empty($grouped)): ?>
+            <h1><?= esc((string) ($layout['title'] ?? 'Laporan')) ?></h1>
+            <p class="muted">Belum ada hasil pengisian.</p>
+        <?php else: ?>
+            <?php $reportIndex = 0; foreach ($grouped as $entry): ?>
+                <?php
+                $reportIndex++;
+                $meta = $entry['meta'];
+                ?>
+                <?php if ($reportIndex > 1): ?><div class="page-break"></div><?php endif; ?>
+                <h1><?= esc((string) ($layout['title'] ?? 'Laporan Instrumen')) ?></h1>
+
+                <h2>A. Identitas</h2>
+                <table class="meta">
+                    <tbody>
+                        <tr><th>Responden</th><td><?= esc((string) ($meta['nama'] ?? '-')) ?></td></tr>
+                        <tr><th>Email</th><td><?= esc((string) ($meta['email'] ?? '-')) ?></td></tr>
+                        <tr><th>NIM/Identitas</th><td><?= esc((string) ($meta['nim'] ?? '-')) ?></td></tr>
+                        <tr><th>Program Studi</th><td><?= esc((string) ($meta['program_studi'] ?? '-')) ?></td></tr>
+                        <tr><th>Instrumen</th><td><?= esc((string) ($meta['instrument_kode'] ?? '-')) ?> - <?= esc((string) ($meta['instrument_judul'] ?? '-')) ?></td></tr>
+                        <tr><th>Waktu Submit</th><td><?= esc((string) ($meta['submitted_at'] ?? '-')) ?></td></tr>
+                    </tbody>
+                </table>
+
+                <h2>B. Hasil Pengisian</h2>
+                <table>
+                    <thead>
+                        <?php if ($layoutType === 'document_review'): ?>
+                            <tr>
+                                <th rowspan="2" style="width: 34px;">No</th>
+                                <th rowspan="2"><?= esc((string) $layout['aspect']) ?></th>
+                                <th rowspan="2"><?= esc((string) $layout['item']) ?></th>
+                                <th rowspan="2">Sumber Dokumen</th>
+                                <th colspan="4">Skor</th>
+                                <th rowspan="2">Komentar</th>
+                            </tr>
+                            <tr>
+                                <?php for ($score = 1; $score <= 4; $score++): ?>
+                                    <th style="width: 24px;"><?= $score ?></th>
+                                <?php endfor; ?>
+                            </tr>
+                        <?php elseif ($layoutType === 'interview_guide'): ?>
+                            <tr>
+                                <th style="width: 34px;">No</th>
+                                <th><?= esc((string) $layout['aspect']) ?></th>
+                                <th><?= esc((string) $layout['item']) ?></th>
+                                <th><?= esc((string) $layout['answer']) ?></th>
+                            </tr>
+                        <?php else: ?>
+                            <tr>
+                                <th style="width: 34px;">No</th>
+                                <th><?= esc((string) $layout['aspect']) ?></th>
+                                <th><?= esc((string) $layout['item']) ?></th>
+                                <th><?= esc((string) $layout['result']) ?></th>
+                            </tr>
+                        <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($entry['answers'] as $answer): ?>
+                            <tr>
+                                <td><?= esc((string) ($answer['nomor'] ?? '-')) ?></td>
+                                <td><?= esc((string) ($answer['nama_aspek'] ?? '-')) ?></td>
+                                <td><?= nl2br(esc((string) ($answer['pernyataan'] ?? '-'))) ?></td>
+                                <?php if ($layoutType === 'document_review'): ?>
+                                    <td><?= esc(document_review_source_label($answer['sumber_dokumen'] ?? '')) ?></td>
+                                    <?php for ($score = 1; $score <= 4; $score++): ?>
+                                        <td style="text-align:center;"><?= (string) ($answer['skor'] ?? '') === (string) $score ? 'X' : '' ?></td>
+                                    <?php endfor; ?>
+                                    <td><?= nl2br(esc((string) ($answer['komentar'] ?? ''))) ?></td>
+                                <?php else: ?>
+                                    <td><?= nl2br(esc((string) (($answer['jawaban_teks'] ?? '') ?: ($answer['komentar'] ?? '') ?: ($answer['skor'] ?? '')))) ?></td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <h2>C. Catatan/Kesimpulan</h2>
+                <table class="meta">
+                    <tbody>
+                        <tr><th>Komentar/Saran</th><td><?= nl2br(esc((string) ($meta['komentar_umum'] ?? '-'))) ?></td></tr>
+                        <tr><th>Kesimpulan</th><td><?= esc((string) ($meta['kesimpulan'] ?? '-')) ?></td></tr>
+                    </tbody>
+                </table>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </body>
+        </html>
+        <?php
+
+        return (string) ob_get_clean();
+    }
+
+    private function safeExportFileName(string $name): string
+    {
+        $name = strtolower(trim($name));
+        $name = preg_replace('/[^a-z0-9]+/', '-', $name) ?? 'laporan';
+        $name = trim($name, '-');
+
+        return $name !== '' ? $name : 'laporan';
     }
 
     private function buildCsv(array $rows): string

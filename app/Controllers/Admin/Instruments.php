@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Models\InstrumentItemModel;
 use App\Models\InstrumentModel;
 use App\Models\SettingModel;
 
@@ -129,9 +130,13 @@ class Instruments extends BaseController
                 ->with('error', 'Data instrumen tidak ditemukan.');
         }
 
+        $itemModel = new InstrumentItemModel();
+        $items = $itemModel->getWithRelations((int) $id);
+
         $data = [
             'title'      => 'Detail Instrumen',
             'instrument' => $instrument,
+            'items'      => $items,
         ];
 
         return view('admin/instruments/show', $data);
@@ -386,15 +391,7 @@ class Instruments extends BaseController
 
     private function getJenisOptions(): array
     {
-        return $this->settingModel->getInstrumentTypes([
-            'Angket',
-            'Wawancara',
-            'Observasi',
-            'FGD',
-            'Tes Kinerja',
-            'Rubrik Penilaian',
-            'Dokumentasi',
-        ]);
+        return $this->settingModel->getInstrumentTypes(sivalid_default_instrument_types());
     }
 
     private function appendUsageCounts(array $instruments): array

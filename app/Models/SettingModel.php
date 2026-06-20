@@ -78,11 +78,40 @@ class SettingModel extends Model
             }
         }
 
+        $fallback = array_values(array_unique(array_filter(array_map(static fn ($item) => trim((string) $item), $fallback))));
+
         if ($types === []) {
             $types = $fallback;
         }
 
         $types = array_values(array_unique(array_filter(array_map(static fn ($item) => trim((string) $item), $types))));
+
+        if ($fallback !== []) {
+            $ordered = [];
+
+            foreach ($fallback as $defaultType) {
+                foreach ($types as $type) {
+                    if (mb_strtolower($type) === mb_strtolower($defaultType)) {
+                        $ordered[] = $type;
+                        break;
+                    }
+                }
+            }
+
+            $extras = array_values(array_filter($types, static function (string $type) use ($fallback): bool {
+                foreach ($fallback as $defaultType) {
+                    if (mb_strtolower($type) === mb_strtolower($defaultType)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }));
+            sort($extras, SORT_NATURAL | SORT_FLAG_CASE);
+
+            return array_values(array_unique(array_merge($ordered, $extras)));
+        }
+
         sort($types, SORT_NATURAL | SORT_FLAG_CASE);
 
         return $types;

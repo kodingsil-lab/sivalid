@@ -105,11 +105,6 @@
             'link' => $link ?? [],
         ]) ?>
 
-        <?= view('admin/partials/justification_builder', [
-            'justificationTemplates' => $justificationTemplates ?? [],
-            'justificationConfig' => $justificationConfig ?? [],
-        ]) ?>
-
         <div class="form-grid">
             <div class="form-row">
                 <label class="form-label" for="tanggal_mulai">Tanggal Mulai</label>

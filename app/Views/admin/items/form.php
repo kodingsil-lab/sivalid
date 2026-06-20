@@ -5,6 +5,8 @@
 <?php
 $selectedIndicator = 0;
 $indicatorOptions = [];
+$itemLayout = isset($itemLayout) && is_array($itemLayout) ? $itemLayout : instrument_item_entry_layout($selectedInstrument['jenis'] ?? '');
+$layoutType = (string) ($itemLayout['type'] ?? 'standard');
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -34,7 +36,7 @@ $indicatorOptions = [];
 
 <div class="card mb-3">
     <div class="card-header">
-        <h3 class="card-title">Form Butir Pernyataan</h3>
+        <h3 class="card-title">Form <?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></h3>
     </div>
     <div class="card-body">
     <?php if (empty($instruments)): ?>
@@ -102,7 +104,7 @@ $indicatorOptions = [];
             </div>
 
             <div class="form-row">
-                <label class="form-label" for="indicator_id">Indikator</label>
+                <label class="form-label" for="indicator_id"><?= esc((string) ($itemLayout['indicator_label'] ?? 'Indikator')) ?></label>
                 <select name="indicator_id" id="indicator_id" class="form-control">
                     <option value="">-- Tanpa Indikator / Pilih Indikator --</option>
 
@@ -149,16 +151,60 @@ $indicatorOptions = [];
             </div>
 
             <div class="form-row">
-                <label class="form-label" for="pernyataan">Butir Pernyataan</label>
+                <label class="form-label" for="pernyataan"><?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></label>
                 <textarea
                     name="pernyataan"
                     id="pernyataan"
                     class="form-control"
                     style="min-height: 130px;"
-                    placeholder="Tuliskan butir pernyataan instrumen."
+                    placeholder="<?= esc((string) ($itemLayout['item_placeholder'] ?? 'Tuliskan butir pernyataan instrumen.')) ?>"
                     required
                 ><?= old('pernyataan', $item['pernyataan'] ?? '') ?></textarea>
             </div>
+
+            <?php if (!empty($itemLayout['show_source_document'])): ?>
+            <div class="form-row">
+                <label class="form-label" for="sumber_dokumen">Sumber Dokumen</label>
+                <input
+                    type="text"
+                    name="sumber_dokumen"
+                    id="sumber_dokumen"
+                    class="form-control"
+                    value="<?= esc(old('sumber_dokumen', $item['sumber_dokumen'] ?? '')) ?>"
+                    maxlength="150"
+                    placeholder="Contoh: RPS, bahan ajar, panduan teknis"
+                >
+                <small class="text-muted">Dipakai pada layout instrumen telaah/dokumentasi. Boleh dikosongkan untuk jenis instrumen lain.</small>
+            </div>
+            <?php else: ?>
+                <input type="hidden" name="sumber_dokumen" value="<?= esc(old('sumber_dokumen', $item['sumber_dokumen'] ?? '')) ?>">
+            <?php endif; ?>
+
+            <?php if (!empty($itemLayout['show_rubric_scores'])): ?>
+                <div class="form-row">
+                    <label class="form-label">Deskripsi Skor Rubrik</label>
+                    <div class="form-grid">
+                        <?php for ($score = 1; $score <= 5; $score++): ?>
+                            <?php $field = 'skor_' . $score . '_deskripsi'; ?>
+                            <div class="form-row">
+                                <label class="form-label" for="<?= esc($field) ?>">Skor <?= $score ?></label>
+                                <textarea
+                                    name="<?= esc($field) ?>"
+                                    id="<?= esc($field) ?>"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Deskripsi kriteria untuk skor <?= $score ?>"
+                                ><?= old($field, $item[$field] ?? '') ?></textarea>
+                            </div>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <?php for ($score = 1; $score <= 5; $score++): ?>
+                    <?php $field = 'skor_' . $score . '_deskripsi'; ?>
+                    <input type="hidden" name="<?= esc($field) ?>" value="<?= esc(old($field, $item[$field] ?? '')) ?>">
+                <?php endfor; ?>
+            <?php endif; ?>
 
             <div class="form-grid">
                 <div class="form-row">
@@ -173,7 +219,7 @@ $indicatorOptions = [];
                             'catatan'  => 'Catatan',
                         ];
 
-                        $selectedTipe = old('tipe_butir', $item['tipe_butir'] ?? 'skala');
+                        $selectedTipe = old('tipe_butir', $item['tipe_butir'] ?? ($itemLayout['default_item_type'] ?? 'skala'));
                         ?>
 
                         <?php foreach ($tipeOptions as $value => $label): ?>

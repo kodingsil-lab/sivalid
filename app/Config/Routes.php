@@ -54,6 +54,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('submissions/export/excel', 'Admin\SubmissionResults::exportExcel');
     $routes->get('submissions/export/word', 'Admin\SubmissionResults::exportWord');
     $routes->get('submissions/export/pdf', 'Admin\SubmissionResults::exportPdf');
+    $routes->get('submissions/export/report', 'Admin\SubmissionResults::exportReport');
     $routes->get('submissions/(:num)', 'Admin\SubmissionResults::show/$1');
     $routes->delete('submissions/(:num)', 'Admin\SubmissionResults::delete/$1');
 

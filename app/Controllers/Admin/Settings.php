@@ -26,10 +26,10 @@ class Settings extends BaseController
             $activeTab = 'category';
         }
 
-        $instrumentTypes = $this->settingModel->getGroupRows('instrument_type');
+        $instrumentTypes = sivalid_sort_instrument_type_rows($this->settingModel->getGroupRows('instrument_type'));
         if ($instrumentTypes === []) {
             $this->seedDefaultInstrumentTypes();
-            $instrumentTypes = $this->settingModel->getGroupRows('instrument_type');
+            $instrumentTypes = sivalid_sort_instrument_type_rows($this->settingModel->getGroupRows('instrument_type'));
         }
 
         $instrumentTypeUsage = [];
@@ -135,15 +135,7 @@ class Settings extends BaseController
 
     private function seedDefaultInstrumentTypes(): void
     {
-        $defaults = [
-            'Angket',
-            'Wawancara',
-            'Observasi',
-            'FGD',
-            'Tes Kinerja',
-            'Rubrik Penilaian',
-            'Dokumentasi',
-        ];
+        $defaults = sivalid_default_instrument_types();
 
         foreach ($defaults as $index => $label) {
             $this->settingModel->insert([

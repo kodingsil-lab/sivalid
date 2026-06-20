@@ -4,7 +4,23 @@
 
 <?php
 $currentInstrument = isset($instrument) && is_array($instrument) ? $instrument : [];
+$items = isset($items) && is_array($items) ? $items : [];
 $instrumentId = (int) ($currentInstrument['id'] ?? 0);
+$scaleMin = (int) ($currentInstrument['skala_min'] ?? 1);
+$scaleMax = (int) ($currentInstrument['skala_max'] ?? 4);
+$scaleRange = $scaleMin <= $scaleMax ? range($scaleMin, $scaleMax) : range(1, 4);
+$previewLayout = instrument_preview_layout(
+    (string) ($currentInstrument['jenis'] ?? '') . ' ' . (string) ($currentInstrument['judul'] ?? '')
+);
+$usesDocumentReviewLayout = ($previewLayout['type'] ?? 'standard') === 'document_review';
+$usesInterviewGuideLayout = ($previewLayout['type'] ?? 'standard') === 'interview_guide';
+$usesObservationGuideLayout = ($previewLayout['type'] ?? 'standard') === 'observation_guide';
+$usesQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'questionnaire';
+$usesProductValidationQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'product_validation_questionnaire';
+$usesUserResponseQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'user_response_questionnaire';
+$usesPerformanceTestLayout = ($previewLayout['type'] ?? 'standard') === 'performance_test';
+$usesRubricAssessmentLayout = ($previewLayout['type'] ?? 'standard') === 'rubric_assessment';
+$rubricScaleRange = range(1, 5);
 
 $renderDetailText = static function (?string $value): string {
     $value = trim((string) $value);
@@ -124,6 +140,337 @@ $renderDetailText = static function (?string $value): string {
     </div>
 </div>
 
+<div class="card mb-3 instrument-detail-card">
+    <div class="card-body">
+        <h3 class="card-title mb-1">Tabel Instrumen Siap Disebar</h3>
+        <div class="text-muted mb-3">
+            Layout siap sebar: <?= esc((string) ($previewLayout['title'] ?? 'Tabel Instrumen')) ?>
+        </div>
+
+        <?php if ($usesPerformanceTestLayout): ?>
+            <div class="instrument-performance-layout">
+                <section>
+                    <h4>1. Identitas Tes</h4>
+                    <table class="table table-sm instrument-plain-table">
+                        <tbody>
+                            <tr>
+                                <th>Nama Tes</th>
+                                <td><?= esc((string) ($currentInstrument['judul'] ?? 'Tes Unjuk Kerja')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Tujuan Tes</th>
+                                <td><?= esc((string) (!empty($currentInstrument['keterangan']) ? $currentInstrument['keterangan'] : 'Mengukur kemampuan peserta dalam menyelesaikan tugas unjuk kerja sesuai kriteria yang ditetapkan.')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Bentuk Tes</th>
+                                <td>Tes unjuk kerja berbasis tugas dan portofolio proses.</td>
+                            </tr>
+                            <tr>
+                                <th>Produk yang Dinilai</th>
+                                <td><?= esc((string) (!empty($currentInstrument['sasaran']) ? $currentInstrument['sasaran'] : 'Produk akhir beserta bukti proses pengerjaan.')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Waktu Pelaksanaan</th>
+                                <td>Disesuaikan dengan jadwal pembelajaran dan tahapan kegiatan.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section>
+                    <h4>2. Petunjuk Umum</h4>
+                    <?= $renderDetailText($currentInstrument['petunjuk'] ?? '') ?>
+                </section>
+
+                <section>
+                    <h4>3. Tugas Unjuk Kerja</h4>
+                    <?= $renderDetailText($currentInstrument['pengantar'] ?? '') ?>
+                </section>
+
+                <section>
+                    <h4>4. Tahapan dan Produk yang Dikumpulkan</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-vcenter instrument-ready-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 54px;">No</th>
+                                    <th style="width: 190px;">Tahap Proses Menulis</th>
+                                    <th>Produk yang Dikumpulkan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td>Pra Menulis</td>
+                                    <td>Hasil pengamatan, identifikasi isu, pembatasan topik, rumusan judul, daftar referensi awal, dan kerangka awal.</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">2</td>
+                                    <td>Menulis Draf</td>
+                                    <td>Draf awal yang memuat pendahuluan, metode, hasil atau temuan awal, pembahasan awal, simpulan sementara, dan daftar referensi awal.</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">3</td>
+                                    <td>Merevisi</td>
+                                    <td>Catatan pembacaan ulang draf, peer review, umpan balik, rencana revisi, dan draf hasil revisi.</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">4</td>
+                                    <td>Menyunting</td>
+                                    <td>Naskah hasil suntingan dari aspek bahasa ilmiah, kalimat efektif, ejaan, kutipan, daftar pustaka, koherensi, dan format.</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">5</td>
+                                    <td>Mempublikasikan</td>
+                                    <td>Produk final, abstrak, kata kunci, checklist kesiapan publikasi, bahan presentasi, unggahan, dan/atau rencana publikasi lanjutan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section>
+                    <h4>5. Ketentuan Produk Final</h4>
+                    <ol type="a">
+                        <li>Panjang dan format produk disesuaikan dengan ketentuan atau template yang digunakan.</li>
+                        <li>Produk memuat bagian utama secara lengkap sesuai karakteristik tugas.</li>
+                        <li>Rujukan, sitasi, dan daftar pustaka ditulis secara konsisten jika diperlukan.</li>
+                        <li>Produk merupakan hasil kerja peserta dan mencerminkan proses revisi berdasarkan umpan balik.</li>
+                        <li>Produk final dikumpulkan bersama portofolio proses pengerjaan.</li>
+                    </ol>
+                </section>
+
+                <section>
+                    <h4>6. Aspek Penilaian</h4>
+                    <?php if (empty($items)): ?>
+                        <p class="text-muted mb-0">Aspek penilaian belum tersedia.</p>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-vcenter instrument-ready-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 54px;">No</th>
+                                        <th style="width: 260px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                        <th><?= esc((string) $previewLayout['item']) ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($items as $item): ?>
+                                        <tr>
+                                            <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                            <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
+                                            <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </section>
+            </div>
+        <?php elseif ($usesRubricAssessmentLayout): ?>
+            <?php $rubricTotalScore = count($items) * max($rubricScaleRange); ?>
+            <div class="instrument-rubric-layout">
+                <h4>3. <?= esc((string) ($previewLayout['title'] ?? 'Rubrik Penilaian')) ?></h4>
+
+                <?php if (empty($items)): ?>
+                    <p class="text-muted mb-0">Butir rubrik belum tersedia.</p>
+                <?php else: ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-vcenter instrument-ready-table instrument-rubric-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="width: 180px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                    <th rowspan="2" style="width: 260px;"><?= esc((string) $previewLayout['item']) ?></th>
+                                    <th colspan="<?= count($rubricScaleRange) ?>" class="text-center"><?= esc((string) $previewLayout['score']) ?></th>
+                                </tr>
+                                <tr>
+                                    <?php foreach ($rubricScaleRange as $score): ?>
+                                        <th class="text-center">Skor <?= esc((string) $score) ?></th>
+                                    <?php endforeach; ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($items as $item): ?>
+                                    <?php
+                                    $indicatorText = trim((string) ($item['indikator'] ?? ''));
+                                    if ($indicatorText === '') {
+                                        $indicatorText = (string) ($item['pernyataan'] ?? '-');
+                                    }
+                                    ?>
+                                    <tr>
+                                        <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
+                                        <td><?= nl2br(esc($indicatorText)) ?></td>
+                                        <?php foreach ($rubricScaleRange as $score): ?>
+                                            <?php $scoreField = 'skor_' . $score . '_deskripsi'; ?>
+                                            <td><?= nl2br(esc((string) ($item[$scoreField] ?? ''))) ?></td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+
+                <h4>4. Catatan Penilai</h4>
+                <div class="instrument-ready-box instrument-rubric-note-box"></div>
+
+                <h4>5. Rekapitulasi Skor</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-vcenter instrument-ready-table instrument-rubric-recap">
+                        <thead>
+                            <tr>
+                                <th style="width: 54px;">No</th>
+                                <th>Aspek Penilaian</th>
+                                <th style="width: 150px;">Skor Maksimum</th>
+                                <th style="width: 180px;">Skor yang Diperoleh</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($items as $item): ?>
+                                <tr>
+                                    <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
+                                    <td class="text-center"><?= esc((string) max($rubricScaleRange)) ?></td>
+                                    <td></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            <tr>
+                                <td></td>
+                                <td class="fw-bold">Jumlah Skor</td>
+                                <td class="text-center fw-bold"><?= esc((string) $rubricTotalScore) ?></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td class="fw-bold">Nilai Akhir</td>
+                                <td class="text-center fw-bold">100</td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="instrument-rubric-formula">
+                    <strong>Rumus Nilai Akhir:</strong><br>
+                    Nilai Akhir = (Skor yang Diperoleh / <?= esc((string) max(1, $rubricTotalScore)) ?>) x 100
+                </div>
+
+                <h4>6. Kesimpulan Penilaian</h4>
+                <p>Berdasarkan hasil penilaian, kemampuan menulis artikel ilmiah mahasiswa dinyatakan:</p>
+                <label><span class="instrument-check-box"></span> Sangat Baik</label>
+                <label><span class="instrument-check-box"></span> Baik</label>
+                <label><span class="instrument-check-box"></span> Cukup</label>
+                <label><span class="instrument-check-box"></span> Kurang</label>
+                <label><span class="instrument-check-box"></span> Sangat Kurang</label>
+            </div>
+        <?php elseif (empty($items)): ?>
+            <p class="text-muted mb-0">Butir instrumen belum tersedia.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-bordered table-vcenter instrument-ready-table">
+                    <thead>
+                        <?php if ($usesDocumentReviewLayout): ?>
+                            <tr>
+                                <th rowspan="2" style="width: 54px;">No</th>
+                                <th rowspan="2" style="width: 170px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th rowspan="2"><?= esc((string) $previewLayout['item']) ?></th>
+                                <th rowspan="2" style="width: 140px;">Sumber Dokumen</th>
+                                <th colspan="<?= count($scaleRange) ?>" class="text-center"><?= esc((string) $previewLayout['score']) ?></th>
+                                <th rowspan="2" style="width: 190px;"><?= esc((string) $previewLayout['comment']) ?></th>
+                            </tr>
+                            <tr>
+                                <?php foreach ($scaleRange as $score): ?>
+                                    <th class="text-center instrument-score-col"><?= esc((string) $score) ?></th>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php elseif ($usesInterviewGuideLayout): ?>
+                            <tr>
+                                <th style="width: 54px;">No</th>
+                                <th style="width: 170px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th><?= esc((string) $previewLayout['item']) ?></th>
+                                <th style="width: 260px;"><?= esc((string) $previewLayout['answer']) ?></th>
+                            </tr>
+                        <?php elseif ($usesObservationGuideLayout): ?>
+                            <tr>
+                                <th style="width: 54px;">No</th>
+                                <th style="width: 190px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th><?= esc((string) $previewLayout['item']) ?></th>
+                                <th style="width: 280px;"><?= esc((string) $previewLayout['result']) ?></th>
+                            </tr>
+                        <?php elseif ($usesQuestionnaireLayout || $usesProductValidationQuestionnaireLayout || $usesUserResponseQuestionnaireLayout): ?>
+                            <tr>
+                                <th rowspan="2" style="width: 54px;">No</th>
+                                <th rowspan="2" style="width: 220px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th rowspan="2"><?= esc((string) $previewLayout['item']) ?></th>
+                                <th colspan="<?= count($scaleRange) ?>" class="text-center"><?= esc((string) $previewLayout['score']) ?></th>
+                            </tr>
+                            <tr>
+                                <?php foreach ($scaleRange as $score): ?>
+                                    <th class="text-center instrument-score-col"><?= esc((string) $score) ?></th>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php else: ?>
+                            <tr>
+                                <th style="width: 54px;">No</th>
+                                <th style="width: 220px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th><?= esc((string) $previewLayout['item']) ?></th>
+                                <?php foreach ($scaleRange as $score): ?>
+                                    <th class="text-center instrument-score-col"><?= esc((string) $score) ?></th>
+                                <?php endforeach; ?>
+                                <th style="width: 190px;"><?= esc((string) $previewLayout['comment']) ?></th>
+                            </tr>
+                        <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($items as $item): ?>
+                            <tr>
+                                <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
+                                <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                <?php if ($usesDocumentReviewLayout): ?>
+                                    <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
+                                <?php endif; ?>
+                                <?php if ($usesInterviewGuideLayout || $usesObservationGuideLayout): ?>
+                                    <td></td>
+                                <?php else: ?>
+                                    <?php foreach ($scaleRange as $score): ?>
+                                        <td class="text-center"></td>
+                                    <?php endforeach; ?>
+                                    <?php if (! $usesQuestionnaireLayout && ! $usesProductValidationQuestionnaireLayout && ! $usesUserResponseQuestionnaireLayout): ?>
+                                        <td></td>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ($usesProductValidationQuestionnaireLayout): ?>
+                <div class="instrument-ready-extra">
+                    <h4>1. Komentar/Saran</h4>
+                    <div class="instrument-ready-box"></div>
+
+                    <h4>2. Kesimpulan Validasi</h4>
+                    <p>Berdasarkan hasil penilaian, produk dinyatakan:</p>
+                    <label><span class="instrument-check-box"></span> Sangat Layak</label>
+                    <label><span class="instrument-check-box"></span> Layak</label>
+                    <label><span class="instrument-check-box"></span> Kurang Layak</label>
+                    <label><span class="instrument-check-box"></span> Tidak Layak</label>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($usesUserResponseQuestionnaireLayout): ?>
+                <div class="instrument-ready-extra">
+                    <h4>Catatan/Saran Pengguna</h4>
+                    <div class="instrument-ready-box"></div>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
 </div>
 
 <style>
@@ -208,6 +555,147 @@ $renderDetailText = static function (?string $value): string {
     .instrument-scale-table th,
     .instrument-scale-table td {
         text-align: center;
+    }
+
+    .instrument-ready-table {
+        min-width: 900px;
+        table-layout: fixed;
+    }
+
+    .instrument-ready-table th {
+        background: #f8fafc;
+        color: #0f172a;
+        font-weight: 700;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .instrument-ready-table td {
+        color: #0f172a;
+        line-height: 1.45;
+        vertical-align: middle;
+        word-break: break-word;
+    }
+
+    .instrument-score-col {
+        width: 46px;
+    }
+
+    .instrument-ready-extra {
+        color: #0f172a;
+        margin-top: 1.25rem;
+    }
+
+    .instrument-ready-extra h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 1rem 0 .4rem;
+    }
+
+    .instrument-ready-extra p {
+        margin: 0 0 .35rem;
+    }
+
+    .instrument-ready-box {
+        border: 1px solid #0f172a;
+        height: 150px;
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .instrument-ready-extra label {
+        display: block;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    .instrument-check-box {
+        border: 1px solid #0f172a;
+        display: inline-block;
+        height: 11px;
+        margin-right: .35rem;
+        vertical-align: -1px;
+        width: 11px;
+    }
+
+    .instrument-performance-layout section {
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 1.2rem;
+        padding-bottom: 1.2rem;
+    }
+
+    .instrument-performance-layout section:last-child {
+        border-bottom: 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .instrument-performance-layout h4 {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 .75rem;
+    }
+
+    .instrument-performance-layout ol {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .instrument-performance-layout li {
+        margin-bottom: .35rem;
+    }
+
+    .instrument-plain-table {
+        max-width: 980px;
+        margin-bottom: 0;
+    }
+
+    .instrument-plain-table th {
+        width: 190px;
+        color: #0f172a;
+        font-weight: 700;
+        vertical-align: top;
+    }
+
+    .instrument-rubric-layout h4 {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 1rem 0 .55rem;
+    }
+
+    .instrument-rubric-layout h4:first-child {
+        margin-top: 0;
+    }
+
+    .instrument-rubric-layout p {
+        margin: 0 0 .35rem;
+    }
+
+    .instrument-rubric-table {
+        min-width: 1180px;
+    }
+
+    .instrument-rubric-table th,
+    .instrument-rubric-table td {
+        vertical-align: top;
+    }
+
+    .instrument-rubric-note-box {
+        height: 150px;
+    }
+
+    .instrument-rubric-formula {
+        color: #0f172a;
+        line-height: 1.6;
+        margin: .75rem 0 1rem;
+    }
+
+    .instrument-rubric-layout label {
+        display: block;
+        line-height: 1.7;
+        margin: 0;
     }
 
     .instrument-detail-prose {

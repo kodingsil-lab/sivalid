@@ -1,12 +1,16 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
+<?php
+$itemLayout = isset($itemLayout) && is_array($itemLayout) ? $itemLayout : instrument_item_entry_layout($selectedInstrument['jenis'] ?? '');
+$layoutType = (string) ($itemLayout['type'] ?? 'standard');
+?>
 
 <div class="page-header d-print-none mb-3">
     <div class="row align-items-center">
         <div class="col">
-            <h2 class="page-title">Butir Pernyataan Instrumen</h2>
-            <div class="text-muted mt-1">Kelola butir pernyataan, tipe butir, dan status untuk instrumen terpilih.</div>
+            <h2 class="page-title"><?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?> Instrumen</h2>
+            <div class="text-muted mt-1">Kelola isian butir sesuai jenis instrumen terpilih.</div>
         </div>
         <?php if (!empty($instrumentId)): ?>
             <div class="col-auto ms-auto">
@@ -81,7 +85,7 @@
 <?php else: ?>
     <div class="card mb-3">
         <div class="card-header">
-            <h3 class="card-title">Daftar Butir Pernyataan</h3>
+            <h3 class="card-title">Daftar <?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></h3>
         </div>
         <div class="card-body p-0">
 
@@ -90,9 +94,15 @@
             <thead>
                 <tr>
                     <th style="width: 60px;">No</th>
-                    <th style="width: 180px;">Aspek</th>
-                    <th style="width: 240px;">Indikator</th>
-                    <th>Butir Pernyataan</th>
+                    <th style="width: 180px;"><?= esc((string) ($itemLayout['aspect_label'] ?? 'Aspek')) ?></th>
+                    <th style="width: 240px;"><?= esc((string) ($itemLayout['indicator_label'] ?? 'Indikator')) ?></th>
+                    <th><?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></th>
+                    <?php if (!empty($itemLayout['show_source_document'])): ?>
+                        <th style="width: 140px;">Sumber Dokumen</th>
+                    <?php endif; ?>
+                    <?php if (!empty($itemLayout['show_rubric_scores'])): ?>
+                        <th style="width: 240px;">Deskripsi Skor</th>
+                    <?php endif; ?>
                     <th style="width: 110px;">Tipe</th>
                     <th style="width: 90px;">Status</th>
                     <th class="table-actions-cell">Aksi</th>
@@ -118,6 +128,17 @@
                                 <?= (int) $item['wajib'] === 1 ? 'Wajib' : 'Tidak wajib' ?>
                             </small>
                         </td>
+                        <?php if (!empty($itemLayout['show_source_document'])): ?>
+                            <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
+                        <?php endif; ?>
+                        <?php if (!empty($itemLayout['show_rubric_scores'])): ?>
+                            <td>
+                                <?php for ($score = 1; $score <= 5; $score++): ?>
+                                    <?php $field = 'skor_' . $score . '_deskripsi'; ?>
+                                    <div><strong>Skor <?= $score ?>:</strong> <?= esc((string) ($item[$field] ?? '-')) ?></div>
+                                <?php endfor; ?>
+                            </td>
+                        <?php endif; ?>
                         <td>
                             <?= esc(title_case_label((string) ($item['tipe_butir'] ?? '-'))) ?>
                         </td>
@@ -188,7 +209,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <a href="<?= base_url('admin/instrument-items/import-template') ?>" class="btn btn-light">
+                            <a href="<?= base_url('admin/instrument-items/import-template?instrument_id=' . (int) $instrumentId) ?>" class="btn btn-light">
                                 Download Template Excel
                             </a>
                         </div>
@@ -198,9 +219,19 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Aspek</th>
-                                        <th>Indikator</th>
-                                        <th>Pernyataan</th>
+                                        <th><?= esc((string) ($itemLayout['aspect_label'] ?? 'Aspek')) ?></th>
+                                        <?php if ($layoutType === 'standard' || str_contains($layoutType, 'questionnaire')): ?>
+                                            <th>Indikator Kisi-Kisi</th>
+                                        <?php endif; ?>
+                                        <th><?= esc((string) ($itemLayout['excel_item_header'] ?? $itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></th>
+                                        <?php if (!empty($itemLayout['show_source_document'])): ?>
+                                            <th>Sumber Dokumen</th>
+                                        <?php endif; ?>
+                                        <?php if (!empty($itemLayout['show_rubric_scores'])): ?>
+                                            <?php for ($score = 1; $score <= 5; $score++): ?>
+                                                <th>Skor <?= $score ?></th>
+                                            <?php endfor; ?>
+                                        <?php endif; ?>
                                         <th>Tipe Butir</th>
                                         <th>Wajib</th>
                                         <th>Urutan</th>
@@ -210,9 +241,19 @@
                                 <tbody>
                                     <tr>
                                         <td>1</td>
-                                        <td>Pendahuluan</td>
-                                        <td>Kejelasan latar belakang dan urgensi pengembangan model pembelajaran.</td>
-                                        <td>Model pembelajaran memiliki latar belakang pengembangan yang jelas.</td>
+                                        <td><?= !empty($itemLayout['show_rubric_scores']) ? 'Isi Tulisan' : 'Pendahuluan' ?></td>
+                                        <?php if ($layoutType === 'standard' || str_contains($layoutType, 'questionnaire')): ?>
+                                            <td>Kejelasan latar belakang dan urgensi pengembangan model pembelajaran.</td>
+                                        <?php endif; ?>
+                                        <td><?= esc((string) ($itemLayout['item_placeholder'] ?? 'Butir contoh.')) ?></td>
+                                        <?php if (!empty($itemLayout['show_source_document'])): ?>
+                                            <td>RPS</td>
+                                        <?php endif; ?>
+                                        <?php if (!empty($itemLayout['show_rubric_scores'])): ?>
+                                            <?php for ($score = 1; $score <= 5; $score++): ?>
+                                                <td>Deskripsi skor <?= $score ?></td>
+                                            <?php endfor; ?>
+                                        <?php endif; ?>
                                         <td>skala</td>
                                         <td>Ya</td>
                                         <td>1</td>
