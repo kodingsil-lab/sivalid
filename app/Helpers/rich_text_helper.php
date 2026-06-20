@@ -1,7 +1,7 @@
 <?php
 
 if (! function_exists('render_rich_text_content')) {
-    function render_rich_text_content(?string $value, string $class = 'ql-editor rich-text-content'): string
+    function render_rich_text_content(?string $value, string $class = 'rich-text-content'): string
     {
         $value = trim((string) $value);
 
@@ -14,7 +14,7 @@ if (! function_exists('render_rich_text_content')) {
             $html = strip_tags($value, $allowedTags);
             $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
             $html = preg_replace('/\s+(href|src|style)\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
-            // Quill often appends empty paragraphs (<p><br></p>) that create visible extra gaps.
+            // Rich text editors often append empty paragraphs (<p><br></p>) that create visible extra gaps.
             $html = preg_replace('/(?:<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>)+$/i', '', $html) ?? $html;
 
             return '<div class="' . esc($class, 'attr') . '">' . $html . '</div>';

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= esc($title ?? 'Paket Validasi') ?> - Instrumen <?= esc(sprintf('%03d', (int) ($position ?? 1))) ?> dari <?= esc(sprintf('%03d', (int) ($total ?? 1))) ?></title>
-    <link rel="icon" href="<?= sivalid_favicon_url() ?>">
     <link rel="stylesheet" href="<?= base_url('assets/vendor/tabler/css/tabler.min.css') ?>">
     <style>
         :root {
@@ -152,8 +151,7 @@
             font-weight: 650;
         }
 
-        .public-rich-text,
-        .public-rich-text.ql-editor {
+        .public-rich-text {
             max-width: 1040px;
             padding: 0;
             color: var(--pub-text);
@@ -712,9 +710,6 @@ $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''))
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
 $scaleRange = array_map('intval', $scale['range'] ?? range($scaleMin, $scaleMax));
-$scaleOptions = isset($scale['options']) && is_array($scale['options'])
-    ? $scale['options']
-    : sivalid_scale_options(['skala_min' => $scaleMin, 'skala_max' => $scaleMax] + $instrumentEntry);
 
 $text = static function (array $row, string $key, string $default = '-'): string {
     $value = $row[$key] ?? $default;
@@ -949,11 +944,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                     <?php if ($tipeButir === 'skala'): ?>
                                         <?php $savedSkor = $saved['skor'] ?? null; ?>
                                         <div class="public-score-row form-selectgroup form-selectgroup-pills">
-                                            <?php foreach ($scaleOptions as $option): ?>
-                                                <?php
-                                                $score = (int) ($option['score'] ?? 0);
-                                                $label = (string) ($option['label'] ?? ('Skor ' . $score));
-                                                ?>
+                                            <?php foreach ($scaleRange as $score): ?>
                                                 <label class="public-score-option form-selectgroup-item">
                                                     <input
                                                         class="form-selectgroup-input public-score-check"
@@ -963,7 +954,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                                         <?= $savedSkor !== null && (int) $savedSkor === $score ? 'checked' : '' ?>
                                                         <?= $isFinal ? 'disabled' : '' ?>
                                                     >
-                                                    <span class="form-selectgroup-label"><?= esc($label) ?></span>
+                                                    <span class="form-selectgroup-label"><?= esc((string) $score) ?></span>
                                                 </label>
                                             <?php endforeach; ?>
                                         </div>
@@ -1144,19 +1135,19 @@ $text = static function (array $row, string $key, string $default = '-'): string
                 <div class="public-rich-text"><?= esc($text($instrumentEntry, 'judul')) ?></div>
             </div>
             <div class="public-modal-section">
-                <h3 class="public-modal-subtitle">Pengantar Instrumen Siap Disebar</h3>
+                <h3 class="public-modal-subtitle">Pengantar</h3>
                 <?php if ($masterPengantar !== ''): ?>
                     <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPengantar) ?></div>
                 <?php else: ?>
-                    <p class="public-muted">Pengantar instrumen siap disebar belum tersedia.</p>
+                    <p class="public-muted">Pengantar belum tersedia.</p>
                 <?php endif; ?>
             </div>
             <div class="public-modal-section">
-                <h3 class="public-modal-subtitle">Petunjuk Pengisian Responden</h3>
+                <h3 class="public-modal-subtitle">Petunjuk</h3>
                 <?php if ($masterPetunjuk !== ''): ?>
                     <div class="public-muted public-rich-text"><?= render_rich_text_content($masterPetunjuk) ?></div>
                 <?php else: ?>
-                    <p class="public-muted">Petunjuk pengisian responden belum tersedia.</p>
+                    <p class="public-muted">Petunjuk belum tersedia.</p>
                 <?php endif; ?>
             </div>
             <div class="public-modal-section">
@@ -1171,9 +1162,8 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             <th style="width: 60px;">No</th>
                             <th style="width: 220px;">Aspek</th>
                             <th>Butir Pernyataan</th>
-                            <?php foreach ($scaleOptions as $option): ?>
-                                <?php $label = (string) ($option['label'] ?? ('Skor ' . (int) ($option['score'] ?? 0))); ?>
-                                <th class="public-score-cell" style="width: 86px;"><?= esc($label) ?></th>
+                            <?php foreach ($scaleRange as $score): ?>
+                                <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
                             <?php endforeach; ?>
                         </tr>
                         </thead>
@@ -1192,7 +1182,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
                                 <td><?= esc($aspectName) ?></td>
                                 <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
-                                <?php foreach ($scaleOptions as $option): ?>
+                                <?php foreach ($scaleRange as $score): ?>
                                     <td class="public-score-cell">&bigcirc;</td>
                                 <?php endforeach; ?>
                             </tr>

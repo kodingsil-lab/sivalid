@@ -163,14 +163,10 @@ if ($selectedScaleTemplate === '') {
                 <textarea
                     name="pengantar"
                     id="pengantar"
-                    class="quill-source"
-                ><?= esc((string) old('pengantar', $instrument['pengantar'] ?? '')) ?></textarea>
-                <div
-                    id="pengantar-editor"
-                    class="quill-editor"
+                    class="form-control rich-text-editor"
+                    rows="10"
                     data-placeholder="Tuliskan pengantar yang tampil saat instrumen disebarkan kepada responden."
-                    data-target-input="pengantar"
-                ></div>
+                ><?= esc((string) old('pengantar', $instrument['pengantar'] ?? '')) ?></textarea>
             </div>
 
             <div class="form-row">
@@ -178,14 +174,10 @@ if ($selectedScaleTemplate === '') {
                 <textarea
                     name="petunjuk"
                     id="petunjuk"
-                    class="quill-source"
-                ><?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? '')) ?></textarea>
-                <div
-                    id="petunjuk-editor"
-                    class="quill-editor"
+                    class="form-control rich-text-editor"
+                    rows="10"
                     data-placeholder="Tuliskan petunjuk pengisian saat instrumen disebarkan kepada responden."
-                    data-target-input="petunjuk"
-                ></div>
+                ><?= esc((string) old('petunjuk', $instrument['petunjuk'] ?? '')) ?></textarea>
             </div>
         </div>
     </div>
@@ -201,91 +193,51 @@ if ($selectedScaleTemplate === '') {
     </div>
 </form>
 
-<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
-    .quill-source {
-        display: none;
-    }
-
-    .quill-editor {
-        min-height: 180px;
-        background: #fff;
+    .tox-tinymce {
+        border-color: #cbd5e1;
         border-radius: 4px;
-    }
-
-    .quill-editor .ql-editor {
-        min-height: 180px;
-        font-size: 0.95rem;
-        line-height: 1.65;
-        white-space: pre-wrap;
+        overflow: hidden;
     }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var form = document.querySelector('form[action]');
-        var editors = [];
-        var editorElements = document.querySelectorAll('.quill-editor');
-
-        function syncQuillEditor(item) {
-            var text = item.quill.getText().replace(/\n$/, '').trim();
-            item.input.value = text === '' ? '' : item.quill.root.innerHTML;
-        }
-
-        if (typeof Quill !== 'undefined') {
-            editorElements.forEach(function (editorElement) {
-                var targetInputId = editorElement.getAttribute('data-target-input');
-                var targetInput = document.getElementById(targetInputId);
-
-                if (!targetInput) {
-                    return;
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({
+                selector: '.rich-text-editor',
+                height: 300,
+                menubar: false,
+                branding: false,
+                promotion: false,
+                plugins: 'lists table',
+                toolbar: 'blocks | bold italic underline strikethrough | numlist bullist | outdent indent | alignleft aligncenter alignright alignjustify | table | removeformat',
+                block_formats: 'Normal=p;Judul 1=h1;Judul 2=h2;Judul 3=h3',
+                table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+                table_default_styles: {
+                    width: '100%',
+                    borderCollapse: 'collapse'
+                },
+                content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.65;color:#1e293b} table{width:100%;border-collapse:collapse;margin:.65rem 0} th,td{border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top} th{background:#f1f5f9;font-weight:700}',
+                setup: function (editor) {
+                    editor.on('init', function () {
+                        var textarea = document.getElementById(editor.id);
+                        var placeholder = textarea ? textarea.getAttribute('data-placeholder') : '';
+                        if (placeholder) {
+                            editor.getBody().setAttribute('data-placeholder', placeholder);
+                        }
+                    });
                 }
-
-                var quill = new Quill(editorElement, {
-                    theme: 'snow',
-                    placeholder: editorElement.getAttribute('data-placeholder') || '',
-                    modules: {
-                        toolbar: [
-                            [{ header: [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ list: 'ordered' }, { list: 'bullet' }],
-                            [{ indent: '-1' }, { indent: '+1' }],
-                            [{ align: [] }],
-                            ['clean']
-                        ]
-                    }
-                });
-
-                var initialContent = targetInput.value || '';
-                if (/<[a-z][\s\S]*>/i.test(initialContent)) {
-                    quill.clipboard.dangerouslyPasteHTML(initialContent);
-                } else {
-                    quill.setText(initialContent);
-                }
-
-                editors.push({
-                    quill: quill,
-                    input: targetInput
-                });
-
-                var item = editors[editors.length - 1];
-                syncQuillEditor(item);
-                quill.on('text-change', function () {
-                    syncQuillEditor(item);
-                });
-            });
-        } else {
-            document.querySelectorAll('.quill-source').forEach(function (textarea) {
-                textarea.style.display = 'block';
-                textarea.classList.add('form-control');
-                textarea.setAttribute('rows', '7');
             });
         }
 
         if (form) {
             form.addEventListener('submit', function () {
-                editors.forEach(syncQuillEditor);
+                if (typeof tinymce !== 'undefined') {
+                    tinymce.triggerSave();
+                }
             });
         }
     });

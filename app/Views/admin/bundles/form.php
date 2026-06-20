@@ -52,19 +52,13 @@
             <div class="form-row">
                 <label class="form-label" for="deskripsi">Deskripsi</label>
                 <?php $deskripsiValue = (string) old('deskripsi', $bundle['deskripsi'] ?? ''); ?>
-                <input
-                    type="hidden"
+                <textarea
                     name="deskripsi"
                     id="deskripsi"
-                    value="<?= esc($deskripsiValue, 'attr') ?>"
-                >
-                <div
-                    id="deskripsi-editor"
-                    class="bundle-quill-editor"
-                    data-target-input="deskripsi"
-                    data-initial="<?= esc($deskripsiValue, 'attr') ?>"
+                    class="form-control rich-text-editor"
+                    rows="7"
                     data-placeholder="Keterangan singkat tentang tujuan validasi instrumen ini"
-                ></div>
+                ><?= esc($deskripsiValue) ?></textarea>
             </div>
 
             <div class="form-grid">
@@ -350,38 +344,26 @@
 
                         <div class="mb-3">
                             <label class="form-label" for="pengantar_validasi_<?= $instrumentId ?>">Pengantar Validasi</label>
-                            <input
-                                type="hidden"
+                            <textarea
                                 form="instrument-bundle-form"
                                 name="pengantar_validasi[<?= $instrumentId ?>]"
                                 id="pengantar_validasi_<?= $instrumentId ?>"
-                                value="<?= esc($pengantarValue, 'attr') ?>"
-                            >
-                            <div
-                                id="pengantar_validasi_editor_<?= $instrumentId ?>"
-                                class="bundle-quill-editor"
-                                data-target-input="pengantar_validasi_<?= $instrumentId ?>"
-                                data-initial="<?= esc($pengantarValue, 'attr') ?>"
+                                class="form-control rich-text-editor"
+                                rows="7"
                                 data-placeholder="Pengantar khusus untuk validator saat menilai instrumen ini."
-                            ></div>
+                            ><?= esc($pengantarValue) ?></textarea>
                         </div>
 
                         <div class="mb-0">
                             <label class="form-label" for="petunjuk_validasi_<?= $instrumentId ?>">Petunjuk Validasi</label>
-                            <input
-                                type="hidden"
+                            <textarea
                                 form="instrument-bundle-form"
                                 name="petunjuk_validasi[<?= $instrumentId ?>]"
                                 id="petunjuk_validasi_<?= $instrumentId ?>"
-                                value="<?= esc($petunjukValue, 'attr') ?>"
-                            >
-                            <div
-                                id="petunjuk_validasi_editor_<?= $instrumentId ?>"
-                                class="bundle-quill-editor"
-                                data-target-input="petunjuk_validasi_<?= $instrumentId ?>"
-                                data-initial="<?= esc($petunjukValue, 'attr') ?>"
+                                class="form-control rich-text-editor"
+                                rows="7"
                                 data-placeholder="Petunjuk khusus penilaian untuk instrumen ini."
-                            ></div>
+                            ><?= esc($petunjukValue) ?></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -393,7 +375,6 @@
     <?php endforeach; ?>
 <?php endif; ?>
 
-<link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <style>
     .table-actions {
         display: flex;
@@ -402,33 +383,22 @@
         flex-wrap: wrap;
     }
 
-    .bundle-quill-editor {
-        background: #fff;
+    .tox-tinymce {
+        border-color: #cbd5e1;
         border-radius: 4px;
-    }
-
-    .bundle-quill-editor.ql-container,
-    .bundle-quill-editor .ql-container {
-        min-height: 150px;
-        font-size: 0.875rem;
-    }
-
-    .bundle-quill-editor .ql-editor {
-        min-height: 150px;
-        white-space: pre-wrap;
+        overflow: hidden;
     }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('instrument-bundle-form');
-        var editorMap = new Map();
         var tokenInput = document.getElementById('token');
         var tokenPreview = document.getElementById('token-preview');
         var tokenPreviewBase = <?= json_encode(rtrim(base_url('paket'), '/')) ?>;
 
-        if (!form || typeof Quill === 'undefined') {
+        if (!form) {
             return;
         }
 
@@ -450,60 +420,6 @@
         if (tokenInput) {
             tokenInput.addEventListener('input', updateTokenPreview);
             updateTokenPreview();
-        }
-
-        function syncEditor(item) {
-            var text = item.quill.getText().replace(/\n$/, '').trim();
-            item.input.value = text === '' ? '' : item.quill.root.innerHTML;
-        }
-
-        function initEditor(editorElement) {
-            if (!editorElement || editorMap.has(editorElement)) {
-                return editorMap.get(editorElement) || null;
-            }
-
-            var targetInputId = editorElement.getAttribute('data-target-input');
-            var targetInput = document.getElementById(targetInputId);
-            var initialContent = editorElement.getAttribute('data-initial') || '';
-
-            if (!targetInput) {
-                return null;
-            }
-
-            var quill = new Quill(editorElement, {
-                theme: 'snow',
-                placeholder: editorElement.getAttribute('data-placeholder') || '',
-                modules: {
-                    toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        [{ indent: '-1' }, { indent: '+1' }],
-                        [{ align: [] }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            if (/<[a-z][\s\S]*>/i.test(initialContent)) {
-                quill.clipboard.dangerouslyPasteHTML(initialContent);
-            } else {
-                quill.setText(initialContent);
-            }
-
-            var item = {
-                quill: quill,
-                input: targetInput
-            };
-
-            quill.on('text-change', function () {
-                syncEditor(item);
-            });
-
-            editorMap.set(editorElement, item);
-            syncEditor(item);
-
-            return item;
         }
 
         function refreshScaleTemplate(selectElement) {
@@ -546,14 +462,6 @@
             });
         }
 
-        document.querySelectorAll('.instrument-validation-modal').forEach(function (modalElement) {
-            modalElement.addEventListener('shown.bs.modal', function () {
-                modalElement.querySelectorAll('.bundle-quill-editor').forEach(initEditor);
-                modalElement.querySelectorAll('.bundle-scale-template').forEach(refreshScaleTemplate);
-            });
-        });
-
-        form.querySelectorAll('.bundle-quill-editor').forEach(initEditor);
         document.querySelectorAll('.bundle-scale-template').forEach(function (selectElement) {
             selectElement.addEventListener('change', function () {
                 refreshScaleTemplate(selectElement);
@@ -561,8 +469,38 @@
             refreshScaleTemplate(selectElement);
         });
 
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({
+                selector: '.rich-text-editor',
+                height: 260,
+                menubar: false,
+                branding: false,
+                promotion: false,
+                plugins: 'lists table',
+                toolbar: 'blocks | bold italic underline strikethrough | numlist bullist | outdent indent | alignleft aligncenter alignright alignjustify | table | removeformat',
+                block_formats: 'Normal=p;Judul 1=h1;Judul 2=h2;Judul 3=h3',
+                table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+                table_default_styles: {
+                    width: '100%',
+                    borderCollapse: 'collapse'
+                },
+                content_style: 'body{font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;font-size:15px;line-height:1.6;color:#1e293b} table{width:100%;border-collapse:collapse;margin:.65rem 0} th,td{border:1px solid #cbd5e1;padding:.45rem .55rem;vertical-align:top} th{background:#f1f5f9;font-weight:700}',
+                setup: function (editor) {
+                    editor.on('init', function () {
+                        var textarea = document.getElementById(editor.id);
+                        var placeholder = textarea ? textarea.getAttribute('data-placeholder') : '';
+                        if (placeholder) {
+                            editor.getBody().setAttribute('data-placeholder', placeholder);
+                        }
+                    });
+                }
+            });
+        }
+
         form.addEventListener('submit', function () {
-            editorMap.forEach(syncEditor);
+            if (typeof tinymce !== 'undefined') {
+                tinymce.triggerSave();
+            }
         });
     });
 </script>

@@ -14,12 +14,12 @@ $renderDetailText = static function (?string $value): string {
     }
 
     if (preg_match('/<[a-z][\s\S]*>/i', $value) === 1) {
-        $allowedTags = '<p><br><strong><b><em><i><u><s><ol><ul><li><h1><h2><h3><blockquote>';
+        $allowedTags = '<p><br><strong><b><em><i><u><s><ol><ul><li><h1><h2><h3><blockquote><table><thead><tbody><tr><th><td>';
         $html = strip_tags($value, $allowedTags);
         $html = preg_replace('/\s+on\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
         $html = preg_replace('/\s+(href|src)\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? $html;
 
-        return '<div class="ql-editor instrument-detail-rich">' . $html . '</div>';
+        return '<div class="rich-text-content instrument-detail-rich">' . $html . '</div>';
     }
 
     $value = str_replace(["\r\n", "\r"], "\n", $value);
