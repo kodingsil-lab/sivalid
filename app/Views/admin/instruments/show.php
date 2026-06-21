@@ -373,11 +373,11 @@ $renderDetailText = static function (?string $value): string {
                         <?php if ($usesDocumentReviewLayout): ?>
                             <tr>
                                 <th rowspan="2" style="width: 54px;">No</th>
-                                <th rowspan="2" style="width: 200px;"><?= esc((string) $previewLayout['aspect']) ?></th>
-                                <th rowspan="2" style="width: 390px;"><?= esc((string) $previewLayout['item']) ?></th>
-                                <th rowspan="2" style="width: 150px;">Sumber Dokumen</th>
+                                <th rowspan="2" style="width: 190px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th rowspan="2" style="width: 380px;"><?= esc((string) $previewLayout['item']) ?></th>
+                                <th rowspan="2" style="width: 140px;">Sumber Dokumen</th>
                                 <th colspan="<?= count($scaleRange) ?>" class="text-center"><?= esc((string) $previewLayout['score']) ?></th>
-                                <th rowspan="2" style="width: 220px;"><?= esc((string) $previewLayout['comment']) ?></th>
+                                <th rowspan="2" style="width: 200px;"><?= esc((string) $previewLayout['comment']) ?></th>
                             </tr>
                             <tr>
                                 <?php foreach ($scaleRange as $score): ?>
@@ -476,7 +476,7 @@ $renderDetailText = static function (?string $value): string {
 <style>
     .instrument-detail-shell {
         width: 100%;
-        max-width: 1180px;
+        max-width: 1320px;
         margin-left: auto;
         margin-right: auto;
         font-size: 14px;
@@ -583,7 +583,7 @@ $renderDetailText = static function (?string $value): string {
     }
 
     .instrument-document-review-table {
-        min-width: 1220px;
+        min-width: 1160px;
     }
 
     .instrument-document-review-table th,
@@ -597,23 +597,23 @@ $renderDetailText = static function (?string $value): string {
     }
 
     .instrument-document-review-table td:nth-child(2) {
-        width: 200px;
+        width: 190px;
     }
 
     .instrument-document-review-table td:nth-child(3) {
-        width: 390px;
+        width: 380px;
     }
 
     .instrument-document-review-table td:nth-child(4) {
-        width: 150px;
+        width: 140px;
     }
 
     .instrument-document-review-table td:last-child {
-        width: 220px;
+        width: 200px;
     }
 
     .instrument-score-col {
-        width: 50px;
+        width: 44px;
     }
 
     .instrument-ready-extra {
