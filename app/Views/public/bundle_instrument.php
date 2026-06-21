@@ -920,15 +920,14 @@ $text = static function (array $row, string $key, string $default = '-'): string
                     <table id="validation-items-table" class="public-table">
                         <thead>
                         <tr>
-                            <th class="public-number-head" style="width: 50px;">No</th>
-                            <th class="public-number-head" style="width: 56px;">No. Butir</th>
+                            <th class="public-number-head" style="width: 76px;">No. Butir</th>
                             <th>Butir yang Dinilai</th>
                             <th style="width: 280px;">Skor Penilaian</th>
                             <th style="width: 200px;">Komentar</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <?php $butirNo = 1; foreach ($items as $item): ?>
+                        <?php foreach ($items as $item): ?>
                             <?php
                             $itemId = (int) $item['id'];
                             $aspectName = '-';
@@ -954,7 +953,6 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             ?>
                             <tr>
                                 <td class="public-number-cell"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                <td class="public-number-cell"><?= $butirNo++ ?></td>
                                 <td>
                                     <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                     <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc((string) $aspectName) ?></span>
@@ -1180,7 +1178,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                     <table class="public-table">
                         <thead>
                         <tr>
-                            <th style="width: 60px;">No</th>
+                            <th style="width: 76px;">No. Butir</th>
                             <th>Butir Pernyataan</th>
                             <?php foreach ($masterScaleRange as $score): ?>
                                 <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>

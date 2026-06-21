@@ -418,7 +418,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                     <table class="items-table">
                         <thead>
                             <tr>
-                                <th style="width: 64px;">No</th>
+                                <th style="width: 76px;">No. Butir</th>
                                 <th><?= esc((string) ($previewLayout['item'] ?? 'Butir Pernyataan')) ?></th>
                                 <?php if ($usesDocumentReview): ?>
                                     <th style="width: 150px;">Sumber Dokumen</th>

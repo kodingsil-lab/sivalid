@@ -303,7 +303,7 @@ $linkToken = $text($link, 'token', '');
                     <table class="public-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">No</th>
+                                <th style="width: 76px;">No. Butir</th>
                                 <th>Topik/Butir Diskusi</th>
                                 <th style="width: 300px;">Tanggapan</th>
                                 <th style="width: 220px;">Rekomendasi</th>

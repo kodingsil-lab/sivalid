@@ -131,7 +131,7 @@ $scaleOptions = isset($scale['options']) && is_array($scale['options'])
                         <table class="table table-bordered table-vcenter">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 50px;">No</th>
+                                    <th style="width: 76px;">No. Butir</th>
                                     <th>Butir Pernyataan</th>
                                     <th style="width: 240px;">Jawaban</th>
                                     <th style="width: 200px;">Komentar</th>

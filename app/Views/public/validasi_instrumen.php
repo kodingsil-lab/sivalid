@@ -350,7 +350,7 @@ $linkToken = $text($link, 'token', '');
                     <table class="public-table">
                         <thead>
                             <tr>
-                                <th style="width: 60px;">No</th>
+                                <th style="width: 76px;">No. Butir</th>
                                 <th>Butir Pernyataan</th>
                             </tr>
                         </thead>
@@ -392,7 +392,7 @@ $linkToken = $text($link, 'token', '');
                     <table class="public-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">No</th>
+                                <th style="width: 76px;">No. Butir</th>
                                 <th>Butir yang Dinilai</th>
                                 <th style="width: 260px;">Jawaban</th>
                                 <th style="width: 220px;">Komentar</th>

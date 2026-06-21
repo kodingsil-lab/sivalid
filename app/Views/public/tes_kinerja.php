@@ -300,7 +300,7 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
                     <table class="public-table">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">No</th>
+                                <th style="width: 76px;">No. Butir</th>
                                 <th>Kriteria Kinerja</th>
                                 <th style="width: 260px;">Skor/Jawaban</th>
                                 <th style="width: 220px;">Catatan Penilai</th>
