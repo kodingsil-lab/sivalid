@@ -229,15 +229,19 @@
             align-items: center;
             justify-content: center;
             gap: .32rem;
-            min-height: 34px;
-            min-width: 46px;
+            min-height: 42px;
+            min-width: 42px;
             border: 1px solid #cbd5e1;
-            border-radius: 6px;
+            border-radius: 999px;
             padding: .25rem .48rem;
             background: #fff;
             color: var(--pub-text);
             font-weight: 600;
             cursor: pointer;
+        }
+
+        .score-option input {
+            margin: 0;
         }
 
         .text-answer {
@@ -331,6 +335,7 @@
 $scaleMin = $scale['min'] ?? (int) ($link['skala_min'] ?? 1);
 $scaleMax = $scale['max'] ?? (int) ($link['skala_max'] ?? 4);
 $scaleRange = $scale['range'] ?? range($scaleMin, $scaleMax);
+$scaleLabels = isset($scale['labels']) && is_array($scale['labels']) ? $scale['labels'] : sivalid_scale_labels(['skala_min' => $scaleMin, 'skala_max' => $scaleMax] + $link);
 $petunjukPenyebaran = trim((string) ($link['petunjuk_penyebaran'] ?? ''));
 $petunjukMaster = trim((string) ($link['petunjuk'] ?? ''));
 $petunjuk = $petunjukPenyebaran !== '' ? $petunjukPenyebaran : $petunjukMaster;
@@ -454,14 +459,19 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                                 }
                                 $tipeButir = $item['tipe_butir'] ?? 'skala';
                                 $isRequired = (int) ($item['wajib'] ?? 1) === 1 ? 'required' : '';
-                                $renderScoreInput = static function (array $scaleRange, array $item, string $isRequired): string {
+                                $renderScoreInput = static function (array $scaleRange, array $item, string $isRequired, array $scaleLabels): string {
                                     ob_start();
                                     ?>
                                     <div class="score-options">
                                         <?php foreach ($scaleRange as $score): ?>
+                                            <?php
+                                            $score = (int) $score;
+                                            $scoreLabel = (string) ($scaleLabels[$score] ?? ('Skor ' . $score));
+                                            $shortLabel = sivalid_scale_short_label($scoreLabel, $score);
+                                            ?>
                                             <label class="score-option">
                                                 <input type="radio" name="answers[<?= $item['id'] ?>][skor]" value="<?= esc((string) $score) ?>" <?= $isRequired ?>>
-                                                <?= esc((string) $score) ?>
+                                                <span title="<?= esc($scoreLabel, 'attr') ?>"><?= esc($shortLabel) ?></span>
                                             </label>
                                         <?php endforeach; ?>
                                     </div>
@@ -482,7 +492,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
 
                                     <?php if ($usesDocumentReview): ?>
                                         <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
-                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired) ?></td>
+                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
                                         <td>
                                             <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan komentar"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
                                         </td>
@@ -490,7 +500,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                                         <?php foreach (range(1, 5) as $score): ?>
                                             <td><?= nl2br(esc((string) ($item['skor_' . $score . '_deskripsi'] ?? '-'))) ?></td>
                                         <?php endforeach; ?>
-                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired) ?></td>
+                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
                                         <td>
                                             <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
                                         </td>
@@ -501,7 +511,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                                     <?php else: ?>
                                         <td>
                                             <?php if ($usesQuestionnaire || $usesPerformanceTest || $tipeButir === 'skala'): ?>
-                                                <?= $renderScoreInput($scaleRange, $item, $isRequired) ?>
+                                                <?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?>
                                             <?php else: ?>
                                                 <?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban') ?>
                                             <?php endif; ?>

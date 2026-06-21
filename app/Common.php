@@ -178,3 +178,30 @@ if (! function_exists('sivalid_scale_options')) {
         return $options;
     }
 }
+
+if (! function_exists('sivalid_scale_short_label')) {
+    function sivalid_scale_short_label(string $label, int $score): string
+    {
+        $label = trim($label);
+
+        if ($label === '') {
+            return (string) $score;
+        }
+
+        if (preg_match('/\(([A-Za-z]{1,5})\)/', $label, $matches) === 1) {
+            return strtoupper($matches[1]);
+        }
+
+        $normalized = strtolower($label);
+
+        if ($normalized === 'setuju') {
+            return 'S';
+        }
+
+        if ($normalized === 'tidak setuju') {
+            return 'TS';
+        }
+
+        return (string) $score;
+    }
+}

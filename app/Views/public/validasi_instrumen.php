@@ -434,15 +434,16 @@ $linkToken = $text($link, 'token', '');
                                                 <?php
                                                 $score = (int) ($option['score'] ?? 0);
                                                 $label = (string) ($option['label'] ?? ('Skor ' . $score));
+                                                $shortLabel = sivalid_scale_short_label($label, $score);
                                                 ?>
-                                                <label class="public-score-option">
+                                                <label class="public-score-option" title="<?= esc($label, 'attr') ?>">
                                                     <input
                                                         type="radio"
                                                         name="answers[<?= $item['id'] ?>][skor]"
                                                         value="<?= esc((string) $score) ?>"
                                                         <?= $isRequired ?>
                                                     >
-                                                    <?= esc($label) ?>
+                                                    <?= esc($shortLabel) ?>
                                                 </label>
                                             <?php endforeach; ?>
 

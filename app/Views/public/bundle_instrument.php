@@ -723,6 +723,7 @@ $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''))
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
 $scaleRange = array_map('intval', $scale['range'] ?? range($scaleMin, $scaleMax));
+$scaleLabels = isset($scale['labels']) && is_array($scale['labels']) ? $scale['labels'] : sivalid_scale_labels(['skala_min' => $scaleMin, 'skala_max' => $scaleMax] + $instrumentEntry);
 $masterScaleMin = (int) ($instrumentEntry['master_skala_min'] ?? $instrumentEntry['skala_min'] ?? 1);
 $masterScaleMax = (int) ($instrumentEntry['master_skala_max'] ?? $instrumentEntry['skala_max'] ?? 4);
 if ($masterScaleMin <= 0) {
@@ -964,6 +965,12 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                         <?php $savedSkor = $saved['skor'] ?? null; ?>
                                         <div class="public-score-row form-selectgroup form-selectgroup-pills">
                                             <?php foreach ($scaleRange as $score): ?>
+                                                <?php
+                                                $scoreLabel = (string) ($scaleLabels[$score] ?? ('Skor ' . $score));
+                                                $shortLabel = $scaleMin === 1 && $scaleMax === 2
+                                                    ? ($score === 1 ? 'TS' : 'S')
+                                                    : sivalid_scale_short_label($scoreLabel, $score);
+                                                ?>
                                                 <label class="public-score-option form-selectgroup-item">
                                                     <input
                                                         class="form-selectgroup-input public-score-check"
@@ -973,7 +980,9 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                                         <?= $savedSkor !== null && (int) $savedSkor === $score ? 'checked' : '' ?>
                                                         <?= $isFinal ? 'disabled' : '' ?>
                                                     >
-                                                    <span class="form-selectgroup-label"><?= esc((string) $score) ?></span>
+                                                    <span class="form-selectgroup-label" title="<?= esc($scoreLabel, 'attr') ?>">
+                                                        <?= esc($shortLabel) ?>
+                                                    </span>
                                                 </label>
                                             <?php endforeach; ?>
                                         </div>
