@@ -255,9 +255,9 @@ $renderDetailText = static function (?string $value): string {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($items as $item): ?>
+                                    <?php foreach ($items as $itemIndex => $item): ?>
                                         <tr>
-                                            <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                            <td class="text-center"><?= esc((string) ($itemIndex + 1)) ?></td>
                                             <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
                                             <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
                                         </tr>
@@ -327,9 +327,9 @@ $renderDetailText = static function (?string $value): string {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($items as $item): ?>
+                            <?php foreach ($items as $itemIndex => $item): ?>
                                 <tr>
-                                    <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td class="text-center"><?= esc((string) ($itemIndex + 1)) ?></td>
                                     <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
                                     <td class="text-center"><?= esc((string) max($rubricScaleRange)) ?></td>
                                     <td></td>
@@ -368,16 +368,16 @@ $renderDetailText = static function (?string $value): string {
             <p class="text-muted mb-0">Butir instrumen belum tersedia.</p>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table table-bordered table-vcenter instrument-ready-table">
+                <table class="table table-bordered table-vcenter instrument-ready-table <?= $usesDocumentReviewLayout ? 'instrument-document-review-table' : '' ?>">
                     <thead>
                         <?php if ($usesDocumentReviewLayout): ?>
                             <tr>
                                 <th rowspan="2" style="width: 54px;">No</th>
-                                <th rowspan="2" style="width: 170px;"><?= esc((string) $previewLayout['aspect']) ?></th>
-                                <th rowspan="2"><?= esc((string) $previewLayout['item']) ?></th>
-                                <th rowspan="2" style="width: 140px;">Sumber Dokumen</th>
+                                <th rowspan="2" style="width: 200px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th rowspan="2" style="width: 390px;"><?= esc((string) $previewLayout['item']) ?></th>
+                                <th rowspan="2" style="width: 150px;">Sumber Dokumen</th>
                                 <th colspan="<?= count($scaleRange) ?>" class="text-center"><?= esc((string) $previewLayout['score']) ?></th>
-                                <th rowspan="2" style="width: 190px;"><?= esc((string) $previewLayout['comment']) ?></th>
+                                <th rowspan="2" style="width: 220px;"><?= esc((string) $previewLayout['comment']) ?></th>
                             </tr>
                             <tr>
                                 <?php foreach ($scaleRange as $score): ?>
@@ -423,9 +423,9 @@ $renderDetailText = static function (?string $value): string {
                         <?php endif; ?>
                     </thead>
                     <tbody>
-                        <?php foreach ($items as $item): ?>
+                        <?php foreach ($items as $itemIndex => $item): ?>
                             <tr>
-                                <td class="text-center"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td class="text-center"><?= esc((string) ($itemIndex + 1)) ?></td>
                                 <td><?= esc((string) ($item['nama_aspek'] ?? '-')) ?></td>
                                 <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
                                 <?php if ($usesDocumentReviewLayout): ?>
@@ -568,17 +568,52 @@ $renderDetailText = static function (?string $value): string {
         font-weight: 700;
         text-align: center;
         vertical-align: middle;
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        word-break: normal;
     }
 
     .instrument-ready-table td {
         color: #0f172a;
         line-height: 1.45;
         vertical-align: middle;
-        word-break: break-word;
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        word-break: normal;
+    }
+
+    .instrument-document-review-table {
+        min-width: 1220px;
+    }
+
+    .instrument-document-review-table th,
+    .instrument-document-review-table td {
+        padding-left: .8rem !important;
+        padding-right: .8rem !important;
+    }
+
+    .instrument-document-review-table td:nth-child(1) {
+        width: 54px;
+    }
+
+    .instrument-document-review-table td:nth-child(2) {
+        width: 200px;
+    }
+
+    .instrument-document-review-table td:nth-child(3) {
+        width: 390px;
+    }
+
+    .instrument-document-review-table td:nth-child(4) {
+        width: 150px;
+    }
+
+    .instrument-document-review-table td:last-child {
+        width: 220px;
     }
 
     .instrument-score-col {
-        width: 46px;
+        width: 50px;
     }
 
     .instrument-ready-extra {
