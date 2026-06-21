@@ -23,7 +23,7 @@
             </svg>
             <h2 class="card-title"><?= esc($title ?? 'Informasi') ?></h2>
             <p class="text-muted"><?= esc($message ?? 'Terima kasih.') ?></p>
-            <p class="text-muted small">Silakan hubungi admin/peneliti jika Bapak/Ibu merasa pesan ini muncul karena kesalahan.</p>
+            <p class="text-muted small"><?= esc($note ?? 'Silakan hubungi admin/peneliti jika Bapak/Ibu merasa pesan ini muncul karena kesalahan.') ?></p>
         </div>
     </div>
 </div>
