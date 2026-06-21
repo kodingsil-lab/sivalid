@@ -3,24 +3,41 @@
 <?= $this->section('content') ?>
 
 <?php
-$modeLabel = static function (?string $mode): string {
-    $mode = (string) $mode;
+$respondentTypeLabel = static function (array $row): string {
+    $templateKey = trim((string) ($row['identity_template'] ?? ''));
+    $templates = \App\Libraries\RespondentIdentitySchema::templates();
 
-    if ($mode === 'validasi_instrumen') {
-        return 'Validasi Instrumen';
+    if ($templateKey !== '' && isset($templates[$templateKey])) {
+        return (string) $templates[$templateKey]['label'];
     }
 
-    return ucwords(str_replace('_', ' ', $mode));
-};
-
-$modeBadgeClass = static function (?string $mode): string {
-    $mode = (string) $mode;
-
-    if ($mode === 'validasi_instrumen') {
-        return 'bg-blue text-blue-fg';
+    $fields = [];
+    if (!empty($row['identity_fields'])) {
+        $decodedFields = json_decode((string) $row['identity_fields'], true);
+        $fields = is_array($decodedFields) ? $decodedFields : [];
     }
 
-    return 'bg-secondary text-secondary-fg';
+    foreach ($fields as $field) {
+        $label = strtolower((string) ($field['label'] ?? ''));
+
+        if (str_contains($label, 'dosen')) {
+            return 'Dosen';
+        }
+
+        if (str_contains($label, 'mahasiswa') || str_contains($label, 'nim')) {
+            return 'Mahasiswa';
+        }
+
+        if (str_contains($label, 'guru') || str_contains($label, 'praktisi')) {
+            return 'Guru / Praktisi';
+        }
+
+        if (str_contains($label, 'validator') || str_contains($label, 'ahli')) {
+            return 'Validator / Ahli';
+        }
+    }
+
+    return title_case_label((string) ($row['jenis_responden'] ?? '-'));
 };
 
 ?>
@@ -100,9 +117,9 @@ $modeBadgeClass = static function (?string $mode): string {
 
 <div class="card mb-3">
     <div class="card-body">
-        <h3 class="card-title mb-3">Ringkasan Respon Berdasarkan Mode</h3>
+        <h3 class="card-title mb-3">Ringkasan Respon Berdasarkan Kategori Pengisi</h3>
 
-        <?php if (empty($responByMode)): ?>
+        <?php if (empty($responByType)): ?>
             <div class="empty-state">Belum ada respon masuk.</div>
         <?php else: ?>
             <div class="table-responsive">
@@ -110,17 +127,17 @@ $modeBadgeClass = static function (?string $mode): string {
                     <thead>
                         <tr>
                             <th style="width: 70px;">No</th>
-                            <th>Mode Pengisian</th>
+                            <th>Kategori Pengisi</th>
                             <th style="width: 200px;">Jumlah Respon</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($responByMode as $index => $row): ?>
+                        <?php foreach ($responByType as $index => $row): ?>
                             <tr>
                                 <td class="text-muted"><?= $index + 1 ?></td>
                                 <td>
-                                    <span class="badge <?= esc($modeBadgeClass($row['mode'] ?? '')) ?>">
-                                        <?= esc($modeLabel($row['mode'] ?? '')) ?>
+                                    <span class="badge bg-secondary text-secondary-fg">
+                                        <?= esc(title_case_label((string) ($row['jenis_responden'] ?? '-'))) ?>
                                     </span>
                                 </td>
                                 <td><strong><?= (int) ($row['total'] ?? 0) ?></strong></td>
@@ -146,7 +163,7 @@ $modeBadgeClass = static function (?string $mode): string {
                         <tr>
                             <th style="width: 70px;">No</th>
                             <th>Responden</th>
-                            <th style="width: 180px;">Mode</th>
+                            <th style="width: 180px;">Kategori Pengisi</th>
                             <th>Instrumen</th>
                             <th>Judul Link</th>
                             <th style="width: 180px;">Waktu Submit</th>
@@ -161,8 +178,8 @@ $modeBadgeClass = static function (?string $mode): string {
                                     <div class="text-muted small"><?= esc(title_case_label((string) ($response['jenis_responden'] ?? '-'))) ?></div>
                                 </td>
                                 <td>
-                                    <span class="badge <?= esc($modeBadgeClass($response['mode'] ?? '')) ?>">
-                                        <?= esc($modeLabel($response['mode'] ?? '')) ?>
+                                    <span class="badge bg-secondary text-secondary-fg">
+                                        <?= esc($respondentTypeLabel($response)) ?>
                                     </span>
                                 </td>
                                 <td>
