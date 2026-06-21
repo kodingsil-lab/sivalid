@@ -229,11 +229,12 @@ class PublicBundle extends BaseController
         $savedAnswers  = $this->answerModel->getBySessionAndInstrument(
             (int) $validatorSession['id'], $instrumentId
         );
-        $savedProgress = $this->progressModel->getBySessionAndInstrument(
+        $progressMap   = $this->syncSessionProgressStatuses((int) $validatorSession['id'], $instruments);
+        $savedProgress = $progressMap[$instrumentId] ?? $this->progressModel->getBySessionAndInstrument(
             (int) $validatorSession['id'], $instrumentId
         );
-        $progressMap   = $this->syncSessionProgressStatuses((int) $validatorSession['id'], $instruments);
         $scale         = $this->getScaleRange($instrumentEntry);
+        $isLocked      = !empty($savedProgress['locked_at']);
 
         return view('public/bundle_instrument', [
             'title'            => esc($bundle['judul']),
@@ -249,7 +250,7 @@ class PublicBundle extends BaseController
             'items'            => $items,
             'scale'            => $scale,
             'validatorSession' => $validatorSession,
-            'isFinal'          => false,
+            'isFinal'          => $isLocked,
             'savedAnswers'     => $savedAnswers,
             'savedProgress'    => $savedProgress,
             'progressMap'      => $progressMap,
@@ -294,6 +295,13 @@ class PublicBundle extends BaseController
         $instrumentId = (int) $instrumentEntry['instrument_id'];
         $total        = count($instruments);
         $nextPos      = $position < $total ? $position + 1 : null;
+
+        $existingProgress = $this->progressModel->getBySessionAndInstrument((int) $validatorSession['id'], $instrumentId);
+        if (!empty($existingProgress['locked_at'])) {
+            return redirect()
+                ->to(base_url('paket/' . $token . '/isi/' . $position))
+                ->with('success', 'Instrumen ini sudah lengkap dan terkunci.');
+        }
 
         $items = $this->itemModel
             ->where('instrument_id', $instrumentId)
@@ -350,11 +358,19 @@ class PublicBundle extends BaseController
         );
         $status = $this->computeStatus($savedAnswers, $items);
 
-        $this->progressModel->saveProgress((int) $validatorSession['id'], $instrumentId, [
+        $progressData = [
             'status'        => $status,
             'kesimpulan'    => trim((string) ($this->request->getPost('kesimpulan') ?? '')) ?: null,
             'komentar_umum' => trim((string) ($this->request->getPost('komentar_umum') ?? '')) ?: null,
-        ]);
+        ];
+
+        if ($status === 'selesai') {
+            $now = date('Y-m-d H:i:s');
+            $progressData['completed_at'] = $now;
+            $progressData['locked_at'] = $now;
+        }
+
+        $this->progressModel->saveProgress((int) $validatorSession['id'], $instrumentId, $progressData);
 
         $action = (string) ($this->request->getPost('action') ?? 'save');
 
@@ -406,6 +422,20 @@ class PublicBundle extends BaseController
 
         $instrumentId = (int) $instrumentEntry['instrument_id'];
 
+        $existingProgress = $this->progressModel->getBySessionAndInstrument((int) $validatorSession['id'], $instrumentId);
+        if (!empty($existingProgress['locked_at'])) {
+            return $this->response
+                ->setContentType('application/json')
+                ->setBody(json_encode([
+                    'ok' => true,
+                    'status' => 'selesai',
+                    'locked' => true,
+                    'saved_at' => date('H:i:s'),
+                    'csrf_name' => csrf_token(),
+                    'csrf_hash' => csrf_hash(),
+                ]));
+        }
+
         $items = $this->itemModel
             ->where('instrument_id', $instrumentId)
             ->whereIn('status', $this->itemModel->usableStatuses())
@@ -452,11 +482,19 @@ class PublicBundle extends BaseController
         );
         $status = $this->computeStatus($savedAnswers, $items);
 
-        $this->progressModel->saveProgress((int) $validatorSession['id'], $instrumentId, [
+        $progressData = [
             'status'        => $status,
             'kesimpulan'    => trim((string) ($this->request->getPost('kesimpulan') ?? '')) ?: null,
             'komentar_umum' => trim((string) ($this->request->getPost('komentar_umum') ?? '')) ?: null,
-        ]);
+        ];
+
+        if ($status === 'selesai') {
+            $now = date('Y-m-d H:i:s');
+            $progressData['completed_at'] = $now;
+            $progressData['locked_at'] = $now;
+        }
+
+        $this->progressModel->saveProgress((int) $validatorSession['id'], $instrumentId, $progressData);
 
         return $this->response
             ->setContentType('application/json')
@@ -711,6 +749,11 @@ class PublicBundle extends BaseController
                 continue;
             }
 
+            $existing = $progressMap[$instrumentId] ?? null;
+            if (!empty($existing['locked_at'])) {
+                continue;
+            }
+
             $items = $this->itemModel
                 ->where('instrument_id', $instrumentId)
                 ->whereIn('status', $this->itemModel->usableStatuses())
@@ -719,15 +762,22 @@ class PublicBundle extends BaseController
             $savedAnswers = $this->answerModel->getBySessionAndInstrument($sessionId, $instrumentId);
             $status = $this->computeStatus($savedAnswers, $items);
 
-            $existing = $progressMap[$instrumentId] ?? null;
             $existingStatus = $existing['status'] ?? 'belum';
 
             if ($existing && $existingStatus !== $status) {
-                $this->progressModel->saveProgress($sessionId, $instrumentId, [
+                $progressData = [
                     'status'        => $status,
                     'kesimpulan'    => $existing['kesimpulan'] ?? null,
                     'komentar_umum' => $existing['komentar_umum'] ?? null,
-                ]);
+                ];
+
+                if ($status === 'selesai') {
+                    $now = date('Y-m-d H:i:s');
+                    $progressData['completed_at'] = $existing['completed_at'] ?? $now;
+                    $progressData['locked_at'] = $existing['locked_at'] ?? $now;
+                }
+
+                $this->progressModel->saveProgress($sessionId, $instrumentId, $progressData);
                 $hasChanges = true;
             }
         }

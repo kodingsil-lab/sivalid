@@ -18,6 +18,8 @@ class ValidationBundleInstrumentProgressModel extends Model
         'kesimpulan',
         'komentar_umum',
         'saved_at',
+        'completed_at',
+        'locked_at',
     ];
 
     protected $useTimestamps = true;
