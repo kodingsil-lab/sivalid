@@ -132,6 +132,17 @@ class Instruments extends BaseController
 
         $itemModel = new InstrumentItemModel();
         $items = $itemModel->getWithRelations((int) $id);
+        usort($items, static function (array $left, array $right): int {
+            return [
+                (int) ($left['urutan'] ?? 0),
+                (int) ($left['nomor'] ?? 0),
+                (int) ($left['id'] ?? 0),
+            ] <=> [
+                (int) ($right['urutan'] ?? 0),
+                (int) ($right['nomor'] ?? 0),
+                (int) ($right['id'] ?? 0),
+            ];
+        });
 
         $data = [
             'title'      => 'Detail Instrumen',
