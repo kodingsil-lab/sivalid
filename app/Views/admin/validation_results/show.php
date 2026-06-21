@@ -81,6 +81,7 @@
                         <th style="width:80px;">Skor</th>
                         <th style="width:180px;">Jawaban Teks</th>
                         <th style="width:220px;">Komentar</th>
+                        <th style="width:150px;">Status Master</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -93,6 +94,13 @@
                             <td><?= esc($row['skor'] !== null ? (string) $row['skor'] : '-') ?></td>
                             <td><?= esc($row['jawaban_teks'] !== '' ? $row['jawaban_teks'] : '-') ?></td>
                             <td><?= esc($row['komentar'] !== '' ? $row['komentar'] : '-') ?></td>
+                            <td>
+                                <?php if (!empty($row['master_revised'])): ?>
+                                    <span class="badge bg-yellow-lt text-yellow">Master sudah direvisi</span>
+                                <?php else: ?>
+                                    <span class="text-muted">Sesuai snapshot</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>

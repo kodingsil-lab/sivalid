@@ -299,6 +299,7 @@ class PublicBundle extends BaseController
             ->where('instrument_id', $instrumentId)
             ->whereIn('status', $this->itemModel->usableStatuses())
             ->findAll();
+        $aspectNames = $this->aspectNamesForInstrument($instrumentId);
 
         $rawAnswers = $this->request->getPost('answers');
         if (!is_array($rawAnswers)) {
@@ -331,6 +332,11 @@ class PublicBundle extends BaseController
 
             $toSave[] = [
                 'instrument_item_id' => $itemId,
+                'snapshot_nomor' => (string) ($item['nomor'] ?? $itemId),
+                'snapshot_aspek' => $aspectNames[(int) ($item['aspect_id'] ?? 0)] ?? '-',
+                'snapshot_pernyataan' => (string) ($item['pernyataan'] ?? '-'),
+                'snapshot_tipe_butir' => (string) $tipe,
+                'snapshot_sumber_dokumen' => (string) ($item['sumber_dokumen'] ?? ''),
                 'skor'               => ($tipe === 'skala' && isset($answer['skor']) && $answer['skor'] !== '') ? (string) $answer['skor'] : null,
                 'jawaban_teks'       => ($tipe !== 'skala') ? trim((string) ($answer['jawaban_teks'] ?? '')) : null,
                 'komentar'           => isset($answer['komentar']) ? trim((string) $answer['komentar']) : null,
@@ -404,6 +410,7 @@ class PublicBundle extends BaseController
             ->where('instrument_id', $instrumentId)
             ->whereIn('status', $this->itemModel->usableStatuses())
             ->findAll();
+        $aspectNames = $this->aspectNamesForInstrument($instrumentId);
 
         $rawAnswers = $this->request->getPost('answers');
         if (!is_array($rawAnswers)) {
@@ -427,6 +434,11 @@ class PublicBundle extends BaseController
 
             $toSave[] = [
                 'instrument_item_id' => $itemId,
+                'snapshot_nomor' => (string) ($item['nomor'] ?? $itemId),
+                'snapshot_aspek' => $aspectNames[(int) ($item['aspect_id'] ?? 0)] ?? '-',
+                'snapshot_pernyataan' => (string) ($item['pernyataan'] ?? '-'),
+                'snapshot_tipe_butir' => (string) $tipe,
+                'snapshot_sumber_dokumen' => (string) ($item['sumber_dokumen'] ?? ''),
                 'skor'               => ($tipe === 'skala' && isset($answer['skor']) && $answer['skor'] !== '') ? (string) $answer['skor'] : null,
                 'jawaban_teks'       => ($tipe !== 'skala') ? trim((string) ($answer['jawaban_teks'] ?? '')) : null,
                 'komentar'           => isset($answer['komentar']) ? trim((string) $answer['komentar']) : null,
@@ -671,6 +683,21 @@ class PublicBundle extends BaseController
             'options' => sivalid_scale_options(['skala_min' => $min, 'skala_max' => $max] + $instrument),
             'labels' => sivalid_scale_labels(['skala_min' => $min, 'skala_max' => $max] + $instrument),
         ];
+    }
+
+    private function aspectNamesForInstrument(int $instrumentId): array
+    {
+        $rows = $this->aspectModel
+            ->where('instrument_id', $instrumentId)
+            ->findAll();
+
+        $names = [];
+
+        foreach ($rows as $row) {
+            $names[(int) ($row['id'] ?? 0)] = (string) ($row['nama_aspek'] ?? '-');
+        }
+
+        return $names;
     }
 
     private function syncSessionProgressStatuses(int $sessionId, array $instruments): array

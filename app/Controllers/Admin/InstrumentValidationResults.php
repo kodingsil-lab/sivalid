@@ -237,15 +237,38 @@ class InstrumentValidationResults extends BaseController
                 $itemId = (int) $item['id'];
                 $answer = $answersMap[$itemId] ?? null;
                 $tipeButir = $item['tipe_butir'] ?? 'skala';
+                $snapshotNomor = trim((string) ($answer['snapshot_nomor'] ?? ''));
+                $snapshotAspek = trim((string) ($answer['snapshot_aspek'] ?? ''));
+                $snapshotPernyataan = trim((string) ($answer['snapshot_pernyataan'] ?? ''));
+                $snapshotTipe = trim((string) ($answer['snapshot_tipe_butir'] ?? ''));
+                $snapshotSumber = trim((string) ($answer['snapshot_sumber_dokumen'] ?? ''));
+
+                $currentAspek = $aspectNames[(int) ($item['aspect_id'] ?? 0)] ?? '-';
+                $displayNomor = $snapshotNomor !== '' ? $snapshotNomor : (string) ($item['nomor'] ?? '-');
+                $displayAspek = $snapshotAspek !== '' ? $snapshotAspek : $currentAspek;
+                $displayPernyataan = $snapshotPernyataan !== '' ? $snapshotPernyataan : (string) ($item['pernyataan'] ?? '-');
+                $displayTipe = $snapshotTipe !== '' ? $snapshotTipe : $tipeButir;
+                $displaySumber = $snapshotSumber !== '' ? $snapshotSumber : (string) ($item['sumber_dokumen'] ?? '');
+
+                $masterRevised = $answer !== null && (
+                    ($snapshotNomor !== '' && $snapshotNomor !== (string) ($item['nomor'] ?? ''))
+                    || ($snapshotAspek !== '' && $snapshotAspek !== $currentAspek)
+                    || ($snapshotPernyataan !== '' && $snapshotPernyataan !== (string) ($item['pernyataan'] ?? ''))
+                    || ($snapshotTipe !== '' && $snapshotTipe !== $tipeButir)
+                    || ($snapshotSumber !== '' && $snapshotSumber !== (string) ($item['sumber_dokumen'] ?? ''))
+                );
 
                 $rows[] = [
-                    'nomor'        => $item['nomor'] ?? '-',
-                    'aspek'        => $aspectNames[(int) ($item['aspect_id'] ?? 0)] ?? '-',
-                    'pernyataan'   => $item['pernyataan'] ?? '-',
-                    'tipe_butir'   => $tipeButir,
+                    'nomor'        => $displayNomor,
+                    'aspek'        => $displayAspek,
+                    'pernyataan'   => $displayPernyataan,
+                    'tipe_butir'   => $displayTipe,
+                    'sumber_dokumen' => $displaySumber,
                     'skor'         => $answer['skor'] ?? null,
                     'jawaban_teks' => trim((string) ($answer['jawaban_teks'] ?? '')),
                     'komentar'     => trim((string) ($answer['komentar'] ?? '')),
+                    'master_revised' => $masterRevised,
+                    'master_pernyataan' => $item['pernyataan'] ?? '-',
                 ];
             }
 
@@ -327,7 +350,7 @@ class InstrumentValidationResults extends BaseController
         $instrument = $detail['instrument'];
 
         $sheet->setCellValue('A1', ($instrument['kode'] ?? '-') . ' - ' . ($instrument['judul'] ?? '-'));
-        $sheet->mergeCells('A1:G1');
+        $sheet->mergeCells('A1:H1');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
 
         $sheet->setCellValue('A3', 'Status');
@@ -337,8 +360,8 @@ class InstrumentValidationResults extends BaseController
         $sheet->setCellValue('A5', 'Komentar Umum');
         $sheet->setCellValue('B5', $detail['komentar_umum'] ?: '-');
 
-        $sheet->fromArray(['No', 'Aspek', 'Pernyataan', 'Tipe Butir', 'Skor', 'Jawaban Teks', 'Komentar'], null, 'A7');
-        $this->styleHeader($sheet, 'A7:G7');
+        $sheet->fromArray(['No', 'Aspek', 'Pernyataan', 'Tipe Butir', 'Skor', 'Jawaban Teks', 'Komentar', 'Status Master'], null, 'A7');
+        $this->styleHeader($sheet, 'A7:H7');
 
         $row = 8;
         foreach ($detail['items'] as $item) {
@@ -350,18 +373,20 @@ class InstrumentValidationResults extends BaseController
                 $item['skor'] ?? '-',
                 $item['jawaban_teks'] !== '' ? $item['jawaban_teks'] : '-',
                 $item['komentar'] !== '' ? $item['komentar'] : '-',
+                !empty($item['master_revised']) ? 'Master sudah direvisi' : 'Sesuai snapshot',
             ], null, 'A' . $row);
             $row++;
         }
 
-        $this->autosize($sheet, 'A', 'G');
+        $this->autosize($sheet, 'A', 'H');
         $sheet->getColumnDimension('C')->setWidth(55);
         $sheet->getColumnDimension('G')->setWidth(35);
-        $sheet->getStyle('A:G')->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
-        $sheet->getStyle('C:G')->getAlignment()->setWrapText(true);
+        $sheet->getColumnDimension('H')->setWidth(24);
+        $sheet->getStyle('A:H')->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle('C:H')->getAlignment()->setWrapText(true);
 
         if ($row > 8) {
-            $sheet->getStyle('A7:G' . ($row - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+            $sheet->getStyle('A7:H' . ($row - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         }
     }
 
