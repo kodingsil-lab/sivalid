@@ -316,6 +316,18 @@ $modeBadgeClass = static function (?string $mode): string {
                                     <a href="<?= base_url('admin/submissions/export/report' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-primary">
                                         Export Laporan
                                     </a>
+                                    <form
+                                        action="<?= base_url('admin/submissions/delete-summary') ?>"
+                                        method="post"
+                                        class="action-inline"
+                                        onsubmit="return confirm('Yakin ingin menghapus semua hasil pengisian pada rekap ini? Data jawaban responden akan ikut terhapus.');"
+                                    >
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="instrument_link_id" value="<?= esc((string) ($summary['instrument_link_id'] ?? '')) ?>">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            Hapus
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

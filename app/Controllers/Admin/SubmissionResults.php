@@ -294,6 +294,62 @@ class SubmissionResults extends BaseController
             ->with('success', 'Data pengisian berhasil dihapus.');
     }
 
+    public function deleteSummary()
+    {
+        $linkId = (int) $this->request->getPost('instrument_link_id');
+
+        if ($linkId <= 0) {
+            return redirect()
+                ->to(base_url('admin/submissions'))
+                ->with('error', 'Rekap hasil pengisian tidak valid.');
+        }
+
+        $responses = $this->responseModel
+            ->scopeOwned('responses.user_id')
+            ->select('id')
+            ->where('instrument_link_id', $linkId)
+            ->findAll();
+
+        if (empty($responses)) {
+            return redirect()
+                ->to(base_url('admin/submissions'))
+                ->with('error', 'Data pengisian pada rekap ini tidak ditemukan.');
+        }
+
+        $responseIds = array_map(static fn (array $row): int => (int) $row['id'], $responses);
+        $db = db_connect();
+        $db->transBegin();
+
+        $this->answerModel
+            ->whereIn('response_id', $responseIds)
+            ->delete();
+
+        $this->responseModel
+            ->whereIn('id', $responseIds)
+            ->delete();
+
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+
+            return redirect()
+                ->to(base_url('admin/submissions'))
+                ->with('error', 'Data pengisian gagal dihapus. Silakan coba lagi.');
+        }
+
+        $db->transCommit();
+
+        $this->auditLog->log(
+            AuditLogService::ACTION_DELETE_SUBMISSION,
+            AuditLogService::ENTITY_RESPONSE,
+            $linkId,
+            'Hapus rekap hasil pengisian link_id=' . $linkId . ', total=' . count($responseIds)
+        );
+
+        return redirect()
+            ->to(base_url('admin/submissions'))
+            ->with('success', count($responseIds) . ' data pengisian berhasil dihapus.');
+    }
+
     private function getFilters(): array
     {
         return [
