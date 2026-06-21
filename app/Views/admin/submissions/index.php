@@ -133,18 +133,10 @@ $modeBadgeClass = static function (?string $mode): string {
         return $value !== null && $value !== '';
     });
 
-    $exportCsvUrl = base_url('admin/submissions/export');
-    $exportExcelUrl = base_url('admin/submissions/export/excel');
-    $exportWordUrl = base_url('admin/submissions/export/word');
-    $exportPdfUrl = base_url('admin/submissions/export/pdf');
     $exportReportUrl = base_url('admin/submissions/export/report');
 
     if (!empty($activeFilters)) {
         $queryString = '?' . http_build_query($activeFilters);
-        $exportCsvUrl .= $queryString;
-        $exportExcelUrl .= $queryString;
-        $exportWordUrl .= $queryString;
-        $exportPdfUrl .= $queryString;
         $exportReportUrl .= $queryString;
     }
     ?>
@@ -229,11 +221,7 @@ $modeBadgeClass = static function (?string $mode): string {
             </div>
 
             <div class="d-flex flex-wrap gap-2">
-                <a href="<?= esc($exportReportUrl) ?>" class="btn btn-primary btn-sm">Export Laporan Sesuai Jenis</a>
-                <a href="<?= esc($exportExcelUrl) ?>" class="btn btn-light btn-sm">Export Excel</a>
-                <a href="<?= esc($exportWordUrl) ?>" class="btn btn-light btn-sm">Export Word</a>
-                <a href="<?= esc($exportPdfUrl) ?>" class="btn btn-light btn-sm">Export PDF</a>
-                <a href="<?= esc($exportCsvUrl) ?>" class="btn btn-light btn-sm">CSV</a>
+                <a href="<?= esc($exportReportUrl) ?>" class="btn btn-primary btn-sm">Export Laporan</a>
             </div>
         </div>
     </form>
@@ -326,16 +314,7 @@ $modeBadgeClass = static function (?string $mode): string {
                             <td class="table-actions-cell">
                                 <div class="table-actions">
                                     <a href="<?= base_url('admin/submissions/export/report' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-primary">
-                                        Laporan
-                                    </a>
-                                    <a href="<?= base_url('admin/submissions/export/excel' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
-                                        Excel
-                                    </a>
-                                    <a href="<?= base_url('admin/submissions/export/word' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
-                                        Word
-                                    </a>
-                                    <a href="<?= base_url('admin/submissions/export/pdf' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
-                                        PDF
+                                        Export Laporan
                                     </a>
                                 </div>
                             </td>
