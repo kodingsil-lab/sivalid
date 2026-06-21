@@ -351,7 +351,6 @@ $linkToken = $text($link, 'token', '');
                         <thead>
                             <tr>
                                 <th style="width: 60px;">No</th>
-                                <th style="width: 220px;">Aspek</th>
                                 <th>Butir Pernyataan</th>
                             </tr>
                         </thead>
@@ -369,8 +368,10 @@ $linkToken = $text($link, 'token', '');
                                 ?>
                                 <tr>
                                     <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                    <td><?= esc((string) $aspectName) ?></td>
-                                    <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                    <td>
+                                        <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                        <br><small class="public-required-note">Aspek: <?= esc((string) $aspectName) ?></small>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -392,7 +393,6 @@ $linkToken = $text($link, 'token', '');
                         <thead>
                             <tr>
                                 <th style="width: 50px;">No</th>
-                                <th style="width: 160px;">Aspek</th>
                                 <th>Butir yang Dinilai</th>
                                 <th style="width: 260px;">Jawaban</th>
                                 <th style="width: 220px;">Komentar</th>
@@ -412,9 +412,9 @@ $linkToken = $text($link, 'token', '');
                                 ?>
                                 <tr class="instrument-item-row">
                                     <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                    <td><?= esc((string) $aspectName) ?></td>
                                     <td>
                                         <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                        <br><small class="public-required-note">Aspek: <?= esc((string) $aspectName) ?></small>
 
                                         <?php if ((int) ($item['wajib'] ?? 1) === 1): ?>
                                             <br><small class="public-required-note">Wajib diisi</small>

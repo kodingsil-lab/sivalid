@@ -419,7 +419,6 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                         <thead>
                             <tr>
                                 <th style="width: 64px;">No</th>
-                                <th style="width: 180px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek')) ?></th>
                                 <th><?= esc((string) ($previewLayout['item'] ?? 'Butir Pernyataan')) ?></th>
                                 <?php if ($usesDocumentReview): ?>
                                     <th style="width: 150px;">Sumber Dokumen</th>
@@ -475,9 +474,9 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                                 ?>
                                 <tr class="instrument-item-row">
                                     <td><span class="item-number"><?= esc((string) ($item['nomor'] ?? ($index + 1))) ?></span></td>
-                                    <td><?= esc($aspectName) ?></td>
                                     <td>
                                         <?= nl2br(esc($item['pernyataan'])) ?>
+                                        <br><small class="text-muted">Aspek: <?= esc($aspectName) ?></small>
                                         <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
                                     </td>
 

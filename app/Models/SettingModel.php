@@ -66,6 +66,63 @@ class SettingModel extends Model
             ->findAll();
     }
 
+    public function getUserProfileValues(int $userId): array
+    {
+        if ($userId <= 0) {
+            return $this->getGroupValues('profile');
+        }
+
+        $group = $this->userProfileGroup($userId);
+        $prefix = $this->userProfileKeyPrefix($userId);
+        $rows = $this->where('setting_group', $group)->findAll();
+        $settings = [];
+
+        foreach ($rows as $row) {
+            $key = (string) ($row['setting_key'] ?? '');
+
+            if (str_starts_with($key, $prefix)) {
+                $settings[substr($key, strlen($prefix))] = $row['setting_value'];
+            }
+        }
+
+        if ($settings === []) {
+            return $this->getGroupValues('profile');
+        }
+
+        return $settings;
+    }
+
+    public function getUserProfileValue(int $userId, string $key, ?string $default = null): ?string
+    {
+        $profile = $this->getUserProfileValues($userId);
+
+        return $profile[$key] ?? $default;
+    }
+
+    public function setUserProfileValue(int $userId, string $key, ?string $value): void
+    {
+        if ($userId <= 0) {
+            $this->setValue($key, $value, 'profile');
+            return;
+        }
+
+        $this->setValue(
+            $this->userProfileKeyPrefix($userId) . $key,
+            $value,
+            $this->userProfileGroup($userId)
+        );
+    }
+
+    private function userProfileGroup(int $userId): string
+    {
+        return 'profile_user_' . $userId;
+    }
+
+    private function userProfileKeyPrefix(int $userId): string
+    {
+        return 'user_' . $userId . '_';
+    }
+
     public function getInstrumentTypes(array $fallback = []): array
     {
         $rows = $this->getGroupRows('instrument_type');

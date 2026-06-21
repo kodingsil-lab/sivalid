@@ -64,6 +64,8 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('settings', 'Admin\Settings::index');
     $routes->post('settings/category', 'Admin\Settings::saveCategory');
     $routes->post('settings/application', 'Admin\Settings::saveApplication');
+    $routes->post('settings/profile', 'Admin\Settings::saveProfile');
+    $routes->post('settings/account', 'Admin\Settings::saveAccount');
 
     $routes->group('', ['filter' => 'role:superadmin'], function ($routes) {
         $routes->get('admin-users', 'Admin\AdminUsers::index');

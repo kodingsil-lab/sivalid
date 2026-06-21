@@ -58,7 +58,7 @@ class PublicBundle extends BaseController
 
         $instruments      = $this->bundleInstrumentModel->getByBundle((int) $bundle['id']);
         $validatorSession = $this->resolveSession($bundle);
-        $profile          = $this->settingModel->getGroupValues('profile');
+        $profile          = $this->settingModel->getUserProfileValues((int) ($bundle['user_id'] ?? 0));
         $editIdentity     = $this->request->getGet('identitas') === 'edit';
 
         if (!$validatorSession || $editIdentity) {

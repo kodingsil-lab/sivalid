@@ -515,6 +515,19 @@
             color: #991b1b;
         }
 
+        .public-item-aspect {
+            display: block;
+            margin-top: .42rem;
+            color: var(--pub-muted);
+            font-size: .82rem;
+            line-height: 1.35;
+        }
+
+        .public-item-aspect strong {
+            color: #475569;
+            font-weight: 650;
+        }
+
 
         .public-alert {
             border: 1px solid #fecaca;
@@ -710,6 +723,15 @@ $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''))
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
 $scaleRange = array_map('intval', $scale['range'] ?? range($scaleMin, $scaleMax));
+$masterScaleMin = (int) ($instrumentEntry['master_skala_min'] ?? $instrumentEntry['skala_min'] ?? 1);
+$masterScaleMax = (int) ($instrumentEntry['master_skala_max'] ?? $instrumentEntry['skala_max'] ?? 4);
+if ($masterScaleMin <= 0) {
+    $masterScaleMin = 1;
+}
+if ($masterScaleMax < $masterScaleMin) {
+    $masterScaleMax = $masterScaleMin;
+}
+$masterScaleRange = range($masterScaleMin, $masterScaleMax);
 
 $text = static function (array $row, string $key, string $default = '-'): string {
     $value = $row[$key] ?? $default;
@@ -899,7 +921,6 @@ $text = static function (array $row, string $key, string $default = '-'): string
                         <thead>
                         <tr>
                             <th class="public-number-head" style="width: 50px;">No</th>
-                            <th style="width: 140px;">Aspek</th>
                             <th class="public-number-head" style="width: 56px;">No. Butir</th>
                             <th>Butir yang Dinilai</th>
                             <th style="width: 280px;">Skor Penilaian</th>
@@ -933,10 +954,10 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             ?>
                             <tr>
                                 <td class="public-number-cell"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                <td><?= esc((string) $aspectName) ?></td>
                                 <td class="public-number-cell"><?= $butirNo++ ?></td>
                                 <td>
                                     <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                    <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc((string) $aspectName) ?></span>
                                     <br>
                                     <span class="item-fill-badge <?= $isFilled ? 'ok' : 'pending' ?>" data-fill-badge><?= $isFilled ? 'Sudah Nilai' : 'Belum Dinilai' ?></span>
                                 </td>
@@ -1160,9 +1181,8 @@ $text = static function (array $row, string $key, string $default = '-'): string
                         <thead>
                         <tr>
                             <th style="width: 60px;">No</th>
-                            <th style="width: 220px;">Aspek</th>
                             <th>Butir Pernyataan</th>
-                            <?php foreach ($scaleRange as $score): ?>
+                            <?php foreach ($masterScaleRange as $score): ?>
                                 <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
                             <?php endforeach; ?>
                         </tr>
@@ -1180,9 +1200,11 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             ?>
                             <tr>
                                 <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                <td><?= esc($aspectName) ?></td>
-                                <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
-                                <?php foreach ($scaleRange as $score): ?>
+                                <td>
+                                    <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                    <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc($aspectName) ?></span>
+                                </td>
+                                <?php foreach ($masterScaleRange as $score): ?>
                                     <td class="public-score-cell">&bigcirc;</td>
                                 <?php endforeach; ?>
                             </tr>

@@ -301,7 +301,6 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
                         <thead>
                             <tr>
                                 <th style="width: 50px;">No</th>
-                                <th style="width: 160px;">Aspek</th>
                                 <th>Kriteria Kinerja</th>
                                 <th style="width: 260px;">Skor/Jawaban</th>
                                 <th style="width: 220px;">Catatan Penilai</th>
@@ -323,9 +322,9 @@ $scaleRange = array_map(static fn($value): int => (int) $value, is_array($rawSca
                                 ?>
                                 <tr>
                                     <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
-                                    <td><?= esc((string) $aspectName) ?></td>
                                     <td>
                                         <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                        <br><small class="public-required-note">Aspek: <?= esc((string) $aspectName) ?></small>
                                         <br><small class="public-required-note"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib dinilai' : 'Opsional' ?></small>
                                     </td>
                                     <td>

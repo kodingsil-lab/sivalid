@@ -48,7 +48,7 @@ class AdminUsers extends BaseController
         $data = [
             'title'   => 'Detail User Admin',
             'user'    => $user,
-            'profile' => $this->settingModel->getGroupValues('profile'),
+            'profile' => $this->settingModel->getUserProfileValues($userId),
         ];
 
         return view('admin/admin_users/show', $data);
@@ -59,7 +59,7 @@ class AdminUsers extends BaseController
         $data = [
             'title'   => 'Tambah User Admin',
             'user'    => null,
-            'profile' => $this->settingModel->getGroupValues('profile'),
+            'profile' => [],
         ];
 
         return view('admin/admin_users/form', $data);
@@ -93,7 +93,7 @@ class AdminUsers extends BaseController
         ]);
 
         $newId = $this->userModel->getInsertID();
-        $this->saveProfileFromRequest();
+        $this->saveProfileFromRequest((int) $newId);
 
         $this->auditLog->log(
             AuditLogService::ACTION_CREATE_INSTRUMENT,
@@ -255,7 +255,7 @@ class AdminUsers extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $this->saveProfileFromRequest();
+        $this->saveProfileFromRequest($userId);
 
         $this->auditLog->log(
             AuditLogService::ACTION_UPDATE_INSTRUMENT,
@@ -288,7 +288,7 @@ class AdminUsers extends BaseController
         return $rules;
     }
 
-    private function saveProfileFromRequest(): void
+    private function saveProfileFromRequest(int $userId): void
     {
         $pdf = $this->request->getFile('ringkasan_penelitian_pdf');
         $fields = [
@@ -301,10 +301,10 @@ class AdminUsers extends BaseController
         ];
 
         foreach ($fields as $field) {
-            $this->settingModel->setValue(
+            $this->settingModel->setUserProfileValue(
+                $userId,
                 $field,
-                trim((string) $this->request->getPost($field)),
-                'profile'
+                trim((string) $this->request->getPost($field))
             );
         }
 
@@ -314,12 +314,12 @@ class AdminUsers extends BaseController
                 mkdir($targetDir, 0775, true);
             }
 
-            $oldPath  = (string) ($this->settingModel->getValue('ringkasan_penelitian_pdf') ?? '');
-            $fileName = 'ringkasan-penelitian-' . date('YmdHis') . '.pdf';
+            $oldPath  = (string) ($this->settingModel->getUserProfileValue($userId, 'ringkasan_penelitian_pdf') ?? '');
+            $fileName = 'ringkasan-penelitian-user-' . $userId . '-' . date('YmdHis') . '.pdf';
             $pdf->move($targetDir, $fileName);
 
             $newPath = 'uploads/settings/' . $fileName;
-            $this->settingModel->setValue('ringkasan_penelitian_pdf', $newPath, 'profile');
+            $this->settingModel->setUserProfileValue($userId, 'ringkasan_penelitian_pdf', $newPath);
 
             if ($oldPath !== '' && str_starts_with($oldPath, 'uploads/settings/')) {
                 $oldFullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $oldPath);

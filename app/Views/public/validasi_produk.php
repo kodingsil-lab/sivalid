@@ -132,7 +132,6 @@ $scaleOptions = isset($scale['options']) && is_array($scale['options'])
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 50px;">No</th>
-                                    <th style="width: 150px;">Aspek</th>
                                     <th>Butir Pernyataan</th>
                                     <th style="width: 240px;">Jawaban</th>
                                     <th style="width: 200px;">Komentar</th>
@@ -151,9 +150,9 @@ $scaleOptions = isset($scale['options']) && is_array($scale['options'])
                                     ?>
                                     <tr class="instrument-item-row">
                                         <td><?= esc($item['nomor']) ?></td>
-                                        <td><?= esc($aspectName) ?></td>
                                         <td>
                                             <?= nl2br(esc($item['pernyataan'])) ?>
+                                            <br><small class="text-muted">Aspek: <?= esc($aspectName) ?></small>
                                             <br><small class="text-muted"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></small>
                                         </td>
                                         <td>

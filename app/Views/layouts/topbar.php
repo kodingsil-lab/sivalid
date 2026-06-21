@@ -41,6 +41,14 @@ $avatarInitials = strtoupper(substr($nameParts[0] ?? 'A', 0, 1) . substr($namePa
                         <div class="small text-muted"><?= esc($adminEmail) ?></div>
                     </div>
                     <div class="dropdown-divider"></div>
+                    <a href="<?= base_url('admin/settings?tab=profile') ?>" class="dropdown-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon dropdown-item-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+                            <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                        </svg>
+                        Profil Saya
+                    </a>
+                    <div class="dropdown-divider"></div>
                     <form action="<?= base_url('logout') ?>" method="post" class="m-0" onsubmit="return confirm('Yakin ingin logout?')">
                         <?= csrf_field() ?>
                         <button type="submit" class="dropdown-item text-danger">

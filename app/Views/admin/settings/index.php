@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<?php $activeTab = isset($activeTab) ? (string) $activeTab : 'category'; ?>
+<?php $activeTab = isset($activeTab) ? (string) $activeTab : 'profile'; ?>
 
 <div class="page-header d-print-none mb-3">
     <div class="container-xl">
@@ -52,6 +52,7 @@
             <aside class="settings-sidebar">
                 <div class="settings-nav-group">
                     <div class="settings-nav-label">Konfigurasi Penelitian</div>
+                    <a href="<?= base_url('admin/settings?tab=profile') ?>" class="settings-nav-link <?= $activeTab === 'profile' ? 'active' : '' ?>">Profil Saya</a>
                     <a href="<?= base_url('admin/settings?tab=category') ?>" class="settings-nav-link <?= $activeTab === 'category' ? 'active' : '' ?>">Kategori Kelayakan</a>
                 </div>
 
@@ -70,7 +71,179 @@
 
         <div class="col-lg-9 col-xl-9">
             <div class="settings-content">
-                <?php if ($activeTab === 'category'): ?>
+                <?php if ($activeTab === 'profile'): ?>
+                <section id="section-profile" class="settings-section">
+                    <div class="settings-section-header">
+                        <h3>Profil Saya</h3>
+                        <p>Atur akun dan profil penelitian yang ditampilkan pada halaman publik paket validasi milik akun Anda.</p>
+                    </div>
+
+                    <?php $currentUser = isset($currentUser) && is_array($currentUser) ? $currentUser : []; ?>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">Akun Saya</h3>
+                        </div>
+                        <div class="card-body">
+                            <form action="<?= base_url('admin/settings/account?tab=profile') ?>" method="post">
+                                <?= csrf_field() ?>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="account_name" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            id="account_name"
+                                            class="form-control"
+                                            value="<?= esc(old('name', $currentUser['name'] ?? session()->get('user_name') ?? '')) ?>"
+                                            required
+                                        >
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Email</label>
+                                        <input type="text" class="form-control" value="<?= esc((string) ($currentUser['email'] ?? session()->get('user_email') ?? '-')) ?>" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="account_password" class="form-label">Password Baru</label>
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            id="account_password"
+                                            class="form-control"
+                                            autocomplete="new-password"
+                                        >
+                                        <div class="form-hint">Kosongkan jika password tidak diubah.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="account_password_confirm" class="form-label">Konfirmasi Password Baru</label>
+                                        <input
+                                            type="password"
+                                            name="password_confirm"
+                                            id="account_password_confirm"
+                                            class="form-control"
+                                            autocomplete="new-password"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="settings-actions">
+                                    <button type="submit" class="btn btn-primary">Simpan Akun</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <h3 class="card-title mb-3">Profil Penelitian</h3>
+
+                    <form action="<?= base_url('admin/settings/profile?tab=profile') ?>" method="post" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+
+                        <div class="mb-3">
+                            <label for="nama_penelitian" class="form-label">Judul Penelitian <span class="text-danger">*</span></label>
+                            <input
+                                type="text"
+                                name="nama_penelitian"
+                                id="nama_penelitian"
+                                class="form-control"
+                                placeholder="Contoh: Pengembangan Bahan Ajar IPA Berbasis PBL"
+                                value="<?= esc(old('nama_penelitian', $profile['nama_penelitian'] ?? '')) ?>"
+                                required
+                            >
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nama_peneliti" class="form-label">Nama Peneliti</label>
+                                <input
+                                    type="text"
+                                    name="nama_peneliti"
+                                    id="nama_peneliti"
+                                    class="form-control"
+                                    placeholder="Nama lengkap peneliti"
+                                    value="<?= esc(old('nama_peneliti', $profile['nama_peneliti'] ?? '')) ?>"
+                                >
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nim" class="form-label">NIM</label>
+                                <input
+                                    type="text"
+                                    name="nim"
+                                    id="nim"
+                                    class="form-control"
+                                    placeholder="Nomor Induk Mahasiswa"
+                                    value="<?= esc(old('nim', $profile['nim'] ?? '')) ?>"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="program_studi" class="form-label">Program Studi</label>
+                                <input
+                                    type="text"
+                                    name="program_studi"
+                                    id="program_studi"
+                                    class="form-control"
+                                    placeholder="Contoh: Pendidikan Matematika"
+                                    value="<?= esc(old('program_studi', $profile['program_studi'] ?? '')) ?>"
+                                >
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="institusi" class="form-label">Perguruan Tinggi</label>
+                                <input
+                                    type="text"
+                                    name="institusi"
+                                    id="institusi"
+                                    class="form-control"
+                                    placeholder="Nama perguruan tinggi"
+                                    value="<?= esc(old('institusi', $profile['institusi'] ?? '')) ?>"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tahun_penelitian" class="form-label">Tahun Penelitian</label>
+                                <input
+                                    type="text"
+                                    name="tahun_penelitian"
+                                    id="tahun_penelitian"
+                                    class="form-control"
+                                    placeholder="<?= date('Y') ?>"
+                                    value="<?= esc(old('tahun_penelitian', $profile['tahun_penelitian'] ?? date('Y'))) ?>"
+                                >
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ringkasan_penelitian_pdf" class="form-label">Ringkasan Penelitian</label>
+                                <input
+                                    type="file"
+                                    name="ringkasan_penelitian_pdf"
+                                    id="ringkasan_penelitian_pdf"
+                                    class="form-control"
+                                    accept="application/pdf,.pdf"
+                                >
+                                <div class="form-hint">Unggah file PDF ringkasan penelitian. Maksimal 10 MB.</div>
+                                <?php if (!empty($profile['ringkasan_penelitian_pdf'])): ?>
+                                    <div class="mt-2">
+                                        <a href="<?= base_url($profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                            Lihat PDF Tersimpan
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions">
+                            <button type="submit" class="btn btn-primary">Simpan Profil Saya</button>
+                        </div>
+                    </form>
+                </section>
+                <?php elseif ($activeTab === 'category'): ?>
+
                 <section id="section-category" class="settings-section">
                     <div class="settings-section-header">
                         <h3>Kategori Kelayakan</h3>
@@ -295,9 +468,10 @@
                             </a>
                         </div>
                     <?php else: ?>
-                        <div class="alert alert-info mb-0">
+                        <div class="alert alert-info mb-3">
                             Pengelolaan user dan backup hanya tersedia untuk superadmin.
                         </div>
+                        <a href="<?= base_url('admin/settings?tab=profile') ?>" class="btn btn-primary">Atur Profil Saya</a>
                     <?php endif; ?>
                 </section>
                 <?php endif; ?>
