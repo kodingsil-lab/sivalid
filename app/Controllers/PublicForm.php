@@ -497,13 +497,10 @@ class PublicForm extends BaseController
         $db->transCommit();
         session()->remove($this->identitySessionKey((int) $link['id']));
 
-        $message = $link['mode'] === 'validasi_produk'
-            ? 'Hasil validasi produk berhasil dikirim. Terima kasih atas penilaian dan masukan Bapak/Ibu Validator.'
-            : 'Hasil validasi instrumen berhasil dikirim. Terima kasih atas penilaian dan masukan Bapak/Ibu Validator.';
-
         return view('public/thanks', [
-            'title'   => 'Terima Kasih',
-            'message' => $message,
+            'title'   => $this->successTitleForInstrument($link),
+            'message' => $this->successMessageForInstrument($link),
+            'note'    => 'Data pengisian sudah tercatat di sistem.',
         ]);
     }
 
@@ -538,6 +535,36 @@ class PublicForm extends BaseController
         }
 
         return 'validator_instrumen';
+    }
+
+    private function successTitleForInstrument(array $link): string
+    {
+        return match (instrument_type_key($link['jenis'] ?? '')) {
+            'panduan_analisis_perangkat_pembelajaran' => 'Pengisian Telaah Perangkat Berhasil',
+            'pedoman_wawancara' => 'Pengisian Wawancara Berhasil',
+            'pedoman_observasi' => 'Pengisian Observasi Berhasil',
+            'angket' => 'Pengisian Angket Berhasil',
+            'angket_validasi_produk' => 'Pengisian Angket Validasi Produk Berhasil',
+            'angket_respon_pengguna' => 'Pengisian Angket Respon Pengguna Berhasil',
+            'tes_unjuk_kerja' => 'Pengisian Tes Unjuk Kerja Berhasil',
+            'rubrik_penilaian' => 'Pengisian Rubrik Berhasil',
+            default => 'Pengisian Instrumen Berhasil',
+        };
+    }
+
+    private function successMessageForInstrument(array $link): string
+    {
+        return match (instrument_type_key($link['jenis'] ?? '')) {
+            'panduan_analisis_perangkat_pembelajaran' => 'Isian telaah perangkat pembelajaran berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            'pedoman_wawancara' => 'Isian pedoman wawancara berhasil dikirim. Terima kasih atas informasi dan masukan Bapak/Ibu.',
+            'pedoman_observasi' => 'Isian pedoman observasi berhasil dikirim. Terima kasih atas pengamatan dan masukan Bapak/Ibu.',
+            'angket' => 'Isian angket berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            'angket_validasi_produk' => 'Isian angket validasi produk berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            'angket_respon_pengguna' => 'Isian angket respon pengguna berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            'tes_unjuk_kerja' => 'Isian tes unjuk kerja berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            'rubrik_penilaian' => 'Isian rubrik penilaian berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+            default => 'Jawaban instrumen berhasil dikirim. Terima kasih atas partisipasi dan masukan Bapak/Ibu.',
+        };
     }
 
     private function getScaleRange(array $link): array
