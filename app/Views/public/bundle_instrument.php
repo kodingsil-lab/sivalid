@@ -927,7 +927,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($items as $item): ?>
+                        <?php $butirNo = 1; foreach ($items as $item): ?>
                             <?php
                             $itemId = (int) $item['id'];
                             $aspectName = '-';
@@ -952,7 +952,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 || ($tipeButir !== 'skala' && $hasJawabanTeks);
                             ?>
                             <tr>
-                                <td class="public-number-cell"><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td class="public-number-cell"><?= esc((string) $butirNo++) ?></td>
                                 <td>
                                     <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                     <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc((string) $aspectName) ?></span>
@@ -1186,7 +1186,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($items as $item): ?>
+                        <?php $modalButirNo = 1; foreach ($items as $item): ?>
                             <?php
                             $aspectName = '-';
                             foreach ($aspects as $aspect) {
@@ -1197,7 +1197,7 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             }
                             ?>
                             <tr>
-                                <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                <td><?= esc((string) $modalButirNo++) ?></td>
                                 <td>
                                     <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                     <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc($aspectName) ?></span>

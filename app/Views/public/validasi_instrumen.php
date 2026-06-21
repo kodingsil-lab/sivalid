@@ -355,7 +355,7 @@ $linkToken = $text($link, 'token', '');
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($items as $item): ?>
+                            <?php $previewButirNo = 1; foreach ($items as $item): ?>
                                 <?php
                                 $aspectName = '-';
 
@@ -367,7 +367,7 @@ $linkToken = $text($link, 'token', '');
                                 }
                                 ?>
                                 <tr>
-                                    <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td><?= esc((string) $previewButirNo++) ?></td>
                                     <td>
                                         <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                         <br><small class="public-required-note">Aspek: <?= esc((string) $aspectName) ?></small>
@@ -399,7 +399,7 @@ $linkToken = $text($link, 'token', '');
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($items as $item): ?>
+                            <?php $butirNo = 1; foreach ($items as $item): ?>
                                 <?php
                                 $aspectName = '-';
 
@@ -411,7 +411,7 @@ $linkToken = $text($link, 'token', '');
                                 }
                                 ?>
                                 <tr class="instrument-item-row">
-                                    <td><?= esc((string) ($item['nomor'] ?? '-')) ?></td>
+                                    <td><?= esc((string) $butirNo++) ?></td>
                                     <td>
                                         <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
                                         <br><small class="public-required-note">Aspek: <?= esc((string) $aspectName) ?></small>

@@ -443,7 +443,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($items as $index => $item): ?>
+                            <?php $butirNo = 1; foreach ($items as $item): ?>
                                 <?php
                                 $aspectName = '-';
                                 foreach ($aspects as $aspect) {
@@ -473,7 +473,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
                                 };
                                 ?>
                                 <tr class="instrument-item-row">
-                                    <td><span class="item-number"><?= esc((string) ($item['nomor'] ?? ($index + 1))) ?></span></td>
+                                    <td><span class="item-number"><?= esc((string) $butirNo++) ?></span></td>
                                     <td>
                                         <?= nl2br(esc($item['pernyataan'])) ?>
                                         <br><small class="text-muted">Aspek: <?= esc($aspectName) ?></small>

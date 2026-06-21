@@ -159,7 +159,7 @@ class PublicForm extends BaseController
             'justificationConfig' => $this->justificationConfigForPublicForm($link),
         ];
 
-        return view('public/validasi_produk', $data);
+        return view('public/pengisian_instrumen', $data);
     }
 
     private function showResponMahasiswa(array $link)
