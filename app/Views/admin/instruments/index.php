@@ -46,7 +46,7 @@
                 type="text"
                 name="keyword"
                 value="<?= esc((string) ($keyword ?? '')) ?>"
-                placeholder="Cari kode, judul, jenis, sasaran, keterangan, status..."
+                placeholder="Cari kode, judul, sasaran, keterangan..."
             >
             <button type="submit" class="btn btn-light btn-sm">Cari</button>
 
@@ -80,11 +80,9 @@
                         <th class="col-no" scope="col">No</th>
                         <th class="col-code" scope="col">Kode</th>
                         <th class="col-title" scope="col">Judul Instrumen</th>
-                        <th class="col-type" scope="col">Jenis</th>
                         <th class="col-target" scope="col">Sasaran</th>
                         <th class="col-note" scope="col">Keterangan</th>
                         <th class="col-scale" scope="col">Skala</th>
-                        <th class="col-status" scope="col">Status</th>
                         <th class="col-actions table-actions-cell" scope="col">Aksi</th>
                     </tr>
                 </thead>
@@ -107,17 +105,9 @@
                             <td class="col-title">
                                 <span class="instrument-title"><?= esc((string) ($instrument['judul'] ?? '-')) ?></span>
                             </td>
-                            <td class="text-muted col-type"><?= esc(title_case_label((string) ($instrument['jenis'] ?? '-'))) ?></td>
                             <td class="text-muted col-target"><?= esc((string) (!empty($instrument['sasaran']) ? $instrument['sasaran'] : '-')) ?></td>
                             <td class="text-muted col-note"><?= esc((string) (!empty($instrument['keterangan']) ? $instrument['keterangan'] : '-')) ?></td>
                             <td class="text-muted col-scale"><?= esc((string) ($instrument['skala_min'] ?? '-')) ?> - <?= esc((string) ($instrument['skala_max'] ?? '-')) ?></td>
-                            <td class="col-status">
-                                <?php $status = (string) ($instrument['status'] ?? ''); ?>
-
-                                <span class="<?= esc(status_badge_class($status)) ?>">
-                                    <?= esc(status_display_label($status)) ?>
-                                </span>
-                            </td>
                             <td class="col-actions table-actions-cell">
                                 <div class="table-actions">
                                     <a href="<?= base_url('admin/instruments/' . $instrument['id']) ?>" class="btn btn-sm btn-light">
