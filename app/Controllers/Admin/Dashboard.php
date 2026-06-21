@@ -42,11 +42,12 @@ class Dashboard extends BaseController
             ->scopeOwned('responses.user_id')
             ->countAllResults();
 
-        $responByMode = $this->responseModel
+        $responByType = $this->responseModel
             ->scopeOwned('responses.user_id')
-            ->select('mode, COUNT(id) AS total')
-            ->groupBy('mode')
-            ->orderBy('mode', 'ASC')
+            ->select('respondents.jenis_responden, COUNT(responses.id) AS total')
+            ->join('respondents', 'respondents.id = responses.respondent_id')
+            ->groupBy('respondents.jenis_responden')
+            ->orderBy('respondents.jenis_responden', 'ASC')
             ->findAll();
 
         $latestResponseQuery = $this->responseModel
@@ -54,6 +55,8 @@ class Dashboard extends BaseController
                 'responses.*,
                  respondents.nama,
                  respondents.jenis_responden,
+                 instrument_links.identity_template,
+                 instrument_links.identity_fields,
                  instrument_links.judul_link,
                  instruments.kode,
                  instruments.judul'
@@ -75,7 +78,7 @@ class Dashboard extends BaseController
             'instrumenValid'  => $instrumenValid,
             'linkAktif'       => $linkAktif,
             'totalRespon'     => $totalRespon,
-            'responByMode'    => $responByMode,
+            'responByType'    => $responByType,
             'latestResponses' => $latestResponses,
         ];
 
