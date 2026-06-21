@@ -101,7 +101,7 @@
             >
                 <?= csrf_field() ?>
                 <input type="hidden" name="instrument_id" value="<?= (int) $instrumentId ?>">
-                <button type="submit" class="btn btn-danger btn-sm js-bulk-delete-button" disabled>
+                <button type="submit" class="btn btn-danger btn-sm js-aspect-bulk-delete-button" disabled>
                     Hapus Terpilih
                 </button>
             </form>
@@ -195,8 +195,22 @@
     </div>
 
     <div class="card mb-3">
-        <div class="card-header">
+        <div class="card-header d-flex align-items-center justify-content-between gap-2">
             <h3 class="card-title">Tampilan Kisi-Kisi Instrumen</h3>
+            <?php if (!empty($indicators)): ?>
+                <form
+                    id="bulk-delete-indicators-form"
+                    action="<?= base_url('admin/instrument-indicators/bulk-delete') ?>"
+                    method="post"
+                    onsubmit="return confirm('Yakin ingin menghapus indikator terpilih? Butir yang terkait dengan indikator tersebut akan dilepas dari indikator.')"
+                >
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="instrument_id" value="<?= (int) $instrumentId ?>">
+                    <button type="submit" class="btn btn-danger btn-sm js-indicator-bulk-delete-button" disabled>
+                        Hapus Terpilih
+                    </button>
+                </form>
+            <?php endif; ?>
         </div>
         <div class="card-body p-0">
 
@@ -209,6 +223,15 @@
             <table class="table table-vcenter table-sm table-no-hover">
                 <thead>
                     <tr>
+                        <th style="width: 44px;">
+                            <?php if (!empty($indicators)): ?>
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input js-indicator-bulk-select-all"
+                                    aria-label="Pilih semua indikator"
+                                >
+                            <?php endif; ?>
+                        </th>
                         <th style="width: 70px;">No</th>
                         <th style="width: 240px;">Aspek</th>
                         <th>Indikator</th>
@@ -225,6 +248,7 @@
 
                         <?php if (empty($aspectIndicators)): ?>
                             <tr>
+                                <td></td>
                                 <td><?= $aspectIndex + 1 ?></td>
                                 <td><?= esc($aspect['nama_aspek']) ?></td>
                                 <td><em>Belum ada indikator.</em></td>
@@ -245,6 +269,16 @@
                         <?php else: ?>
                             <?php foreach ($aspectIndicators as $indicatorIndex => $indicator): ?>
                                 <tr>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            class="form-check-input js-indicator-bulk-checkbox"
+                                            name="ids[]"
+                                            value="<?= (int) $indicator['id'] ?>"
+                                            form="bulk-delete-indicators-form"
+                                            aria-label="Pilih indikator <?= esc((string) ($indicator['urutan'] ?? ''), 'attr') ?>"
+                                        >
+                                    </td>
                                     <?php if ($indicatorIndex === 0): ?>
                                         <td rowspan="<?= count($aspectIndicators) ?>"><?= $aspectIndex + 1 ?></td>
                                         <td rowspan="<?= count($aspectIndicators) ?>"><?= esc($aspect['nama_aspek']) ?></td>
@@ -716,28 +750,49 @@
             var indicatorAspectSelect = document.getElementById('modal_aspect_id');
             var indicatorOrderInput = document.getElementById('modal_urutan_indikator');
             var openIndicatorButtons = document.querySelectorAll('.js-open-indicator-modal');
-            var bulkCheckboxes = document.querySelectorAll('.js-aspect-bulk-checkbox');
-            var bulkSelectAll = document.querySelector('.js-bulk-select-all');
-            var bulkDeleteButton = document.querySelector('.js-bulk-delete-button');
+            var aspectBulkCheckboxes = document.querySelectorAll('.js-aspect-bulk-checkbox');
+            var aspectBulkSelectAll = document.querySelector('.js-bulk-select-all');
+            var aspectBulkDeleteButton = document.querySelector('.js-aspect-bulk-delete-button');
+            var indicatorBulkCheckboxes = document.querySelectorAll('.js-indicator-bulk-checkbox');
+            var indicatorBulkSelectAll = document.querySelector('.js-indicator-bulk-select-all');
+            var indicatorBulkDeleteButton = document.querySelector('.js-indicator-bulk-delete-button');
             var nextIndicatorOrders = <?= json_encode($nextIndicatorOrders, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
-            function updateBulkDeleteState() {
-                var checkedCount = 0;
+            function setupBulkSelection(checkboxes, selectAll, deleteButton) {
+                function updateBulkDeleteState() {
+                    var checkedCount = 0;
 
-                bulkCheckboxes.forEach(function (checkbox) {
-                    if (checkbox.checked) {
-                        checkedCount++;
+                    checkboxes.forEach(function (checkbox) {
+                        if (checkbox.checked) {
+                            checkedCount++;
+                        }
+                    });
+
+                    if (deleteButton) {
+                        deleteButton.disabled = checkedCount === 0;
                     }
+
+                    if (selectAll) {
+                        selectAll.checked = checkedCount > 0 && checkedCount === checkboxes.length;
+                        selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+                    }
+                }
+
+                if (selectAll) {
+                    selectAll.addEventListener('change', function () {
+                        checkboxes.forEach(function (checkbox) {
+                            checkbox.checked = selectAll.checked;
+                        });
+
+                        updateBulkDeleteState();
+                    });
+                }
+
+                checkboxes.forEach(function (checkbox) {
+                    checkbox.addEventListener('change', updateBulkDeleteState);
                 });
 
-                if (bulkDeleteButton) {
-                    bulkDeleteButton.disabled = checkedCount === 0;
-                }
-
-                if (bulkSelectAll) {
-                    bulkSelectAll.checked = checkedCount > 0 && checkedCount === bulkCheckboxes.length;
-                    bulkSelectAll.indeterminate = checkedCount > 0 && checkedCount < bulkCheckboxes.length;
-                }
+                updateBulkDeleteState();
             }
 
             function setIndicatorOrder(aspectId) {
@@ -765,21 +820,8 @@
                 });
             });
 
-            if (bulkSelectAll) {
-                bulkSelectAll.addEventListener('change', function () {
-                    bulkCheckboxes.forEach(function (checkbox) {
-                        checkbox.checked = bulkSelectAll.checked;
-                    });
-
-                    updateBulkDeleteState();
-                });
-            }
-
-            bulkCheckboxes.forEach(function (checkbox) {
-                checkbox.addEventListener('change', updateBulkDeleteState);
-            });
-
-            updateBulkDeleteState();
+            setupBulkSelection(aspectBulkCheckboxes, aspectBulkSelectAll, aspectBulkDeleteButton);
+            setupBulkSelection(indicatorBulkCheckboxes, indicatorBulkSelectAll, indicatorBulkDeleteButton);
 
             var openModalTarget = '<?= esc((string) old('modal_target'), 'js') ?>';
 

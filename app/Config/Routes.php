@@ -23,6 +23,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('instrument-aspects/import-template', 'Admin\InstrumentAspects::importTemplate');
     $routes->post('instrument-aspects/bulk-delete', 'Admin\InstrumentAspects::bulkDelete');
     $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
+    $routes->post('instrument-indicators/bulk-delete', 'Admin\InstrumentIndicators::bulkDelete');
     $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->post('instrument-items/import', 'Admin\InstrumentItems::import');
     $routes->get('instrument-items/import-template', 'Admin\InstrumentItems::importTemplate');
