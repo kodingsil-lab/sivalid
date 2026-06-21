@@ -6,9 +6,10 @@
 $safeFilters = isset($filters) && is_array($filters) ? $filters : [];
 $safeAllowedModes = isset($allowedModes) && is_array($allowedModes) ? $allowedModes : [];
 $safeInstruments = isset($instruments) && is_array($instruments) ? $instruments : [];
+$safeInstrumentTypes = isset($instrumentTypes) && is_array($instrumentTypes) ? $instrumentTypes : [];
 $safeLinks = isset($links) && is_array($links) ? $links : [];
 $safeProducts = isset($products) && is_array($products) ? $products : [];
-$safeResponses = isset($responses) && is_array($responses) ? $responses : [];
+$safeSummaries = isset($summaries) && is_array($summaries) ? $summaries : [];
 $safeOffset = isset($offset) ? (int) $offset : 0;
 
 $modeLabel = static function (?string $mode): string {
@@ -46,6 +47,43 @@ $categoryLabel = static function (array $row) use ($modeLabel): string {
     }
 
     return $modeLabel((string) ($row['mode'] ?? ''));
+};
+
+$respondentTypeLabel = static function (array $row): string {
+    $templateKey = trim((string) ($row['identity_template'] ?? ''));
+    $templates = \App\Libraries\RespondentIdentitySchema::templates();
+
+    if ($templateKey !== '' && isset($templates[$templateKey])) {
+        return (string) $templates[$templateKey]['label'];
+    }
+
+    $fields = [];
+    if (!empty($row['identity_fields'])) {
+        $decodedFields = json_decode((string) $row['identity_fields'], true);
+        $fields = is_array($decodedFields) ? $decodedFields : [];
+    }
+
+    foreach ($fields as $field) {
+        $label = strtolower((string) ($field['label'] ?? ''));
+
+        if (str_contains($label, 'dosen')) {
+            return 'Dosen';
+        }
+
+        if (str_contains($label, 'mahasiswa') || str_contains($label, 'nim')) {
+            return 'Mahasiswa';
+        }
+
+        if (str_contains($label, 'guru') || str_contains($label, 'praktisi')) {
+            return 'Guru / Praktisi';
+        }
+
+        if (str_contains($label, 'validator') || str_contains($label, 'ahli')) {
+            return 'Validator / Ahli';
+        }
+    }
+
+    return title_case_label((string) ($row['jenis_responden'] ?? '-'));
 };
 
 $modeBadgeClass = static function (?string $mode): string {
@@ -114,12 +152,12 @@ $modeBadgeClass = static function (?string $mode): string {
     <form action="<?= base_url('admin/submissions') ?>" method="get" class="filter-form">
         <div class="form-grid">
             <div class="form-row">
-                <label class="form-label" for="mode">Kategori Teknis</label>
-                <select name="mode" id="mode" class="form-control">
-                    <option value="">-- Semua Kategori --</option>
-                    <?php foreach ($safeAllowedModes as $modeOption): ?>
-                        <option value="<?= esc((string) $modeOption) ?>" <?= ($safeFilters['mode'] ?? '') === $modeOption ? 'selected' : '' ?>>
-                            <?= esc($modeLabel($modeOption)) ?>
+                <label class="form-label" for="jenis">Jenis Instrumen</label>
+                <select name="jenis" id="jenis" class="form-control">
+                    <option value="">-- Semua Jenis Instrumen --</option>
+                    <?php foreach ($safeInstrumentTypes as $jenisOption): ?>
+                        <option value="<?= esc((string) $jenisOption) ?>" <?= ($safeFilters['jenis'] ?? '') === (string) $jenisOption ? 'selected' : '' ?>>
+                            <?= esc(title_case_label((string) $jenisOption)) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -207,7 +245,7 @@ $modeBadgeClass = static function (?string $mode): string {
         <div class="card-body">
             <div class="fw-semibold mb-2">Filter cepat berdasarkan link/instrumen</div>
             <div class="d-flex flex-wrap gap-2">
-                <a href="<?= base_url('admin/submissions') ?>" class="btn btn-sm <?= empty($safeFilters['instrument_link_id']) && empty($safeFilters['mode']) ? 'btn-primary' : 'btn-light' ?>">
+                <a href="<?= base_url('admin/submissions') ?>" class="btn btn-sm <?= empty($safeFilters['instrument_link_id']) && empty($safeFilters['mode']) && empty($safeFilters['jenis']) ? 'btn-primary' : 'btn-light' ?>">
                     Semua
                 </a>
                 <?php foreach ($safeLinks as $link): ?>
@@ -233,79 +271,72 @@ $modeBadgeClass = static function (?string $mode): string {
 
 <div class="card">
     <div class="card-body">
-    <?php if (empty($safeResponses)): ?>
+    <?php if (empty($safeSummaries)): ?>
         <div class="empty-state">
             Belum ada hasil pengisian.
         </div>
     <?php else: ?>
         <?php
-        $currentPage = isset($pager) ? $pager->getCurrentPage('submissions') : 1;
-        $perPage = isset($pager) ? $pager->getPerPage('submissions') : 0;
-        $total = isset($pager) ? $pager->getTotal('submissions') : count($safeResponses);
-        $firstItem = $total > 0 && $perPage > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
-        $lastItem = $total > 0 && $perPage > 0 ? min($currentPage * $perPage, $total) : $total;
+        $total = count($safeSummaries);
         ?>
         <div class="table-responsive">
             <table class="table table-vcenter table-hover table-sm">
                 <thead>
                     <tr>
                         <th style="width: 70px;">No</th>
-                        <th>Responden</th>
-                        <th style="width: 180px;">Kategori</th>
                         <th>Instrumen</th>
-                        <th style="width: 170px;">Produk</th>
-                        <th style="width: 220px;">Kesimpulan</th>
-                        <th style="width: 170px;">Waktu Submit</th>
+                        <th style="width: 220px;">Jenis Instrumen</th>
+                        <th>Link Pengisian</th>
+                        <th style="width: 150px;">Kategori Pengisi</th>
+                        <th style="width: 130px;">Jumlah Pengisi</th>
+                        <th style="width: 170px;">Submit Terakhir</th>
                         <th class="table-actions-cell">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($safeResponses as $index => $response): ?>
+                    <?php foreach ($safeSummaries as $index => $summary): ?>
+                        <?php
+                        $summaryFilters = array_filter($safeFilters + [
+                            'instrument_link_id' => (string) ($summary['instrument_link_id'] ?? ''),
+                        ], static fn ($value) => $value !== null && $value !== '');
+                        $summaryFilters['instrument_link_id'] = (string) ($summary['instrument_link_id'] ?? '');
+                        $summaryQuery = http_build_query($summaryFilters);
+                        $summaryUrlSuffix = $summaryQuery !== '' ? '?' . $summaryQuery : '';
+                        ?>
                         <tr>
                             <td class="text-muted"><?= $safeOffset + $index + 1 ?></td>
                             <td>
-                                <div class="fw-semibold"><?= esc((string) ($response['nama'] ?? '-')) ?></div>
-                                <div class="small text-muted"><?= esc(title_case_label((string) ($response['jenis_responden'] ?? '-'))) ?></div>
-
-                                <?php if (!empty($response['nim'])): ?>
-                                    <div class="small text-muted">NIM: <?= esc((string) $response['nim']) ?></div>
-                                <?php endif; ?>
-
-                                <?php if (!empty($response['program_studi'])): ?>
-                                    <div class="small text-muted">Prodi: <?= esc((string) $response['program_studi']) ?></div>
+                                <div class="fw-semibold"><?= esc((string) ($summary['kode'] ?? '-')) ?></div>
+                                <div><?= esc((string) ($summary['judul'] ?? '-')) ?></div>
+                                <?php if (!empty($summary['nama_produk'])): ?>
+                                    <div class="small text-muted">Produk: <?= esc((string) $summary['nama_produk']) ?></div>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <span class="<?= esc($modeBadgeClass((string) ($response['mode'] ?? ''))) ?>">
-                                    <?= esc($categoryLabel($response)) ?>
+                                <span class="badge bg-green text-green-fg">
+                                    <?= esc(title_case_label((string) ($summary['jenis'] ?? '-'))) ?>
                                 </span>
                             </td>
                             <td>
-                                <div class="fw-semibold"><?= esc((string) ($response['kode'] ?? '-')) ?></div>
-                                <div class="small text-muted"><?= esc((string) ($response['judul'] ?? '-')) ?></div>
-                                <div class="small text-muted"><?= esc((string) ($response['judul_link'] ?? '-')) ?></div>
+                                <?= esc((string) (!empty($summary['judul_link']) ? $summary['judul_link'] : '-')) ?>
                             </td>
-                            <td><?= esc((string) (!empty($response['nama_produk']) ? $response['nama_produk'] : '-')) ?></td>
-                            <td><?= esc((string) (!empty($response['kesimpulan']) ? $response['kesimpulan'] : '-')) ?></td>
-                            <td class="text-muted"><?= esc((string) (!empty($response['submitted_at']) ? $response['submitted_at'] : '-')) ?></td>
+                            <td><?= esc($respondentTypeLabel($summary)) ?></td>
+                            <td><span class="fw-semibold"><?= esc((string) ($summary['total_responses'] ?? 0)) ?></span> entri</td>
+                            <td class="text-muted"><?= esc((string) (!empty($summary['last_submitted_at']) ? $summary['last_submitted_at'] : '-')) ?></td>
                             <td class="table-actions-cell">
                                 <div class="table-actions">
-                                    <a href="<?= base_url('admin/submissions/' . $response['id']) ?>" class="btn btn-sm btn-light">
-                                        Detail
+                                    <a href="<?= base_url('admin/submissions/export/report' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-primary">
+                                        Laporan
                                     </a>
-
-                                    <form
-                                        action="<?= base_url('admin/submissions/' . $response['id']) ?>"
-                                        method="post"
-                                        class="action-inline"
-                                        onsubmit="return confirm('Yakin ingin menghapus hasil pengisian ini?')"
-                                    >
-                                        <?= csrf_field() ?>
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            Hapus
-                                        </button>
-                                    </form>
+                                    <a href="<?= base_url('admin/submissions/export/excel' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
+                                        Excel
+                                    </a>
+                                    <a href="<?= base_url('admin/submissions/export/word' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
+                                        Word
+                                    </a>
+                                    <a href="<?= base_url('admin/submissions/export/pdf' . $summaryUrlSuffix) ?>" class="btn btn-sm btn-light">
+                                        PDF
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -314,14 +345,11 @@ $modeBadgeClass = static function (?string $mode): string {
             </table>
         </div>
 
-        <?php if (isset($pager)): ?>
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mt-3">
                 <div class="text-muted small">
-                    Menampilkan <?= esc((string) $firstItem) ?> sampai <?= esc((string) $lastItem) ?> dari <?= esc((string) $total) ?> entri
+                    Menampilkan <?= esc((string) $total) ?> rekap instrumen/link pengisian.
                 </div>
-                <div><?= $pager->links('submissions', 'default_full') ?></div>
             </div>
-        <?php endif; ?>
     <?php endif; ?>
     </div>
 </div>

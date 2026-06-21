@@ -18,6 +18,37 @@ if ($modeValue === 'validasi_instrumen') {
     $modeBadgeClass = 'badge bg-green text-green-fg';
 }
 
+$respondentTypeLabel = static function (array $row, array $fields = []): string {
+    $templateKey = trim((string) ($row['identity_template'] ?? ''));
+    $templates = \App\Libraries\RespondentIdentitySchema::templates();
+
+    if ($templateKey !== '' && isset($templates[$templateKey])) {
+        return (string) $templates[$templateKey]['label'];
+    }
+
+    foreach ($fields as $field) {
+        $label = strtolower((string) ($field['label'] ?? ''));
+
+        if (str_contains($label, 'dosen')) {
+            return 'Dosen';
+        }
+
+        if (str_contains($label, 'mahasiswa') || str_contains($label, 'nim')) {
+            return 'Mahasiswa';
+        }
+
+        if (str_contains($label, 'guru') || str_contains($label, 'praktisi')) {
+            return 'Guru / Praktisi';
+        }
+
+        if (str_contains($label, 'validator') || str_contains($label, 'ahli')) {
+            return 'Validator / Ahli';
+        }
+    }
+
+    return title_case_label((string) ($row['jenis_responden'] ?? '-'));
+};
+
 $identityData = [];
 if (!empty($currentResponse['identity_data'])) {
     $decodedIdentity = json_decode((string) $currentResponse['identity_data'], true);
@@ -71,6 +102,7 @@ $usesObservation = $layoutType === 'observation_guide';
 $usesRubric = $layoutType === 'rubric_assessment';
 $usesQuestionnaire = in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire'], true);
 $usesPerformanceTest = $layoutType === 'performance_test';
+$respondenLabel = $respondentTypeLabel($currentResponse, $identityFields);
 ?>
 
 <div class="page-header d-print-none mb-3">
@@ -81,7 +113,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
         </div>
         <div class="col-auto ms-auto">
             <span class="<?= esc($modeBadgeClass) ?>">
-                <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
+                <?= esc($respondenLabel) ?>
             </span>
         </div>
     </div>
@@ -95,10 +127,10 @@ $usesPerformanceTest = $layoutType === 'performance_test';
         <table class="table table-vcenter table-sm">
             <tbody>
                 <tr>
-                    <th style="width: 240px;">Mode</th>
+                    <th style="width: 240px;">Kategori Pengisi</th>
                     <td>
                         <span class="<?= esc($modeBadgeClass) ?>">
-                            <?= esc($modeLabel !== '' ? $modeLabel : '-') ?>
+                            <?= esc($respondenLabel) ?>
                         </span>
                     </td>
                 </tr>
@@ -148,7 +180,7 @@ $usesPerformanceTest = $layoutType === 'performance_test';
             <tbody>
                 <tr>
                     <th>Jenis Responden</th>
-                    <td><?= esc(title_case_label((string) ($currentResponse['jenis_responden'] ?? '-'))) ?></td>
+                    <td><?= esc($respondenLabel) ?></td>
                 </tr>
                 <?php foreach ($identityFields as $field): ?>
                     <?php
@@ -249,6 +281,6 @@ $usesPerformanceTest = $layoutType === 'performance_test';
     </div>
 </div>
 
-<a href="<?= base_url('admin/submissions?mode=' . ($currentResponse['mode'] ?? '')) ?>" class="btn btn-light">Kembali</a>
+<a href="<?= base_url('admin/submissions') ?>" class="btn btn-light">Kembali</a>
 
 <?= $this->endSection() ?>

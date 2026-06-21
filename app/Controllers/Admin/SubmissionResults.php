@@ -55,20 +55,21 @@ class SubmissionResults extends BaseController
         $perPage = config(Pager::class)->perPage;
         $currentPage = max(1, (int) ($this->request->getGet('page_submissions') ?? 1));
 
-        $builder = $this->getResponsesQuery();
-        $this->applyResponseFilters($builder, $filters);
+        $summaryBuilder = $this->getSubmissionSummaryQuery();
+        $this->applyResponseFilters($summaryBuilder, $filters);
 
         $data = [
             'title'        => 'Hasil Pengisian',
             'mode'         => $filters['mode'],
             'filters'      => $filters,
             'allowedModes' => $this->allowedModes,
-            'responses'    => $builder
-                ->orderBy('responses.id', 'DESC')
-                ->paginate($perPage, 'submissions'),
-            'pager'        => $this->responseModel->pager,
+            'summaries'    => $summaryBuilder
+                ->orderBy('last_submitted_at', 'DESC')
+                ->findAll(),
+            'pager'        => null,
             'offset'       => ($currentPage - 1) * $perPage,
             'instruments'  => $this->getInstrumentOptions(),
+            'instrumentTypes' => $this->getInstrumentTypeOptions(),
             'links'        => $this->getLinkOptions(),
             'products'     => $this->getProductOptions(),
         ];
@@ -94,7 +95,6 @@ class SubmissionResults extends BaseController
     {
         $filters = $this->getFilters();
         $matrix = $this->getExcelScoreMatrix($filters);
-        $detailMatrix = $this->getExportMatrix($filters);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Rekap Skor');
@@ -158,56 +158,6 @@ class SubmissionResults extends BaseController
             ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
             ->setFitToWidth(1)
             ->setFitToHeight(0);
-
-        $detailSheet = $spreadsheet->createSheet();
-        $detailSheet->setTitle('Detail');
-        $detailSheet->fromArray($detailMatrix['headers'], null, 'A1');
-        $detailRowNumber = 2;
-
-        foreach ($detailMatrix['rows'] as $row) {
-            $detailSheet->fromArray($row, null, 'A' . $detailRowNumber);
-            $detailRowNumber++;
-        }
-
-        $detailHighestColumn = $detailSheet->getHighestColumn();
-        $detailHighestRow = max(1, $detailSheet->getHighestRow());
-        $detailSheet->getStyle('A1:' . $detailHighestColumn . '1')->applyFromArray([
-            'font' => ['bold' => true],
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => 'EAF2F8'],
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-        ]);
-        $detailSheet->getStyle('A1:' . $detailHighestColumn . $detailHighestRow)->applyFromArray([
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => 'D9E2EC'],
-                ],
-            ],
-            'alignment' => [
-                'vertical' => Alignment::VERTICAL_TOP,
-                'wrapText' => true,
-            ],
-        ]);
-        $detailHighestColumnIndex = Coordinate::columnIndexFromString($detailHighestColumn);
-
-        for ($columnIndex = 1; $columnIndex <= $detailHighestColumnIndex; $columnIndex++) {
-            $detailSheet->getColumnDimension(Coordinate::stringFromColumnIndex($columnIndex))->setAutoSize(true);
-        }
-
-        $detailSheet->freezePane('A2');
-        $detailSheet->setAutoFilter('A1:' . $detailHighestColumn . '1');
-        $detailSheet->getPageSetup()
-            ->setOrientation(PageSetup::ORIENTATION_LANDSCAPE)
-            ->setFitToWidth(1)
-            ->setFitToHeight(0);
-        $spreadsheet->setActiveSheetIndex(0);
 
         $filename = 'rekap-hasil-pengisian-' . date('Ymd-His') . '.xlsx';
 
@@ -340,20 +290,15 @@ class SubmissionResults extends BaseController
         );
 
         return redirect()
-            ->to(base_url('admin/submissions?mode=' . $response['mode']))
+            ->to(base_url('admin/submissions'))
             ->with('success', 'Data pengisian berhasil dihapus.');
     }
 
     private function getFilters(): array
     {
-        $mode = trim((string) $this->request->getGet('mode'));
-
-        if (!in_array($mode, $this->allowedModes, true)) {
-            $mode = '';
-        }
-
         return [
-            'mode'               => $mode,
+            'mode'               => '',
+            'jenis'              => trim((string) $this->request->getGet('jenis')),
             'instrument_id'      => $this->getPositiveIntFilter('instrument_id'),
             'instrument_link_id' => $this->getPositiveIntFilter('instrument_link_id'),
             'product_id'         => $this->getPositiveIntFilter('product_id'),
@@ -402,6 +347,7 @@ class SubmissionResults extends BaseController
                  respondents.bidang_keahlian,
                  respondents.identity_data,
                  instrument_links.judul_link,
+                 instrument_links.identity_template,
                  instrument_links.identity_fields,
                  instrument_links.justification_config,
                  instruments.kode,
@@ -419,10 +365,52 @@ class SubmissionResults extends BaseController
         return $builder;
     }
 
+    private function getSubmissionSummaryQuery()
+    {
+        $builder = $this->responseModel
+            ->select(
+                'responses.instrument_id,
+                 responses.instrument_link_id,
+                 responses.product_id,
+                 COUNT(responses.id) AS total_responses,
+                 MAX(responses.submitted_at) AS last_submitted_at,
+                 instrument_links.judul_link,
+                 instrument_links.identity_template,
+                 instrument_links.identity_fields,
+                 instruments.kode,
+                 instruments.judul,
+                 instruments.jenis,
+                 research_products.nama_produk'
+            )
+            ->join('instrument_links', 'instrument_links.id = responses.instrument_link_id')
+            ->join('instruments', 'instruments.id = responses.instrument_id')
+            ->join('research_products', 'research_products.id = responses.product_id', 'left')
+            ->groupBy(
+                'responses.instrument_id,
+                 responses.instrument_link_id,
+                 responses.product_id,
+                 instrument_links.judul_link,
+                 instrument_links.identity_template,
+                 instrument_links.identity_fields,
+                 instruments.kode,
+                 instruments.judul,
+                 instruments.jenis,
+                 research_products.nama_produk'
+            );
+
+        $this->applyOwnerScope($builder, 'responses.user_id');
+
+        return $builder;
+    }
+
     private function applyResponseFilters($builder, array $filters): void
     {
         if ($filters['mode'] !== '') {
             $builder->where('responses.mode', $filters['mode']);
+        }
+
+        if (($filters['jenis'] ?? '') !== '') {
+            $builder->where('instruments.jenis', $filters['jenis']);
         }
 
         if ($filters['instrument_id'] !== '') {
@@ -462,6 +450,7 @@ class SubmissionResults extends BaseController
                  respondents.bidang_keahlian,
                  respondents.identity_data,
                  instrument_links.judul_link,
+                 instrument_links.identity_template,
                  instrument_links.identity_fields,
                  instrument_links.justification_config,
                  instruments.kode,
@@ -492,6 +481,29 @@ class SubmissionResults extends BaseController
             ->findAll();
     }
 
+    private function getInstrumentTypeOptions(): array
+    {
+        $rows = $this->instrumentModel
+            ->scopeOwned('instruments.user_id')
+            ->select('jenis')
+            ->where('jenis IS NOT NULL', null, false)
+            ->groupBy('jenis')
+            ->orderBy('jenis', 'ASC')
+            ->findAll();
+
+        $types = [];
+
+        foreach ($rows as $row) {
+            $jenis = trim((string) ($row['jenis'] ?? ''));
+
+            if ($jenis !== '') {
+                $types[] = $jenis;
+            }
+        }
+
+        return $types;
+    }
+
     private function getLinkOptions(): array
     {
         return $this->linkModel
@@ -500,6 +512,7 @@ class SubmissionResults extends BaseController
                 'instrument_links.id,
                  instrument_links.judul_link,
                  instrument_links.mode,
+                 instrument_links.identity_template,
                  instruments.kode,
                  instruments.judul,
                  instruments.jenis'
@@ -698,9 +711,13 @@ class SubmissionResults extends BaseController
         ];
 
         foreach ($itemColumns as $column) {
-            $headers[] = $multiInstrument && $column['instrument_kode'] !== ''
+            $itemLabel = $multiInstrument && $column['instrument_kode'] !== ''
                 ? $column['instrument_kode'] . '-' . $column['nomor']
                 : $column['nomor'];
+
+            foreach ($this->matrixValueColumnsForItem($column, $itemLabel) as $header) {
+                $headers[] = $header;
+            }
         }
 
         $headers[] = 'Komentar/Saran';
@@ -729,7 +746,11 @@ class SubmissionResults extends BaseController
             ];
 
             foreach (array_keys($itemColumns) as $columnKey) {
-                $row[] = $answersByResponse[$responseId][$columnKey] ?? '';
+                $answer = $answersByResponse[$responseId][$columnKey] ?? ['value' => '', 'comment' => ''];
+
+                foreach ($this->matrixAnswerValuesForItem($itemColumns[$columnKey], $answer) as $value) {
+                    $row[] = $value;
+                }
             }
 
             $row[] = $response['komentar_umum'] ?? '';
@@ -751,7 +772,8 @@ class SubmissionResults extends BaseController
                 'instrument_items.id AS item_id,
                  instrument_items.nomor,
                  instrument_items.instrument_id,
-                 instruments.kode AS instrument_kode'
+                 instruments.kode AS instrument_kode,
+                 instruments.jenis AS instrument_jenis'
             )
             ->join('instruments', 'instruments.id = instrument_items.instrument_id');
 
@@ -783,10 +805,43 @@ class SubmissionResults extends BaseController
                 'item_id' => $itemId,
                 'nomor' => (string) ($item['nomor'] ?? $itemId),
                 'instrument_kode' => (string) ($item['instrument_kode'] ?? ''),
+                'instrument_jenis' => (string) ($item['instrument_jenis'] ?? ''),
             ];
         }
 
         return $columns;
+    }
+
+    private function matrixValueColumnsForItem(array $column, string $itemLabel): array
+    {
+        $layout = instrument_preview_layout($column['instrument_jenis'] ?? '');
+        $layoutType = (string) ($layout['type'] ?? 'standard');
+        $prefix = 'Butir ' . $itemLabel . ' ';
+
+        return match ($layoutType) {
+            'interview_guide' => [$prefix . (string) ($layout['answer'] ?? 'Jawaban')],
+            'observation_guide' => [$prefix . (string) ($layout['result'] ?? 'Hasil Pengamatan')],
+            'rubric_assessment' => [$prefix . 'Skor yang Diperoleh', $prefix . 'Catatan'],
+            'performance_test' => [$prefix . 'Skor', $prefix . 'Catatan'],
+            'document_review' => [$prefix . 'Skor', $prefix . 'Komentar'],
+            'questionnaire',
+            'product_validation_questionnaire',
+            'user_response_questionnaire' => [$prefix . 'Skor', $prefix . 'Komentar'],
+            default => [$prefix . 'Jawaban', $prefix . 'Komentar'],
+        };
+    }
+
+    private function matrixAnswerValuesForItem(array $column, array $answer): array
+    {
+        $layoutType = (string) (instrument_preview_layout($column['instrument_jenis'] ?? '')['type'] ?? 'standard');
+        $value = $answer['value'] ?? '';
+        $comment = $answer['comment'] ?? '';
+
+        return match ($layoutType) {
+            'interview_guide',
+            'observation_guide' => [$value],
+            default => [$value, $comment],
+        };
     }
 
     private function getMatrixAnswers(array $responseIds): array
@@ -814,12 +869,12 @@ class SubmissionResults extends BaseController
             $value = $item['skor'] !== null && $item['skor'] !== ''
                 ? (string) $item['skor']
                 : trim((string) ($item['jawaban_teks'] ?? ''));
+            $comment = trim((string) ($item['komentar'] ?? ''));
 
-            if (!empty($item['komentar'])) {
-                $value .= ($value !== '' ? ' | ' : '') . 'Komentar: ' . trim((string) $item['komentar']);
-            }
-
-            $answersByResponse[$responseId][$columnKey] = $value;
+            $answersByResponse[$responseId][$columnKey] = [
+                'value' => $value,
+                'comment' => $comment,
+            ];
         }
 
         return $answersByResponse;

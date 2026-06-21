@@ -430,7 +430,7 @@ class PublicForm extends BaseController
             'email'              => $identity['email'],
             'bidang_keahlian'    => $identity['bidang_keahlian'],
             'instansi'           => $identity['instansi'],
-            'jenis_responden'    => $this->jenisRespondenFromMode($link['mode']),
+            'jenis_responden'    => $this->jenisRespondenFromLink($link),
             'nim'                => $identity['nim'],
             'program_studi'      => $identity['program_studi'],
             'semester'           => $identity['semester'],
@@ -535,6 +535,22 @@ class PublicForm extends BaseController
         }
 
         return 'validator_instrumen';
+    }
+
+    private function jenisRespondenFromLink(array $link): string
+    {
+        $templates = RespondentIdentitySchema::templates();
+        $templateKey = trim((string) ($link['identity_template'] ?? ''));
+
+        if ($templateKey === '' || !isset($templates[$templateKey])) {
+            $templateKey = RespondentIdentitySchema::defaultTemplateForLink($link);
+        }
+
+        if (isset($templates[$templateKey])) {
+            return (string) $templates[$templateKey]['label'];
+        }
+
+        return title_case_label($this->jenisRespondenFromMode((string) ($link['mode'] ?? '')));
     }
 
     private function successTitleForInstrument(array $link): string
