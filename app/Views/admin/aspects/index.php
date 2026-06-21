@@ -91,8 +91,20 @@
 <?php else: ?>
 
     <div class="card mb-3">
-        <div class="card-header">
+        <div class="card-header d-flex align-items-center justify-content-between gap-2">
             <h3 class="card-title">Daftar Aspek Instrumen</h3>
+            <form
+                id="bulk-delete-aspects-form"
+                action="<?= base_url('admin/instrument-aspects/bulk-delete') ?>"
+                method="post"
+                onsubmit="return confirm('Yakin ingin menghapus aspek terpilih? Semua indikator dan butir di bawah aspek tersebut juga akan terhapus.')"
+            >
+                <?= csrf_field() ?>
+                <input type="hidden" name="instrument_id" value="<?= (int) $instrumentId ?>">
+                <button type="submit" class="btn btn-danger btn-sm js-bulk-delete-button" disabled>
+                    Hapus Terpilih
+                </button>
+            </form>
         </div>
         <div class="card-body p-0">
 
@@ -114,6 +126,14 @@
             <table class="table table-vcenter table-sm table-no-hover">
                 <thead>
                     <tr>
+                        <th style="width: 44px;">
+                            <input
+                                type="checkbox"
+                                class="form-check-input js-bulk-select-all"
+                                aria-label="Pilih semua aspek"
+                                data-bulk-target=".js-aspect-bulk-checkbox"
+                            >
+                        </th>
                         <th style="width: 70px;">Urutan</th>
                         <th>Aspek</th>
                         <th>Deskripsi</th>
@@ -123,6 +143,16 @@
                 <tbody>
                     <?php foreach ($aspectRows as $aspect): ?>
                         <tr>
+                            <td>
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input js-aspect-bulk-checkbox"
+                                    name="ids[]"
+                                    value="<?= (int) $aspect['id'] ?>"
+                                    form="bulk-delete-aspects-form"
+                                    aria-label="Pilih aspek <?= esc((string) ($aspect['nama_aspek'] ?? ''), 'attr') ?>"
+                                >
+                            </td>
                             <td><?= esc($aspect['urutan']) ?></td>
                             <td><?= esc($aspect['nama_aspek']) ?></td>
                             <td><?= nl2br(esc($aspect['deskripsi'] ?: '-')) ?></td>
@@ -686,7 +716,29 @@
             var indicatorAspectSelect = document.getElementById('modal_aspect_id');
             var indicatorOrderInput = document.getElementById('modal_urutan_indikator');
             var openIndicatorButtons = document.querySelectorAll('.js-open-indicator-modal');
+            var bulkCheckboxes = document.querySelectorAll('.js-aspect-bulk-checkbox');
+            var bulkSelectAll = document.querySelector('.js-bulk-select-all');
+            var bulkDeleteButton = document.querySelector('.js-bulk-delete-button');
             var nextIndicatorOrders = <?= json_encode($nextIndicatorOrders, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+
+            function updateBulkDeleteState() {
+                var checkedCount = 0;
+
+                bulkCheckboxes.forEach(function (checkbox) {
+                    if (checkbox.checked) {
+                        checkedCount++;
+                    }
+                });
+
+                if (bulkDeleteButton) {
+                    bulkDeleteButton.disabled = checkedCount === 0;
+                }
+
+                if (bulkSelectAll) {
+                    bulkSelectAll.checked = checkedCount > 0 && checkedCount === bulkCheckboxes.length;
+                    bulkSelectAll.indeterminate = checkedCount > 0 && checkedCount < bulkCheckboxes.length;
+                }
+            }
 
             function setIndicatorOrder(aspectId) {
                 if (!indicatorOrderInput) {
@@ -712,6 +764,22 @@
                     }
                 });
             });
+
+            if (bulkSelectAll) {
+                bulkSelectAll.addEventListener('change', function () {
+                    bulkCheckboxes.forEach(function (checkbox) {
+                        checkbox.checked = bulkSelectAll.checked;
+                    });
+
+                    updateBulkDeleteState();
+                });
+            }
+
+            bulkCheckboxes.forEach(function (checkbox) {
+                checkbox.addEventListener('change', updateBulkDeleteState);
+            });
+
+            updateBulkDeleteState();
 
             var openModalTarget = '<?= esc((string) old('modal_target'), 'js') ?>';
 

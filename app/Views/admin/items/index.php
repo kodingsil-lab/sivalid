@@ -84,8 +84,20 @@ $layoutType = (string) ($itemLayout['type'] ?? 'standard');
     </div>
 <?php else: ?>
     <div class="card mb-3">
-        <div class="card-header">
+        <div class="card-header d-flex align-items-center justify-content-between gap-2">
             <h3 class="card-title">Daftar <?= esc((string) ($itemLayout['item_label'] ?? 'Butir Pernyataan')) ?></h3>
+            <form
+                id="bulk-delete-items-form"
+                action="<?= base_url('admin/instrument-items/bulk-delete') ?>"
+                method="post"
+                onsubmit="return confirm('Yakin ingin menghapus butir terpilih?')"
+            >
+                <?= csrf_field() ?>
+                <input type="hidden" name="instrument_id" value="<?= (int) $instrumentId ?>">
+                <button type="submit" class="btn btn-danger btn-sm js-bulk-delete-button" disabled>
+                    Hapus Terpilih
+                </button>
+            </form>
         </div>
         <div class="card-body p-0">
 
@@ -93,6 +105,14 @@ $layoutType = (string) ($itemLayout['type'] ?? 'standard');
         <table class="table table-vcenter table-hover table-sm">
             <thead>
                 <tr>
+                    <th style="width: 44px;">
+                        <input
+                            type="checkbox"
+                            class="form-check-input js-bulk-select-all"
+                            aria-label="Pilih semua butir"
+                            data-bulk-target=".js-item-bulk-checkbox"
+                        >
+                    </th>
                     <th style="width: 60px;">No</th>
                     <th style="width: 180px;"><?= esc((string) ($itemLayout['aspect_label'] ?? 'Aspek')) ?></th>
                     <th style="width: 240px;"><?= esc((string) ($itemLayout['indicator_label'] ?? 'Indikator')) ?></th>
@@ -111,6 +131,16 @@ $layoutType = (string) ($itemLayout['type'] ?? 'standard');
             <tbody>
                 <?php foreach ($items as $item): ?>
                     <tr>
+                        <td>
+                            <input
+                                type="checkbox"
+                                class="form-check-input js-item-bulk-checkbox"
+                                name="ids[]"
+                                value="<?= (int) $item['id'] ?>"
+                                form="bulk-delete-items-form"
+                                aria-label="Pilih butir nomor <?= esc((string) ($item['nomor'] ?? ''), 'attr') ?>"
+                            >
+                        </td>
                         <td>
                             <?= esc($item['nomor']) ?>
                         </td>
@@ -276,5 +306,48 @@ $layoutType = (string) ($itemLayout['type'] ?? 'standard');
         </div>
     </div>
 <?php endif; ?>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var bulkCheckboxes = document.querySelectorAll('.js-item-bulk-checkbox');
+        var bulkSelectAll = document.querySelector('.js-bulk-select-all');
+        var bulkDeleteButton = document.querySelector('.js-bulk-delete-button');
+
+        function updateBulkDeleteState() {
+            var checkedCount = 0;
+
+            bulkCheckboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    checkedCount++;
+                }
+            });
+
+            if (bulkDeleteButton) {
+                bulkDeleteButton.disabled = checkedCount === 0;
+            }
+
+            if (bulkSelectAll) {
+                bulkSelectAll.checked = checkedCount > 0 && checkedCount === bulkCheckboxes.length;
+                bulkSelectAll.indeterminate = checkedCount > 0 && checkedCount < bulkCheckboxes.length;
+            }
+        }
+
+        if (bulkSelectAll) {
+            bulkSelectAll.addEventListener('change', function () {
+                bulkCheckboxes.forEach(function (checkbox) {
+                    checkbox.checked = bulkSelectAll.checked;
+                });
+
+                updateBulkDeleteState();
+            });
+        }
+
+        bulkCheckboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', updateBulkDeleteState);
+        });
+
+        updateBulkDeleteState();
+    });
+</script>
 
 <?= $this->endSection() ?>

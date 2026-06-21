@@ -21,10 +21,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->delete('instrument-types/(:num)', 'Admin\InstrumentTypes::delete/$1');
     $routes->post('instrument-aspects/import', 'Admin\InstrumentAspects::import');
     $routes->get('instrument-aspects/import-template', 'Admin\InstrumentAspects::importTemplate');
+    $routes->post('instrument-aspects/bulk-delete', 'Admin\InstrumentAspects::bulkDelete');
     $routes->resource('instrument-aspects', ['controller' => 'Admin\InstrumentAspects', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->resource('instrument-indicators', ['controller' => 'Admin\InstrumentIndicators', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->post('instrument-items/import', 'Admin\InstrumentItems::import');
     $routes->get('instrument-items/import-template', 'Admin\InstrumentItems::importTemplate');
+    $routes->post('instrument-items/bulk-delete', 'Admin\InstrumentItems::bulkDelete');
     $routes->resource('instrument-items', ['controller' => 'Admin\InstrumentItems', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->resource('instrument-links', ['controller' => 'Admin\InstrumentLinks', 'only' => ['index', 'new', 'create', 'edit', 'update', 'delete']]);
     $routes->get('instrument-bundles/(:num)/sessions', 'Admin\InstrumentBundles::sessions/$1');

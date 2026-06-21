@@ -174,6 +174,52 @@ class InstrumentAspects extends BaseController
             ->with('success', 'Aspek instrumen berhasil dihapus.');
     }
 
+    public function bulkDelete()
+    {
+        $instrumentId = (int) ($this->request->getPost('instrument_id') ?? 0);
+        $redirectUrl = base_url('admin/instrument-aspects' . ($instrumentId > 0 ? '?instrument_id=' . $instrumentId : ''));
+
+        if ($instrumentId > 0 && ! $this->findOwnedInstrument($instrumentId)) {
+            return redirect()
+                ->to(base_url('admin/instrument-aspects'))
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $ids = $this->selectedIdsFromPost();
+
+        if ($ids === []) {
+            return redirect()
+                ->to($redirectUrl)
+                ->with('error', 'Pilih minimal satu aspek yang akan dihapus.');
+        }
+
+        $query = $this->aspectModel
+            ->scopeOwned('instrument_aspects.user_id')
+            ->select('instrument_aspects.id')
+            ->whereIn('instrument_aspects.id', $ids);
+
+        if ($instrumentId > 0) {
+            $query->where('instrument_aspects.instrument_id', $instrumentId);
+        }
+
+        $ownedIds = array_map(
+            static fn(array $row): int => (int) $row['id'],
+            $query->findAll()
+        );
+
+        if ($ownedIds === []) {
+            return redirect()
+                ->to($redirectUrl)
+                ->with('error', 'Aspek terpilih tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $this->aspectModel->delete($ownedIds);
+
+        return redirect()
+            ->to($redirectUrl)
+            ->with('success', count($ownedIds) . ' aspek instrumen berhasil dihapus.');
+    }
+
     public function import()
     {
         $instrumentId = (int) $this->request->getPost('instrument_id');
@@ -667,6 +713,15 @@ class InstrumentAspects extends BaseController
             ->scopeOwned('instrument_aspects.user_id')
             ->where('instrument_aspects.id', (int) $id)
             ->first();
+    }
+
+    private function selectedIdsFromPost(): array
+    {
+        $ids = (array) $this->request->getPost('ids');
+        $ids = array_map('intval', $ids);
+        $ids = array_filter($ids, static fn(int $id): bool => $id > 0);
+
+        return array_values(array_unique($ids));
     }
 
     private function ownerIdFromInstrument(array $instrument): int

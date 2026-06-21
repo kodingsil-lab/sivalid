@@ -363,6 +363,52 @@ class InstrumentItems extends BaseController
             ->with('success', 'Butir pernyataan berhasil dihapus.');
     }
 
+    public function bulkDelete()
+    {
+        $instrumentId = (int) ($this->request->getPost('instrument_id') ?? 0);
+        $redirectUrl = base_url('admin/instrument-items' . ($instrumentId > 0 ? '?instrument_id=' . $instrumentId : ''));
+
+        if ($instrumentId > 0 && ! $this->findOwnedInstrument($instrumentId)) {
+            return redirect()
+                ->to(base_url('admin/instrument-items'))
+                ->with('error', 'Instrumen tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $ids = $this->selectedIdsFromPost();
+
+        if ($ids === []) {
+            return redirect()
+                ->to($redirectUrl)
+                ->with('error', 'Pilih minimal satu butir yang akan dihapus.');
+        }
+
+        $query = $this->itemModel
+            ->scopeOwned('instrument_items.user_id')
+            ->select('instrument_items.id')
+            ->whereIn('instrument_items.id', $ids);
+
+        if ($instrumentId > 0) {
+            $query->where('instrument_items.instrument_id', $instrumentId);
+        }
+
+        $ownedIds = array_map(
+            static fn(array $row): int => (int) $row['id'],
+            $query->findAll()
+        );
+
+        if ($ownedIds === []) {
+            return redirect()
+                ->to($redirectUrl)
+                ->with('error', 'Butir terpilih tidak ditemukan atau bukan milik akun Anda.');
+        }
+
+        $this->itemModel->delete($ownedIds);
+
+        return redirect()
+            ->to($redirectUrl)
+            ->with('success', count($ownedIds) . ' butir berhasil dihapus.');
+    }
+
     public function import()
     {
         $instrumentId = (int) $this->request->getPost('instrument_id');
@@ -1009,6 +1055,15 @@ class InstrumentItems extends BaseController
             ->scopeOwned('instrument_items.user_id')
             ->where('instrument_items.id', (int) $id)
             ->first();
+    }
+
+    private function selectedIdsFromPost(): array
+    {
+        $ids = (array) $this->request->getPost('ids');
+        $ids = array_map('intval', $ids);
+        $ids = array_filter($ids, static fn(int $id): bool => $id > 0);
+
+        return array_values(array_unique($ids));
     }
 
     private function ownerIdFromInstrument(array $instrument): int
