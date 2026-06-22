@@ -5,6 +5,7 @@
 <?php
 $currentInstrument = isset($instrument) && is_array($instrument) ? $instrument : [];
 $items = isset($items) && is_array($items) ? $items : [];
+$attachments = isset($attachments) && is_array($attachments) ? $attachments : [];
 $instrumentId = (int) ($currentInstrument['id'] ?? 0);
 $scaleMin = (int) ($currentInstrument['skala_min'] ?? 1);
 $scaleMax = (int) ($currentInstrument['skala_max'] ?? 4);
@@ -119,6 +120,39 @@ $renderDetailText = static function (?string $value): string {
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<div class="card mb-3 instrument-detail-card">
+    <div class="card-body">
+        <h3 class="card-title mb-3">Lampiran Instrumen</h3>
+
+        <?php if (empty($attachments)): ?>
+            <p class="text-muted mb-0">Belum ada lampiran PDF untuk instrumen ini.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-sm instrument-meta-table">
+                    <thead>
+                        <tr>
+                            <th>Judul Lampiran</th>
+                            <th style="width: 160px;">File</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($attachments as $attachment): ?>
+                            <tr>
+                                <td><?= esc((string) ($attachment['title'] ?? '-')) ?></td>
+                                <td>
+                                    <a href="<?= base_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                        Lihat PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

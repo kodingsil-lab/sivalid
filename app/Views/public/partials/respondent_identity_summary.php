@@ -47,7 +47,7 @@ $identityFields = isset($identityFields) && is_array($identityFields) ? $identit
     .identity-summary-actions {
         display: flex;
         justify-content: flex-end;
-        margin-top: .75rem;
+        margin: 0 0 .75rem;
     }
 
     .identity-summary-edit-btn {
@@ -93,6 +93,12 @@ $identityFields = isset($identityFields) && is_array($identityFields) ? $identit
         </div>
     <?php endif; ?>
 
+    <?php if ($token !== ''): ?>
+        <div class="identity-summary-actions">
+            <a href="<?= base_url('isi/' . $token . '?identitas=edit') ?>" class="identity-summary-edit-btn">Ubah Identitas</a>
+        </div>
+    <?php endif; ?>
+
     <table class="identity-summary-table">
         <tbody>
         <?php foreach ($identityFields as $field): ?>
@@ -112,9 +118,3 @@ $identityFields = isset($identityFields) && is_array($identityFields) ? $identit
         </tbody>
     </table>
 </div>
-
-<?php if ($token !== ''): ?>
-    <div class="identity-summary-actions">
-        <a href="<?= base_url('isi/' . $token . '?identitas=edit') ?>" class="identity-summary-edit-btn">Ubah Identitas</a>
-    </div>
-<?php endif; ?>

@@ -6,6 +6,7 @@
 $pageTitle = isset($title) ? (string) $title : 'Form Instrumen';
 $formAction = isset($action) ? (string) $action : base_url('admin/instruments');
 $formMethod = isset($method) ? (string) $method : 'post';
+$attachments = isset($attachments) && is_array($attachments) ? $attachments : [];
 $isCreateForm = strtolower($formMethod) === 'post';
 $codeValue = $isCreateForm
     ? (string) ($autoCode ?? old('kode', '01'))
@@ -58,7 +59,7 @@ if ($selectedScaleTemplate === '') {
     </div>
 <?php endif; ?>
 
-<form action="<?= esc($formAction) ?>" method="post">
+<form action="<?= esc($formAction) ?>" method="post" enctype="multipart/form-data">
     <?= csrf_field() ?>
 
     <?php if (strtolower($formMethod) === 'put'): ?>
@@ -182,6 +183,81 @@ if ($selectedScaleTemplate === '') {
         </div>
     </div>
 
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title">Lampiran Instrumen</h3>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                Opsional. Lampiran PDF akan tampil di halaman pengisian sebagai tombol pembuka popup PDF.
+            </p>
+
+            <?php if (!empty($attachments)): ?>
+                <div class="table-responsive mb-3">
+                    <table class="table table-sm table-vcenter">
+                        <thead>
+                            <tr>
+                                <th>Judul Lampiran</th>
+                                <th style="width: 140px;">File</th>
+                                <th style="width: 110px;">Hapus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($attachments as $attachment): ?>
+                                <tr>
+                                    <td><?= esc((string) ($attachment['title'] ?? '-')) ?></td>
+                                    <td>
+                                        <a href="<?= base_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                            Lihat PDF
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <label class="form-check mb-0">
+                                            <input
+                                                type="checkbox"
+                                                name="delete_attachments[]"
+                                                value="<?= esc((string) ($attachment['id'] ?? 0), 'attr') ?>"
+                                                class="form-check-input"
+                                            >
+                                            <span class="form-check-label">Hapus</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+
+            <div id="attachment-fields" class="attachment-fields">
+                <div class="attachment-row">
+                    <div class="form-row mb-0">
+                        <label class="form-label">Judul Lampiran Baru</label>
+                        <input
+                            type="text"
+                            name="attachment_titles[]"
+                            class="form-control"
+                            placeholder="Contoh: Buku Model Pembelajaran"
+                        >
+                    </div>
+                    <div class="form-row mb-0">
+                        <label class="form-label">File PDF</label>
+                        <input
+                            type="file"
+                            name="attachment_files[]"
+                            class="form-control"
+                            accept="application/pdf,.pdf"
+                        >
+                    </div>
+                    <button type="button" class="btn btn-light attachment-remove" aria-label="Hapus baris lampiran">Hapus</button>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-outline-primary mt-2" id="add-attachment-row">Tambah Lampiran</button>
+            <small class="text-muted d-block mt-2">Maksimal 10 MB per file PDF.</small>
+        </div>
+    </div>
+
     <input type="hidden" name="scale_template" value="<?= esc($selectedScaleTemplate, 'attr') ?>">
     <input type="hidden" name="skala_min" value="<?= esc((string) old('skala_min', $instrument['skala_min'] ?? 1), 'attr') ?>">
     <input type="hidden" name="skala_max" value="<?= esc((string) old('skala_max', $instrument['skala_max'] ?? 4), 'attr') ?>">
@@ -198,6 +274,28 @@ if ($selectedScaleTemplate === '') {
         border-color: #cbd5e1;
         border-radius: 4px;
         overflow: hidden;
+    }
+
+    .attachment-fields {
+        display: grid;
+        gap: .75rem;
+    }
+
+    .attachment-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(220px, .75fr) auto;
+        align-items: end;
+        gap: .75rem;
+        padding: .75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        background: #f8fafc;
+    }
+
+    @media (max-width: 767.98px) {
+        .attachment-row {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
@@ -241,6 +339,48 @@ if ($selectedScaleTemplate === '') {
                     tinymce.triggerSave();
                 }
             });
+        }
+
+        var attachmentFields = document.getElementById('attachment-fields');
+        var addAttachmentButton = document.getElementById('add-attachment-row');
+
+        function updateAttachmentRemoveButtons() {
+            if (!attachmentFields) return;
+
+            var rows = attachmentFields.querySelectorAll('.attachment-row');
+            rows.forEach(function (row) {
+                var button = row.querySelector('.attachment-remove');
+                if (button) {
+                    button.disabled = rows.length <= 1;
+                }
+            });
+        }
+
+        if (attachmentFields && addAttachmentButton) {
+            addAttachmentButton.addEventListener('click', function () {
+                var firstRow = attachmentFields.querySelector('.attachment-row');
+                if (!firstRow) return;
+
+                var newRow = firstRow.cloneNode(true);
+                newRow.querySelectorAll('input').forEach(function (input) {
+                    input.value = '';
+                });
+                attachmentFields.appendChild(newRow);
+                updateAttachmentRemoveButtons();
+            });
+
+            attachmentFields.addEventListener('click', function (event) {
+                var button = event.target.closest('.attachment-remove');
+                if (!button || button.disabled) return;
+
+                var row = button.closest('.attachment-row');
+                if (row) {
+                    row.remove();
+                    updateAttachmentRemoveButtons();
+                }
+            });
+
+            updateAttachmentRemoveButtons();
         }
     });
 </script>

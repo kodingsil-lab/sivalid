@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Libraries\JustificationSchema;
 use App\Libraries\RespondentIdentitySchema;
+use App\Models\InstrumentAttachmentModel;
 use App\Models\InstrumentAspectModel;
 use App\Models\InstrumentIndicatorModel;
 use App\Models\InstrumentItemModel;
@@ -17,6 +18,7 @@ use App\Models\ResponseModel;
 class PublicForm extends BaseController
 {
     protected InstrumentLinkModel $linkModel;
+    protected InstrumentAttachmentModel $attachmentModel;
     protected InstrumentAspectModel $aspectModel;
     protected InstrumentIndicatorModel $indicatorModel;
     protected InstrumentItemModel $itemModel;
@@ -30,6 +32,7 @@ class PublicForm extends BaseController
         helper('instrument_layout');
 
         $this->linkModel       = new InstrumentLinkModel();
+        $this->attachmentModel = new InstrumentAttachmentModel();
         $this->aspectModel     = new InstrumentAspectModel();
         $this->indicatorModel  = new InstrumentIndicatorModel();
         $this->itemModel       = new InstrumentItemModel();
@@ -115,6 +118,7 @@ class PublicForm extends BaseController
             'indicators' => $indicators,
             'items'      => $items,
             'scale'      => $scale,
+            'attachments' => $this->attachmentModel->getByInstrument($instrumentId),
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
             'justificationConfig' => $this->justificationConfigForPublicForm($link),
@@ -154,6 +158,7 @@ class PublicForm extends BaseController
             'aspects' => $aspects,
             'items'   => $items,
             'scale'   => $scale,
+            'attachments' => $this->attachmentModel->getByInstrument($instrumentId),
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
             'justificationConfig' => $this->justificationConfigForPublicForm($link),
@@ -206,6 +211,7 @@ class PublicForm extends BaseController
             'aspects' => $aspects,
             'items'   => $items,
             'scale'   => $scale,
+            'attachments' => $this->attachmentModel->getByInstrument($instrumentId),
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
             'justificationConfig' => $this->justificationConfigForPublicForm($link),

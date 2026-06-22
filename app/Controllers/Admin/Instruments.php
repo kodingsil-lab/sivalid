@@ -3,6 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Models\InstrumentAttachmentModel;
 use App\Models\InstrumentItemModel;
 use App\Models\InstrumentModel;
 use App\Models\SettingModel;
@@ -10,11 +11,13 @@ use App\Models\SettingModel;
 class Instruments extends BaseController
 {
     protected InstrumentModel $instrumentModel;
+    protected InstrumentAttachmentModel $attachmentModel;
     protected SettingModel $settingModel;
 
     public function __construct()
     {
         $this->instrumentModel = new InstrumentModel();
+        $this->attachmentModel = new InstrumentAttachmentModel();
         $this->settingModel = new SettingModel();
     }
 
@@ -80,6 +83,14 @@ class Instruments extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
+        $attachmentErrors = $this->attachmentUploadErrors();
+        if ($attachmentErrors !== []) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $attachmentErrors);
+        }
+
         $scaleConfig = $this->scaleConfigFromRequest();
         $skalaMin = $scaleConfig['min'];
         $skalaMax = $scaleConfig['max'];
@@ -100,7 +111,7 @@ class Instruments extends BaseController
                 ->with('errors', ['kode' => 'Kode instrumen sudah digunakan pada akun ini.']);
         }
 
-        $this->instrumentModel->insert($this->instrumentModel->withOwner([
+        $instrumentId = (int) $this->instrumentModel->insert($this->instrumentModel->withOwner([
             'kode'      => $kode,
             'judul'     => trim((string) $this->request->getPost('judul')),
             'jenis'     => trim((string) $this->request->getPost('jenis')),
@@ -113,7 +124,9 @@ class Instruments extends BaseController
             'skala_labels' => $scaleConfig['labels_json'],
             'sort_order' => $this->getNextSortOrder(),
             'status'    => 'Draft',
-        ]));
+        ]), true);
+
+        $this->saveAttachmentsFromRequest($instrumentId);
 
         return redirect()
             ->to(base_url('admin/instruments'))
@@ -148,6 +161,7 @@ class Instruments extends BaseController
             'title'      => 'Detail Instrumen',
             'instrument' => $instrument,
             'items'      => $items,
+            'attachments' => $this->attachmentModel->getByInstrument((int) $id),
         ];
 
         return view('admin/instruments/show', $data);
@@ -166,6 +180,7 @@ class Instruments extends BaseController
         $data = [
             'title'      => 'Edit Instrumen',
             'instrument' => $instrument,
+            'attachments' => $this->attachmentModel->getByInstrument((int) $id),
             'jenisOptions' => $this->getJenisOptions(),
             'isManualValid' => $this->isManualValidInstrument((int) $id),
             'action'     => base_url('admin/instruments/' . $id),
@@ -200,6 +215,14 @@ class Instruments extends BaseController
                 ->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
+        }
+
+        $attachmentErrors = $this->attachmentUploadErrors();
+        if ($attachmentErrors !== []) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('errors', $attachmentErrors);
         }
 
         $kode = trim((string) $this->request->getPost('kode'));
@@ -244,6 +267,9 @@ class Instruments extends BaseController
             'skala_labels' => $scaleConfig['labels_json'],
             'status'    => $statusToSave,
         ]);
+
+        $this->deleteSelectedAttachments((int) $id);
+        $this->saveAttachmentsFromRequest((int) $id);
 
         return redirect()
             ->to(base_url('admin/instruments/' . (int) $id))
@@ -393,6 +419,7 @@ class Instruments extends BaseController
                 );
         }
 
+        $this->deleteAllAttachments((int) $id);
         $this->instrumentModel->delete($id);
 
         return redirect()
@@ -466,6 +493,166 @@ class Instruments extends BaseController
             'indicators' => $db->table('instrument_indicators')->where('instrument_id', $instrumentId)->countAllResults(),
             'items'      => $db->table('instrument_items')->where('instrument_id', $instrumentId)->countAllResults(),
         ];
+    }
+
+    private function saveAttachmentsFromRequest(int $instrumentId): void
+    {
+        if ($instrumentId <= 0) {
+            return;
+        }
+
+        $files = $this->request->getFileMultiple('attachment_files');
+        $titles = $this->request->getPost('attachment_titles');
+
+        if (!is_array($files) || $files === []) {
+            return;
+        }
+
+        $titles = is_array($titles) ? $titles : [];
+        $targetDir = FCPATH . 'uploads/instrument-attachments';
+
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0775, true);
+        }
+
+        $sortOrder = $this->nextAttachmentSortOrder($instrumentId);
+
+        foreach ($files as $index => $file) {
+            if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            if (!$file->isValid()) {
+                continue;
+            }
+
+            $extension = strtolower((string) ($file->getClientExtension() ?: $file->guessExtension()));
+            $mimeType = (string) $file->getMimeType();
+
+            if ($extension !== 'pdf' || !in_array($mimeType, ['application/pdf', 'application/x-pdf'], true)) {
+                continue;
+            }
+
+            if ($file->getSizeByUnit('kb') > 10240) {
+                continue;
+            }
+
+            $title = trim((string) ($titles[$index] ?? ''));
+            if ($title === '') {
+                $title = 'Lampiran Instrumen';
+            }
+
+            $fileName = 'lampiran-instrumen-' . $instrumentId . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.pdf';
+            $file->move($targetDir, $fileName);
+
+            $this->attachmentModel->insert([
+                'instrument_id' => $instrumentId,
+                'title'         => $title,
+                'file_path'     => 'uploads/instrument-attachments/' . $fileName,
+                'sort_order'    => $sortOrder++,
+            ]);
+        }
+    }
+
+    private function attachmentUploadErrors(): array
+    {
+        $files = $this->request->getFileMultiple('attachment_files');
+
+        if (!is_array($files) || $files === []) {
+            return [];
+        }
+
+        $errors = [];
+
+        foreach ($files as $index => $file) {
+            if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            $label = 'Lampiran #' . ($index + 1);
+
+            if (!$file->isValid()) {
+                $errors['attachment_files_' . $index] = $label . ' gagal diunggah.';
+                continue;
+            }
+
+            $extension = strtolower((string) ($file->getClientExtension() ?: $file->guessExtension()));
+            $mimeType = (string) $file->getMimeType();
+
+            if ($extension !== 'pdf' || !in_array($mimeType, ['application/pdf', 'application/x-pdf'], true)) {
+                $errors['attachment_files_' . $index] = $label . ' harus berupa file PDF.';
+                continue;
+            }
+
+            if ($file->getSizeByUnit('kb') > 10240) {
+                $errors['attachment_files_' . $index] = $label . ' maksimal 10 MB.';
+            }
+        }
+
+        return $errors;
+    }
+
+    private function deleteSelectedAttachments(int $instrumentId): void
+    {
+        $deleteIds = $this->request->getPost('delete_attachments');
+
+        if (!is_array($deleteIds) || $deleteIds === []) {
+            return;
+        }
+
+        $deleteIds = array_values(array_unique(array_filter(array_map('intval', $deleteIds), static fn(int $id): bool => $id > 0)));
+
+        if ($deleteIds === []) {
+            return;
+        }
+
+        $attachments = $this->attachmentModel
+            ->where('instrument_id', $instrumentId)
+            ->whereIn('id', $deleteIds)
+            ->findAll();
+
+        foreach ($attachments as $attachment) {
+            $path = (string) ($attachment['file_path'] ?? '');
+
+            if ($path !== '' && str_starts_with($path, 'uploads/instrument-attachments/')) {
+                $fullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+
+                if (is_file($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+
+            $this->attachmentModel->delete((int) $attachment['id']);
+        }
+    }
+
+    private function deleteAllAttachments(int $instrumentId): void
+    {
+        $attachments = $this->attachmentModel
+            ->where('instrument_id', $instrumentId)
+            ->findAll();
+
+        foreach ($attachments as $attachment) {
+            $path = (string) ($attachment['file_path'] ?? '');
+
+            if ($path !== '' && str_starts_with($path, 'uploads/instrument-attachments/')) {
+                $fullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
+
+                if (is_file($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+        }
+    }
+
+    private function nextAttachmentSortOrder(int $instrumentId): int
+    {
+        $row = $this->attachmentModel
+            ->selectMax('sort_order')
+            ->where('instrument_id', $instrumentId)
+            ->first();
+
+        return ((int) ($row['sort_order'] ?? 0)) + 1;
     }
 
     private function generateNextCode(): string
