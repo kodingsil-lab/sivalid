@@ -189,7 +189,7 @@ if ($selectedScaleTemplate === '') {
         </div>
         <div class="card-body">
             <p class="text-muted mb-3">
-                Opsional. Lampiran PDF akan tampil di halaman pengisian sebagai tombol pembuka popup PDF.
+                Opsional. Lampiran PDF akan tampil di halaman pengisian responden sebagai tombol pembuka popup Google Drive.
             </p>
 
             <?php if (!empty($attachments)): ?>
@@ -207,8 +207,8 @@ if ($selectedScaleTemplate === '') {
                                 <tr>
                                     <td><?= esc((string) ($attachment['title'] ?? '-')) ?></td>
                                     <td>
-                                        <a href="<?= sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
-                                            Lihat PDF
+                                        <a href="<?= sivalid_pdf_viewer_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                            Lihat Lampiran
                                         </a>
                                     </td>
                                     <td>
@@ -241,12 +241,12 @@ if ($selectedScaleTemplate === '') {
                         >
                     </div>
                     <div class="form-row mb-0">
-                        <label class="form-label">File PDF</label>
+                        <label class="form-label">Link Google Drive PDF</label>
                         <input
-                            type="file"
-                            name="attachment_files[]"
+                            type="url"
+                            name="attachment_urls[]"
                             class="form-control"
-                            accept="application/pdf,.pdf"
+                            placeholder="https://drive.google.com/file/d/.../view"
                         >
                     </div>
                     <button type="button" class="btn btn-light attachment-remove" aria-label="Hapus baris lampiran">Hapus</button>
@@ -254,7 +254,7 @@ if ($selectedScaleTemplate === '') {
             </div>
 
             <button type="button" class="btn btn-outline-primary mt-2" id="add-attachment-row">Tambah Lampiran</button>
-            <small class="text-muted d-block mt-2">Maksimal 10 MB per file PDF.</small>
+            <small class="text-muted d-block mt-2">Pastikan akses file Google Drive disetel ke siapa saja yang memiliki link dapat melihat.</small>
         </div>
     </div>
 

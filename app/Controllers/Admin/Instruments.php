@@ -83,14 +83,6 @@ class Instruments extends BaseController
                 ->with('errors', $this->validator->getErrors());
         }
 
-        $attachmentErrors = $this->attachmentUploadErrors();
-        if ($attachmentErrors !== []) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('errors', $attachmentErrors);
-        }
-
         $scaleConfig = $this->scaleConfigFromRequest();
         $skalaMin = $scaleConfig['min'];
         $skalaMax = $scaleConfig['max'];
@@ -215,14 +207,6 @@ class Instruments extends BaseController
                 ->back()
                 ->withInput()
                 ->with('errors', $this->validator->getErrors());
-        }
-
-        $attachmentErrors = $this->attachmentUploadErrors();
-        if ($attachmentErrors !== []) {
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('errors', $attachmentErrors);
         }
 
         $kode = trim((string) $this->request->getPost('kode'));
@@ -501,39 +485,20 @@ class Instruments extends BaseController
             return;
         }
 
-        $files = $this->request->getFileMultiple('attachment_files');
         $titles = $this->request->getPost('attachment_titles');
+        $urls = $this->request->getPost('attachment_urls');
 
-        if (!is_array($files) || $files === []) {
+        if (!is_array($urls) || $urls === []) {
             return;
         }
 
         $titles = is_array($titles) ? $titles : [];
-        $targetDir = FCPATH . 'uploads/instrument-attachments';
-
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0775, true);
-        }
-
         $sortOrder = $this->nextAttachmentSortOrder($instrumentId);
 
-        foreach ($files as $index => $file) {
-            if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
+        foreach ($urls as $index => $url) {
+            $url = trim((string) $url);
 
-            if (!$file->isValid()) {
-                continue;
-            }
-
-            $extension = strtolower((string) ($file->getClientExtension() ?: $file->guessExtension()));
-            $mimeType = (string) $file->getMimeType();
-
-            if ($extension !== 'pdf' || !in_array($mimeType, ['application/pdf', 'application/x-pdf'], true)) {
-                continue;
-            }
-
-            if ($file->getSizeByUnit('kb') > 10240) {
+            if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
                 continue;
             }
 
@@ -542,54 +507,13 @@ class Instruments extends BaseController
                 $title = 'Lampiran Instrumen';
             }
 
-            $fileName = 'lampiran-instrumen-' . $instrumentId . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(3)) . '.pdf';
-            $file->move($targetDir, $fileName);
-
             $this->attachmentModel->insert([
                 'instrument_id' => $instrumentId,
                 'title'         => $title,
-                'file_path'     => 'uploads/instrument-attachments/' . $fileName,
+                'file_path'     => $url,
                 'sort_order'    => $sortOrder++,
             ]);
         }
-    }
-
-    private function attachmentUploadErrors(): array
-    {
-        $files = $this->request->getFileMultiple('attachment_files');
-
-        if (!is_array($files) || $files === []) {
-            return [];
-        }
-
-        $errors = [];
-
-        foreach ($files as $index => $file) {
-            if (!$file || $file->getError() === UPLOAD_ERR_NO_FILE) {
-                continue;
-            }
-
-            $label = 'Lampiran #' . ($index + 1);
-
-            if (!$file->isValid()) {
-                $errors['attachment_files_' . $index] = $label . ' gagal diunggah.';
-                continue;
-            }
-
-            $extension = strtolower((string) ($file->getClientExtension() ?: $file->guessExtension()));
-            $mimeType = (string) $file->getMimeType();
-
-            if ($extension !== 'pdf' || !in_array($mimeType, ['application/pdf', 'application/x-pdf'], true)) {
-                $errors['attachment_files_' . $index] = $label . ' harus berupa file PDF.';
-                continue;
-            }
-
-            if ($file->getSizeByUnit('kb') > 10240) {
-                $errors['attachment_files_' . $index] = $label . ' maksimal 10 MB.';
-            }
-        }
-
-        return $errors;
     }
 
     private function deleteSelectedAttachments(int $instrumentId): void

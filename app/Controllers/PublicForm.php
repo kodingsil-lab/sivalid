@@ -118,7 +118,6 @@ class PublicForm extends BaseController
             'indicators' => $indicators,
             'items'      => $items,
             'scale'      => $scale,
-            'attachments' => $this->attachmentModel->getByInstrument($instrumentId),
             'respondentIdentity' => $this->getRespondentIdentity($link),
             'identityFields' => RespondentIdentitySchema::fieldsForLink($link),
             'justificationConfig' => $this->justificationConfigForPublicForm($link),

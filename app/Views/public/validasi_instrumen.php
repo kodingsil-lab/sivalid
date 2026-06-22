@@ -171,105 +171,6 @@
             font-weight: 600;
         }
 
-        .attachment-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .45rem;
-        }
-
-        .attachment-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 38px;
-            padding: .45rem .9rem;
-            border: 1px solid var(--pub-blue);
-            border-radius: 6px;
-            background: var(--pub-blue);
-            color: #fff;
-            cursor: pointer;
-            font-size: .92rem;
-            font-weight: 650;
-            line-height: 1.2;
-            text-decoration: none;
-        }
-
-        .attachment-btn:hover,
-        .attachment-btn:focus {
-            border-color: var(--pub-blue);
-            background: var(--pub-blue);
-            color: #fff;
-            outline: none;
-            filter: brightness(0.92);
-        }
-
-        .public-modal-backdrop {
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: rgba(15, 23, 42, .46);
-        }
-
-        .public-modal-backdrop.show {
-            display: flex;
-        }
-
-        .public-modal {
-            width: min(940px, 100%);
-            height: min(86vh, 780px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, .24);
-        }
-
-        .public-modal-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: .85rem 1rem;
-            border-bottom: 1px solid var(--pub-border);
-        }
-
-        .public-modal-title {
-            margin: 0;
-            color: #0f172a;
-            font-size: 1rem;
-            font-weight: 720;
-        }
-
-        .public-modal-close {
-            width: 38px;
-            height: 38px;
-            padding: 0;
-            border: 1px solid #94a3b8;
-            border-radius: 8px;
-            background: #94a3b8;
-            color: #ffffff;
-            cursor: pointer;
-        }
-
-        .public-modal-body {
-            flex: 1;
-            min-height: 0;
-            background: #eef2f6;
-        }
-
-        .pdf-frame {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            display: block;
-            background: #eef2f6;
-        }
-
         @media (max-width: 900px) {
             .public-grid {
                 grid-template-columns: 1fr;
@@ -290,7 +191,6 @@ $aspects = isset($aspects) && is_array($aspects) ? $aspects : [];
 $indicators = isset($indicators) && is_array($indicators) ? $indicators : [];
 $items = isset($items) && is_array($items) ? $items : [];
 $scale = isset($scale) && is_array($scale) ? $scale : [];
-$attachments = isset($attachments) && is_array($attachments) ? $attachments : [];
 
 $text = static function (array $row, string $key, string $default = '-'): string {
     $value = $row[$key] ?? $default;
@@ -354,27 +254,6 @@ $linkToken = $text($link, 'token', '');
                                 <?= !empty($link['tanggal_selesai']) ? esc(format_tanggal_indonesia($link['tanggal_selesai'])) : 'Tidak dibatasi' ?>
                             </td>
                         </tr>
-                        <?php if (!empty($attachments)): ?>
-                            <tr>
-                                <th>Lampiran</th>
-                                <td>
-                                    <div class="attachment-actions">
-                                        <?php foreach ($attachments as $attachmentIndex => $attachment): ?>
-                                            <?php
-                                            $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen'));
-                                            ?>
-                                            <button
-                                                type="button"
-                                                class="attachment-btn"
-                                                data-open-pdf-modal="instrument-attachment-<?= esc((string) $attachmentIndex, 'attr') ?>"
-                                            >
-                                                <?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen') ?>
-                                            </button>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -635,77 +514,6 @@ $linkToken = $text($link, 'token', '');
         </div>
     </form>
 </div>
-
-<?php foreach ($attachments as $attachmentIndex => $attachment): ?>
-    <?php
-    $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen'));
-    $attachmentUrl = sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? ''));
-    $attachmentViewerUrl = $attachmentUrl . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH';
-    ?>
-    <div id="instrument-attachment-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-backdrop" aria-hidden="true">
-        <div class="public-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-attachment-title-<?= esc((string) $attachmentIndex, 'attr') ?>">
-            <div class="public-modal-head">
-                <h2 id="instrument-attachment-title-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-title">
-                    <?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen') ?>
-                </h2>
-                <button type="button" class="public-modal-close" data-close-modal aria-label="Tutup">x</button>
-            </div>
-            <div class="public-modal-body">
-                <iframe class="pdf-frame" src="<?= esc($attachmentViewerUrl) ?>" title="<?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen', 'attr') ?>"></iframe>
-            </div>
-        </div>
-    </div>
-<?php endforeach; ?>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var activeModal = null;
-
-        function openModal(modal) {
-            if (!modal) return;
-            activeModal = modal;
-            modal.classList.add('show');
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden';
-            var closeButton = modal.querySelector('[data-close-modal]');
-            if (closeButton) closeButton.focus();
-        }
-
-        function closeModal(modal) {
-            if (!modal) return;
-            modal.classList.remove('show');
-            modal.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = '';
-            if (activeModal === modal) activeModal = null;
-        }
-
-        document.querySelectorAll('[data-open-pdf-modal]').forEach(function (button) {
-            button.addEventListener('click', function () {
-                openModal(document.getElementById(button.getAttribute('data-open-pdf-modal')));
-            });
-        });
-
-        document.querySelectorAll('[data-close-modal]').forEach(function (button) {
-            button.addEventListener('click', function () {
-                closeModal(button.closest('.public-modal-backdrop'));
-            });
-        });
-
-        document.querySelectorAll('.public-modal-backdrop').forEach(function (modal) {
-            modal.addEventListener('click', function (event) {
-                if (event.target === modal) {
-                    closeModal(modal);
-                }
-            });
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && activeModal) {
-                closeModal(activeModal);
-            }
-        });
-    });
-</script>
 
 </body>
 </html>

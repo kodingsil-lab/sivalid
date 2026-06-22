@@ -224,17 +224,13 @@ class Settings extends BaseController
             'tahun_penelitian' => 'permit_empty|max_length[20]',
         ];
 
-        $pdf = $this->request->getFile('ringkasan_penelitian_pdf');
-        if ($pdf && $pdf->getError() !== UPLOAD_ERR_NO_FILE) {
-            $rules['ringkasan_penelitian_pdf'] = 'uploaded[ringkasan_penelitian_pdf]|max_size[ringkasan_penelitian_pdf,10240]|ext_in[ringkasan_penelitian_pdf,pdf]|mime_in[ringkasan_penelitian_pdf,application/pdf,application/x-pdf]';
-        }
+        $rules['ringkasan_penelitian_pdf'] = 'permit_empty|valid_url_strict|max_length[500]';
 
         return $rules;
     }
 
     private function saveProfileFromRequest(int $userId): void
     {
-        $pdf = $this->request->getFile('ringkasan_penelitian_pdf');
         $fields = [
             'nama_penelitian',
             'nama_peneliti',
@@ -252,26 +248,11 @@ class Settings extends BaseController
             );
         }
 
-        if ($pdf && $pdf->isValid() && ! $pdf->hasMoved()) {
-            $targetDir = FCPATH . 'uploads/settings';
-            if (! is_dir($targetDir)) {
-                mkdir($targetDir, 0775, true);
-            }
-
-            $oldPath = (string) ($this->settingModel->getUserProfileValue($userId, 'ringkasan_penelitian_pdf') ?? '');
-            $fileName = 'ringkasan-penelitian-user-' . $userId . '-' . date('YmdHis') . '.pdf';
-            $pdf->move($targetDir, $fileName);
-
-            $newPath = 'uploads/settings/' . $fileName;
-            $this->settingModel->setUserProfileValue($userId, 'ringkasan_penelitian_pdf', $newPath);
-
-            if ($oldPath !== '' && str_starts_with($oldPath, 'uploads/settings/')) {
-                $oldFullPath = FCPATH . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $oldPath);
-                if (is_file($oldFullPath)) {
-                    unlink($oldFullPath);
-                }
-            }
-        }
+        $this->settingModel->setUserProfileValue(
+            $userId,
+            'ringkasan_penelitian_pdf',
+            trim((string) $this->request->getPost('ringkasan_penelitian_pdf'))
+        );
     }
 
 }

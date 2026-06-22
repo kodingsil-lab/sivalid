@@ -426,23 +426,6 @@
             padding: 1.1rem;
         }
 
-        .public-modal-body.pdf-modal-body {
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-            padding: 0;
-            background: #eef2f6;
-        }
-
-        .pdf-frame {
-            width: 100%;
-            height: 100%;
-            min-height: 620px;
-            border: 0;
-            display: block;
-            background: #eef2f6;
-        }
-
         .public-modal-section {
             padding-bottom: .95rem;
             margin-bottom: 1rem;
@@ -716,7 +699,6 @@ $instrumentEntry  = isset($instrumentEntry) && is_array($instrumentEntry) ? $ins
 $aspects          = isset($aspects) && is_array($aspects) ? $aspects : [];
 $indicators       = isset($indicators) && is_array($indicators) ? $indicators : [];
 $items            = isset($items) && is_array($items) ? $items : [];
-$attachments      = isset($attachments) && is_array($attachments) ? $attachments : [];
 $scale            = isset($scale) && is_array($scale) ? $scale : [];
 $position         = isset($position) ? (int) $position : 1;
 $total            = isset($total) ? (int) $total : 1;
@@ -842,23 +824,6 @@ $text = static function (array $row, string $key, string $default = '-'): string
                         </button>
                     </td>
                 </tr>
-                <?php if (!empty($attachments)): ?>
-                    <tr>
-                        <th>Lampiran</th>
-                        <td>
-                            <?php foreach ($attachments as $attachmentIndex => $attachment): ?>
-                                <?php $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen')); ?>
-                                <button
-                                    type="button"
-                                    class="public-mini-btn"
-                                    data-open-modal="attachment-modal-<?= esc((string) $attachmentIndex, 'attr') ?>"
-                                >
-                                    <?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen') ?>
-                                </button>
-                            <?php endforeach; ?>
-                        </td>
-                    </tr>
-                <?php endif; ?>
                 <tr>
                     <th>Validator</th>
                     <td><?= esc(trim((string) ($validatorSession['validator_nama'] ?? '')) ?: '-') ?></td>
@@ -1259,33 +1224,6 @@ $text = static function (array $row, string $key, string $default = '-'): string
         </div>
     </div>
 </div>
-
-<?php foreach ($attachments as $attachmentIndex => $attachment): ?>
-    <?php
-    $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen'));
-    $attachmentUrl = sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? ''));
-    $attachmentViewerUrl = $attachmentUrl . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH';
-    ?>
-    <div id="attachment-modal-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-backdrop" aria-hidden="true">
-        <div class="public-modal" role="dialog" aria-modal="true" aria-labelledby="attachment-modal-title-<?= esc((string) $attachmentIndex, 'attr') ?>">
-            <div class="public-modal-head">
-                <h2 id="attachment-modal-title-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-title">
-                    <?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen') ?>
-                </h2>
-                <button type="button" class="btn btn-icon btn-ghost-secondary public-modal-close" data-close-modal aria-label="Tutup">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <path d="M18 6l-12 12"/>
-                        <path d="M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="public-modal-body pdf-modal-body">
-                <iframe class="pdf-frame" src="<?= esc($attachmentViewerUrl) ?>" title="<?= esc($attachmentTitle !== '' ? $attachmentTitle : 'Lampiran Instrumen', 'attr') ?>"></iframe>
-            </div>
-        </div>
-    </div>
-<?php endforeach; ?>
 
 <script>
 (function () {

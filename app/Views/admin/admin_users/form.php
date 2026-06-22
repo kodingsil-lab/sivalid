@@ -188,19 +188,20 @@
                     >
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="ringkasan_penelitian_pdf" class="form-label">Ringkasan Penelitian</label>
+                    <label for="ringkasan_penelitian_pdf" class="form-label">Link Ringkasan Penelitian</label>
                     <input
-                        type="file"
+                        type="url"
                         name="ringkasan_penelitian_pdf"
                         id="ringkasan_penelitian_pdf"
                         class="form-control"
-                        accept="application/pdf,.pdf"
+                        placeholder="https://drive.google.com/file/d/.../view"
+                        value="<?= esc(old('ringkasan_penelitian_pdf', $profile['ringkasan_penelitian_pdf'] ?? '')) ?>"
                     >
-                    <div class="form-hint">Unggah file PDF ringkasan penelitian. Maksimal 10 MB.</div>
+                    <div class="form-hint">Masukkan link Google Drive PDF. Pastikan akses file disetel ke siapa saja yang memiliki link dapat melihat.</div>
                     <?php if (!empty($profile['ringkasan_penelitian_pdf'])): ?>
                         <div class="mt-2">
-                            <a href="<?= sivalid_uploaded_file_url((string) $profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
-                                Lihat PDF Tersimpan
+                            <a href="<?= sivalid_pdf_viewer_url((string) $profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                Lihat Ringkasan
                             </a>
                         </div>
                     <?php endif; ?>

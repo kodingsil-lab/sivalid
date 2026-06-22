@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Libraries\AuditLogService;
-use App\Models\InstrumentAttachmentModel;
 use App\Models\InstrumentAspectModel;
 use App\Models\InstrumentIndicatorModel;
 use App\Models\InstrumentItemModel;
@@ -22,7 +21,6 @@ class PublicBundle extends BaseController
     protected ValidationBundleSessionModel $sessionModel;
     protected ValidationBundleAnswerModel $answerModel;
     protected ValidationBundleInstrumentProgressModel $progressModel;
-    protected InstrumentAttachmentModel $attachmentModel;
     protected InstrumentAspectModel $aspectModel;
     protected InstrumentIndicatorModel $indicatorModel;
     protected InstrumentItemModel $itemModel;
@@ -36,7 +34,6 @@ class PublicBundle extends BaseController
         $this->sessionModel          = new ValidationBundleSessionModel();
         $this->answerModel           = new ValidationBundleAnswerModel();
         $this->progressModel         = new ValidationBundleInstrumentProgressModel();
-        $this->attachmentModel       = new InstrumentAttachmentModel();
         $this->aspectModel           = new InstrumentAspectModel();
         $this->indicatorModel        = new InstrumentIndicatorModel();
         $this->itemModel             = new InstrumentItemModel();
@@ -250,7 +247,6 @@ class PublicBundle extends BaseController
             'aspects'          => $aspects,
             'indicators'       => $indicators,
             'items'            => $items,
-            'attachments'      => $this->attachmentModel->getByInstrument($instrumentId),
             'scale'            => $scale,
             'validatorSession' => $validatorSession,
             'isFinal'          => false,

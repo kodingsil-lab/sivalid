@@ -566,8 +566,8 @@ $progressMap = $progressMap ?? [];
 $validatorSession = $validatorSession ?? null;
 $profile = isset($profile) && is_array($profile) ? $profile : [];
 $profilePdf = trim((string) ($profile['ringkasan_penelitian_pdf'] ?? ''));
-$profilePdfUrl = sivalid_uploaded_file_url($profilePdf);
-$profilePdfViewerUrl = $profilePdfUrl !== '' ? $profilePdfUrl . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH' : '';
+$profilePdfUrl = $profilePdf;
+$profilePdfViewerUrl = sivalid_pdf_viewer_url($profilePdf);
 $hasValidatorSession = is_array($validatorSession) && !empty($validatorSession);
 $identityButtonLabel = $hasValidatorSession ? 'Simpan Identitas' : 'Mulai Validasi';
 ?>

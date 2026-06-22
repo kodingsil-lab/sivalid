@@ -661,8 +661,7 @@ $attachments = isset($attachments) && is_array($attachments) ? $attachments : []
 <?php foreach ($attachments as $attachmentIndex => $attachment): ?>
     <?php
     $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen'));
-    $attachmentUrl = sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? ''));
-    $attachmentViewerUrl = $attachmentUrl . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH';
+    $attachmentViewerUrl = sivalid_pdf_viewer_url((string) ($attachment['file_path'] ?? ''));
     ?>
     <div id="instrument-attachment-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-backdrop" aria-hidden="true">
         <div class="public-modal" role="dialog" aria-modal="true" aria-labelledby="instrument-attachment-title-<?= esc((string) $attachmentIndex, 'attr') ?>">

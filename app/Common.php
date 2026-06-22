@@ -79,6 +79,52 @@ if (! function_exists('sivalid_uploaded_file_url')) {
     }
 }
 
+if (! function_exists('sivalid_pdf_viewer_url')) {
+    function sivalid_pdf_viewer_url(?string $pathOrUrl): string
+    {
+        $value = trim((string) $pathOrUrl);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//i', $value) === 1) {
+            return sivalid_google_drive_preview_url($value);
+        }
+
+        $url = sivalid_uploaded_file_url($value);
+
+        return $url !== '' ? $url . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH' : '';
+    }
+}
+
+if (! function_exists('sivalid_google_drive_preview_url')) {
+    function sivalid_google_drive_preview_url(string $url): string
+    {
+        $url = trim($url);
+
+        if ($url === '') {
+            return '';
+        }
+
+        $fileId = '';
+
+        if (preg_match('~drive\.google\.com/file/d/([^/]+)~i', $url, $matches) === 1) {
+            $fileId = $matches[1];
+        } elseif (preg_match('~drive\.google\.com/open\?id=([^&]+)~i', $url, $matches) === 1) {
+            $fileId = $matches[1];
+        } elseif (preg_match('~drive\.google\.com/uc\?[^#]*\bid=([^&]+)~i', $url, $matches) === 1) {
+            $fileId = $matches[1];
+        }
+
+        if ($fileId !== '') {
+            return 'https://drive.google.com/file/d/' . rawurlencode($fileId) . '/preview';
+        }
+
+        return $url;
+    }
+}
+
 if (! function_exists('sivalid_logo_url')) {
     function sivalid_logo_url(): string
     {
