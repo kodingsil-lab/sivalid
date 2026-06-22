@@ -47,7 +47,11 @@ $identityFields = isset($identityFields) && is_array($identityFields) ? $identit
     .identity-summary-actions {
         display: flex;
         justify-content: flex-end;
-        margin: 0 0 .75rem;
+        position: absolute;
+        top: 1.55rem;
+        right: 1.6rem;
+        z-index: 2;
+        margin: 0;
     }
 
     .identity-summary-edit-btn {
@@ -72,6 +76,13 @@ $identityFields = isset($identityFields) && is_array($identityFields) ? $identit
         background: #f3f8fd;
         color: #0b63b6;
         text-decoration: none;
+    }
+
+    @media (max-width: 720px) {
+        .identity-summary-actions {
+            position: static;
+            margin: 0 0 .75rem;
+        }
     }
 </style>
 

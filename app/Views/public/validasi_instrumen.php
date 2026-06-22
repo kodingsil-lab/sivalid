@@ -33,6 +33,7 @@
         }
 
         .public-card {
+            position: relative;
             background: var(--pub-surface);
             border: 1px solid var(--pub-border);
             border-radius: var(--pub-radius);
@@ -180,23 +181,26 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 36px;
-            padding: .42rem .82rem;
-            border: 1px solid #bfdbfe;
+            min-height: 42px;
+            padding: .58rem 1.05rem;
+            border: 1px solid var(--pub-blue);
             border-radius: 6px;
-            background: #eff6ff;
-            color: var(--pub-blue);
+            background: var(--pub-blue);
+            color: #fff;
             cursor: pointer;
-            font-size: .92rem;
+            font-size: .95rem;
             font-weight: 650;
             line-height: 1.2;
+            text-decoration: none;
         }
 
         .attachment-btn:hover,
         .attachment-btn:focus {
             border-color: var(--pub-blue);
-            background: #dbeafe;
+            background: var(--pub-blue);
+            color: #fff;
             outline: none;
+            filter: brightness(0.92);
         }
 
         .public-modal-backdrop {

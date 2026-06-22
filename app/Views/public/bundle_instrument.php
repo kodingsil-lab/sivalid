@@ -302,11 +302,11 @@
             border: 1px solid #206bc4;
             background: #206bc4;
             color: #fff;
-            min-height: 34px;
-            padding: .42rem .82rem;
+            min-height: 42px;
+            padding: .58rem 1.05rem;
             border-radius: 6px;
             cursor: pointer;
-            font-size: .92rem;
+            font-size: .95rem;
             font-weight: 650;
             text-decoration: none;
             box-shadow: 0 4px 10px rgba(32, 107, 196, .14);

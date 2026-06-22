@@ -34,6 +34,7 @@
         }
 
         .public-card {
+            position: relative;
             background: var(--pub-surface);
             border: 1px solid var(--pub-border);
             border-radius: var(--pub-radius);
@@ -46,6 +47,7 @@
             border-bottom: 1px solid #d5e0ec;
             margin-bottom: 1.15rem;
             padding-bottom: .95rem;
+            padding-right: 190px;
         }
 
         .public-title {
@@ -306,22 +308,24 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 36px;
-            padding: .42rem .82rem;
-            border: 1px solid #bfdbfe;
+            min-height: 42px;
+            padding: .58rem 1.05rem;
+            border: 1px solid #0b6fc8;
             border-radius: 6px;
-            background: #eff6ff;
-            color: var(--pub-blue);
+            background: #0b6fc8;
+            color: #fff;
             cursor: pointer;
-            font-size: .9rem;
+            font-size: .95rem;
             font-weight: 650;
             line-height: 1.2;
+            text-decoration: none;
         }
 
         .attachment-btn:hover,
         .attachment-btn:focus {
-            border-color: var(--pub-blue);
-            background: #dbeafe;
+            border-color: #095fae;
+            background: #095fae;
+            color: #fff;
             outline: none;
         }
 
@@ -413,6 +417,10 @@
 
             .public-card {
                 padding: 1.1rem;
+            }
+
+            .public-header {
+                padding-right: 0;
             }
 
             .form-row {
