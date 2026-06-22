@@ -479,15 +479,23 @@ class InstrumentItems extends BaseController
         }
 
         $templateRows = $this->importTemplateRows($itemLayout);
-        $sharedStrings = $this->xlsxSharedStringsFromRows($templateRows);
+        $referenceRows = $this->importTemplateReferenceRows();
+        $sharedStrings = $this->xlsxSharedStringsFromRows(array_merge($templateRows, $referenceRows));
+        $itemTypeColumn = $this->templateHeaderColumn($templateRows[0] ?? [], 'Tipe Butir');
 
         $zip->addFromString('[Content_Types].xml', $this->xlsxContentTypesXml());
         $zip->addFromString('_rels/.rels', $this->xlsxRootRelsXml());
-        $zip->addFromString('xl/workbook.xml', $this->xlsxWorkbookXml('Template Butir'));
+        $zip->addFromString('xl/workbook.xml', $this->xlsxWorkbookXml(['Isian', 'Referensi']));
         $zip->addFromString('xl/_rels/workbook.xml.rels', $this->xlsxWorkbookRelsXml());
         $zip->addFromString('xl/styles.xml', $this->xlsxStylesXml());
         $zip->addFromString('xl/sharedStrings.xml', $this->xlsxSharedStringsXml($sharedStrings));
-        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxTemplateSheetXml($templateRows, $sharedStrings));
+        $zip->addFromString('xl/worksheets/sheet1.xml', $this->xlsxTemplateSheetXml(
+            $templateRows,
+            $sharedStrings,
+            $itemTypeColumn,
+            "'Referensi'!\$B\$2:\$B\$6"
+        ));
+        $zip->addFromString('xl/worksheets/sheet2.xml', $this->xlsxTemplateSheetXml($referenceRows, $sharedStrings));
         $zip->close();
 
         return $this->response
@@ -862,6 +870,7 @@ class InstrumentItems extends BaseController
             . '<Default Extension="xml" ContentType="application/xml"/>'
             . '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
             . '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+            . '<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
             . '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
             . '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>'
             . '</Types>';
@@ -875,11 +884,17 @@ class InstrumentItems extends BaseController
             . '</Relationships>';
     }
 
-    private function xlsxWorkbookXml(string $sheetName): string
+    private function xlsxWorkbookXml(array $sheetNames): string
     {
+        $sheets = '';
+        foreach ($sheetNames as $index => $sheetName) {
+            $sheetId = $index + 1;
+            $sheets .= '<sheet name="' . htmlspecialchars((string) $sheetName, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" sheetId="' . $sheetId . '" r:id="rId' . $sheetId . '"/>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8"?>'
             . '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-            . '<sheets><sheet name="' . htmlspecialchars($sheetName, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '" sheetId="1" r:id="rId1"/></sheets>'
+            . '<sheets>' . $sheets . '</sheets>'
             . '</workbook>';
     }
 
@@ -888,8 +903,9 @@ class InstrumentItems extends BaseController
         return '<?xml version="1.0" encoding="UTF-8"?>'
             . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
             . '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
-            . '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
-            . '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
+            . '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>'
+            . '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+            . '<Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>'
             . '</Relationships>';
     }
 
@@ -972,6 +988,35 @@ class InstrumentItems extends BaseController
         return [$headers, $sampleOne, $sampleTwo];
     }
 
+    private function importTemplateReferenceRows(): array
+    {
+        return [
+            ['Referensi', 'Nilai', 'Keterangan'],
+            ['Tipe Butir', 'skala', 'Jawaban berupa skor sesuai skala instrumen.'],
+            ['Tipe Butir', 'komentar', 'Jawaban berupa komentar atau saran.'],
+            ['Tipe Butir', 'isian', 'Jawaban berupa teks isian.'],
+            ['Tipe Butir', 'pilihan', 'Jawaban berupa pilihan.'],
+            ['Tipe Butir', 'catatan', 'Jawaban berupa catatan.'],
+            ['Wajib', 'Ya', 'Butir wajib diisi.'],
+            ['Wajib', 'Tidak', 'Butir boleh dikosongkan.'],
+            ['Status', 'Aktif', 'Butir digunakan.'],
+            ['Status', 'Perlu Revisi', 'Butir perlu ditinjau ulang.'],
+            ['Status', 'Direvisi', 'Butir sudah diperbaiki.'],
+            ['Status', 'Tidak Aktif', 'Butir tidak digunakan.'],
+        ];
+    }
+
+    private function templateHeaderColumn(array $headers, string $label): ?int
+    {
+        foreach ($headers as $index => $header) {
+            if ((string) $header === $label) {
+                return $index + 1;
+            }
+        }
+
+        return null;
+    }
+
     private function xlsxSharedStringsFromRows(array $rows): array
     {
         $strings = [];
@@ -988,7 +1033,12 @@ class InstrumentItems extends BaseController
         return $strings;
     }
 
-    private function xlsxTemplateSheetXml(array $rows, array $sharedStrings): string
+    private function xlsxTemplateSheetXml(
+        array $rows,
+        array $sharedStrings,
+        ?int $validationColumn = null,
+        ?string $validationFormula = null
+    ): string
     {
         $stringIndex = array_flip($sharedStrings);
         $maxColumns = max(array_map('count', $rows));
@@ -1013,10 +1063,21 @@ class InstrumentItems extends BaseController
             $sheetData .= '</row>';
         }
 
+        $dataValidations = '';
+        if ($validationColumn !== null && $validationFormula !== null) {
+            $columnName = $this->xlsxColumnName($validationColumn);
+            $dataValidations = '<dataValidations count="1">'
+                . '<dataValidation type="list" allowBlank="1" showErrorMessage="1" sqref="' . $columnName . '2:' . $columnName . '1001">'
+                . '<formula1>' . htmlspecialchars($validationFormula, ENT_XML1 | ENT_COMPAT, 'UTF-8') . '</formula1>'
+                . '</dataValidation>'
+                . '</dataValidations>';
+        }
+
         return '<?xml version="1.0" encoding="UTF-8"?>'
             . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
             . '<cols>' . $columns . '</cols>'
             . '<sheetData>' . $sheetData . '</sheetData>'
+            . $dataValidations
             . '</worksheet>';
     }
 
