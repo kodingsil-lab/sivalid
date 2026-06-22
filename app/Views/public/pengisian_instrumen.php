@@ -308,14 +308,14 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-height: 42px;
-            padding: .58rem 1.05rem;
+            min-height: 38px;
+            padding: .45rem .9rem;
             border: 1px solid #0b6fc8;
             border-radius: 6px;
             background: #0b6fc8;
             color: #fff;
             cursor: pointer;
-            font-size: .95rem;
+            font-size: .92rem;
             font-weight: 650;
             line-height: 1.2;
             text-decoration: none;
