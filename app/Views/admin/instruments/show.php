@@ -143,7 +143,7 @@ $renderDetailText = static function (?string $value): string {
                             <tr>
                                 <td><?= esc((string) ($attachment['title'] ?? '-')) ?></td>
                                 <td>
-                                    <a href="<?= base_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                    <a href="<?= sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? '')) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
                                         Lihat PDF
                                     </a>
                                 </td>

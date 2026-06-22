@@ -87,6 +87,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 $routes->get('isi/(:segment)', 'PublicForm::show/$1');
 $routes->post('isi/(:segment)', 'PublicForm::submit/$1');
 $routes->get('terima-kasih', 'PublicForm::thanks');
+$routes->get('berkas/unggahan/(:segment)', 'PublicFiles::uploaded/$1');
 
 $routes->get('paket/(:segment)', 'PublicBundle::show/$1');
 $routes->post('paket/(:segment)/mulai', 'PublicBundle::startSession/$1');

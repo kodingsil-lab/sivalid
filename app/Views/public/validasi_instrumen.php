@@ -639,7 +639,7 @@ $linkToken = $text($link, 'token', '');
 <?php foreach ($attachments as $attachmentIndex => $attachment): ?>
     <?php
     $attachmentTitle = trim((string) ($attachment['title'] ?? 'Lampiran Instrumen'));
-    $attachmentUrl = base_url((string) ($attachment['file_path'] ?? ''));
+    $attachmentUrl = sivalid_uploaded_file_url((string) ($attachment['file_path'] ?? ''));
     $attachmentViewerUrl = $attachmentUrl . '#toolbar=0&navpanes=0&scrollbar=1&view=FitH';
     ?>
     <div id="instrument-attachment-<?= esc((string) $attachmentIndex, 'attr') ?>" class="public-modal-backdrop" aria-hidden="true">

@@ -59,6 +59,26 @@ if (! function_exists('sivalid_asset_url')) {
     }
 }
 
+if (! function_exists('sivalid_uploaded_file_url')) {
+    function sivalid_uploaded_file_url(?string $path): string
+    {
+        $path = trim((string) $path);
+
+        if ($path === '') {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//i', $path) === 1) {
+            return $path;
+        }
+
+        $normalizedPath = ltrim(str_replace('\\', '/', $path), '/');
+        $encodedPath = rtrim(strtr(base64_encode($normalizedPath), '+/', '-_'), '=');
+
+        return base_url('berkas/unggahan/' . $encodedPath);
+    }
+}
+
 if (! function_exists('sivalid_logo_url')) {
     function sivalid_logo_url(): string
     {

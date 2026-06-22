@@ -229,7 +229,7 @@
                                 <div class="form-hint">Unggah file PDF ringkasan penelitian. Maksimal 10 MB.</div>
                                 <?php if (!empty($profile['ringkasan_penelitian_pdf'])): ?>
                                     <div class="mt-2">
-                                        <a href="<?= base_url($profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
+                                        <a href="<?= sivalid_uploaded_file_url((string) $profile['ringkasan_penelitian_pdf']) ?>" target="_blank" rel="noopener" class="btn btn-sm btn-light">
                                             Lihat PDF Tersimpan
                                         </a>
                                     </div>
