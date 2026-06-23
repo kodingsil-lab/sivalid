@@ -565,7 +565,7 @@ $attachments = isset($attachments) && is_array($attachments) ? $attachments : []
                                 <?php elseif ($usesInterview): ?>
                                     <th style="width: 300px;"><?= esc((string) ($previewLayout['answer'] ?? 'Jawaban')) ?></th>
                                 <?php elseif ($usesObservation): ?>
-                                    <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Hasil Pengamatan')) ?></th>
+                                    <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Catatan Aktivitas')) ?></th>
                                 <?php else: ?>
                                     <th style="width: 250px;"><?= $usesQuestionnaire || $usesPerformanceTest ? 'Skor' : 'Jawaban' ?></th>
                                     <?php if ($usesPerformanceTest): ?>

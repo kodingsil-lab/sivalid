@@ -137,8 +137,8 @@ if (! function_exists('instrument_preview_layout')) {
                 'type' => 'observation_guide',
                 'title' => 'Pedoman Observasi',
                 'aspect' => 'Aspek yang Diobservasi',
-                'item' => 'Indikator',
-                'result' => 'Hasil Pengamatan',
+                'item' => 'Fokus Pengamatan',
+                'result' => 'Catatan Aktivitas',
             ],
             'focus_group_discussion' => [
                 'type' => 'focus_group_discussion',
@@ -219,7 +219,7 @@ if (! function_exists('instrument_item_entry_layout')) {
             'item_placeholder' => match ($type) {
                 'document_review' => 'Tuliskan item telaah.',
                 'interview_guide' => 'Tuliskan pertanyaan wawancara.',
-                'observation_guide' => 'Tuliskan indikator yang diamati.',
+                'observation_guide' => 'Tuliskan fokus pengamatan.',
                 'focus_group_discussion' => 'Tuliskan pertanyaan pemandu atau fokus diskusi.',
                 'performance_test' => 'Tuliskan fokus penilaian.',
                 'rubric_assessment' => 'Tuliskan indikator rubrik penilaian.',

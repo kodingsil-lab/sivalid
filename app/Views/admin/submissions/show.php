@@ -229,7 +229,7 @@ $respondenLabel = $respondentTypeLabel($currentResponse, $identityFields);
                             <?php elseif ($usesInterview): ?>
                                 <th style="width: 300px;"><?= esc((string) ($previewLayout['answer'] ?? 'Jawaban')) ?></th>
                             <?php elseif ($usesObservation): ?>
-                                <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Hasil Pengamatan')) ?></th>
+                                <th style="width: 300px;"><?= esc((string) ($previewLayout['result'] ?? 'Catatan Aktivitas')) ?></th>
                             <?php else: ?>
                                 <th style="width: 120px;"><?= $usesQuestionnaire || $usesPerformanceTest ? 'Skor' : 'Jawaban' ?></th>
                                 <th style="width: 220px;">Komentar/Catatan</th>

@@ -647,7 +647,7 @@ class InstrumentItems extends BaseController
         $statementHeaders = match ($layoutType) {
             'document_review' => ['item telaah', 'pernyataan', 'butir', 'butir pernyataan'],
             'interview_guide' => ['pertanyaan wawancara', 'pertanyaan', 'pernyataan', 'butir', 'butir pernyataan'],
-            'observation_guide' => ['indikator', 'indikator yang diamati', 'pernyataan', 'butir', 'butir pernyataan'],
+            'observation_guide' => ['fokus pengamatan', 'indikator', 'indikator yang diamati', 'pernyataan', 'butir', 'butir pernyataan'],
             'focus_group_discussion' => ['pertanyaan pemandu/fokus diskusi', 'pertanyaan pemandu', 'fokus diskusi', 'pertanyaan', 'pernyataan', 'butir', 'butir pernyataan'],
             'performance_test' => ['fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
             'rubric_assessment' => ['indikator', 'fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
@@ -963,7 +963,7 @@ class InstrumentItems extends BaseController
         $sampleOne = match ($type) {
             'document_review' => ['1', 'Pendekatan Pembelajaran', 'RPS mencantumkan pendekatan pembelajaran.', 'RPS', 'skala', 'Ya', '1', 'Aktif'],
             'interview_guide' => ['1', 'Perencanaan Pembelajaran', 'Bagaimana Bapak/Ibu merencanakan pembelajaran?', 'isian', 'Ya', '1', 'Aktif'],
-            'observation_guide' => ['1', 'Kondisi Pembelajaran', 'Pengamatan terhadap proses pembelajaran.', 'isian', 'Ya', '1', 'Aktif'],
+            'observation_guide' => ['1', 'Kegiatan Pembelajaran', 'Pelaksanaan lima tahap Process Writing Approach pada pembelajaran menulis artikel ilmiah.', 'isian', 'Ya', '1', 'Aktif'],
             'focus_group_discussion' => ['1', 'Isi', 'Apakah konsep model pembelajaran sudah jelas sebelum digunakan pada tahap uji coba berikutnya?', 'isian', 'Ya', '1', 'Aktif'],
             'performance_test' => ['1', 'Kelayakan topik dan fokus artikel', 'Kejelasan topik, relevansi isu, batasan masalah, tujuan artikel, dan kesesuaian dengan bidang kajian.', 'skala', 'Ya', '1', 'Aktif'],
             'rubric_assessment' => [

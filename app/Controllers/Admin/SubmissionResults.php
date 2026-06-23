@@ -876,7 +876,7 @@ class SubmissionResults extends BaseController
 
         return match ($layoutType) {
             'interview_guide' => [$prefix . (string) ($layout['answer'] ?? 'Jawaban')],
-            'observation_guide' => [$prefix . (string) ($layout['result'] ?? 'Hasil Pengamatan')],
+            'observation_guide' => [$prefix . (string) ($layout['result'] ?? 'Catatan Aktivitas')],
             'rubric_assessment' => [$prefix . 'Skor yang Diperoleh', $prefix . 'Catatan'],
             'performance_test' => [$prefix . 'Skor', $prefix . 'Catatan'],
             'document_review' => [$prefix . 'Skor', $prefix . 'Komentar'],
