@@ -449,6 +449,7 @@ $layoutType = (string) ($previewLayout['type'] ?? 'standard');
 $usesDocumentReview = $layoutType === 'document_review';
 $usesInterview = $layoutType === 'interview_guide';
 $usesObservation = $layoutType === 'observation_guide';
+$usesFgd = $layoutType === 'focus_group_discussion';
 $usesRubric = $layoutType === 'rubric_assessment';
 $usesQuestionnaire = in_array($layoutType, ['questionnaire', 'product_validation_questionnaire', 'user_response_questionnaire'], true);
 $usesPerformanceTest = $layoutType === 'performance_test';
@@ -544,7 +545,13 @@ $attachments = isset($attachments) && is_array($attachments) ? $attachments : []
                         <thead>
                             <tr>
                                 <th style="width: 76px;">No. Butir</th>
-                                <th><?= esc((string) ($previewLayout['item'] ?? 'Butir Pernyataan')) ?></th>
+                                <?php if ($usesFgd): ?>
+                                    <th style="width: 220px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek yang Didiskusikan')) ?></th>
+                                    <th><?= esc((string) ($previewLayout['item'] ?? 'Pertanyaan Pemandu/Fokus Diskusi')) ?></th>
+                                    <th style="width: 300px;"><?= esc((string) ($previewLayout['comment'] ?? 'Komentar')) ?></th>
+                                <?php else: ?>
+                                    <th><?= esc((string) ($previewLayout['item'] ?? 'Butir Pernyataan')) ?></th>
+                                <?php endif; ?>
                                 <?php if ($usesDocumentReview): ?>
                                     <th style="width: 150px;">Sumber Dokumen</th>
                                     <th style="width: 230px;">Skor</th>
@@ -604,42 +611,53 @@ $attachments = isset($attachments) && is_array($attachments) ? $attachments : []
                                 ?>
                                 <tr class="instrument-item-row">
                                     <td><span class="item-number"><?= esc((string) $butirNo++) ?></span></td>
-                                    <td>
-                                        <?= nl2br(esc($item['pernyataan'])) ?>
-                                        <br><small class="text-muted">Aspek: <?= esc($aspectName) ?></small>
-                                        <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
-                                    </td>
-
-                                    <?php if ($usesDocumentReview): ?>
-                                        <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
-                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
+                                    <?php if ($usesFgd): ?>
+                                        <td><?= esc((string) $aspectName) ?></td>
                                         <td>
-                                            <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan komentar"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                            <?= nl2br(esc($item['pernyataan'])) ?>
+                                            <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
                                         </td>
-                                    <?php elseif ($usesRubric): ?>
-                                        <?php foreach (range(1, 5) as $score): ?>
-                                            <td><?= nl2br(esc((string) ($item['skor_' . $score . '_deskripsi'] ?? '-'))) ?></td>
-                                        <?php endforeach; ?>
-                                        <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
-                                        <td>
-                                            <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
-                                        </td>
-                                    <?php elseif ($usesInterview): ?>
-                                        <td><?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban wawancara') ?></td>
-                                    <?php elseif ($usesObservation): ?>
-                                        <td><?= $renderTextInput($item, $isRequired, 'Tuliskan hasil pengamatan') ?></td>
+                                        <td><?= $renderTextInput($item, $isRequired, 'Tuliskan komentar') ?></td>
                                     <?php else: ?>
                                         <td>
-                                            <?php if ($usesQuestionnaire || $usesPerformanceTest || $tipeButir === 'skala'): ?>
-                                                <?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?>
-                                            <?php else: ?>
-                                                <?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban') ?>
-                                            <?php endif; ?>
+                                            <?= nl2br(esc($item['pernyataan'])) ?>
+                                            <br><small class="text-muted">Aspek: <?= esc($aspectName) ?></small>
+                                            <span class="item-required"><?= (int) ($item['wajib'] ?? 1) === 1 ? 'Wajib diisi' : 'Opsional' ?></span>
                                         </td>
-                                        <?php if ($usesPerformanceTest): ?>
+                                    <?php endif; ?>
+
+                                    <?php if (! $usesFgd): ?>
+                                        <?php if ($usesDocumentReview): ?>
+                                            <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
+                                            <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
+                                            <td>
+                                                <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan komentar"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                            </td>
+                                        <?php elseif ($usesRubric): ?>
+                                            <?php foreach (range(1, 5) as $score): ?>
+                                                <td><?= nl2br(esc((string) ($item['skor_' . $score . '_deskripsi'] ?? '-'))) ?></td>
+                                            <?php endforeach; ?>
+                                            <td><?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?></td>
                                             <td>
                                                 <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
                                             </td>
+                                        <?php elseif ($usesInterview): ?>
+                                            <td><?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban wawancara') ?></td>
+                                        <?php elseif ($usesObservation): ?>
+                                            <td><?= $renderTextInput($item, $isRequired, 'Tuliskan hasil pengamatan') ?></td>
+                                        <?php else: ?>
+                                            <td>
+                                                <?php if ($usesQuestionnaire || $usesPerformanceTest || $tipeButir === 'skala'): ?>
+                                                    <?= $renderScoreInput($scaleRange, $item, $isRequired, $scaleLabels) ?>
+                                                <?php else: ?>
+                                                    <?= $renderTextInput($item, $isRequired, 'Tuliskan jawaban') ?>
+                                                <?php endif; ?>
+                                            </td>
+                                            <?php if ($usesPerformanceTest): ?>
+                                                <td>
+                                                    <textarea class="text-answer" name="answers[<?= $item['id'] ?>][komentar]" placeholder="Tuliskan catatan"><?= esc(old('answers.' . $item['id'] . '.komentar')) ?></textarea>
+                                                </td>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     <?php endif; ?>
                                 </tr>

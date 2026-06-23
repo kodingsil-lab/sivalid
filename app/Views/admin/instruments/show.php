@@ -16,6 +16,7 @@ $previewLayout = instrument_preview_layout(
 $usesDocumentReviewLayout = ($previewLayout['type'] ?? 'standard') === 'document_review';
 $usesInterviewGuideLayout = ($previewLayout['type'] ?? 'standard') === 'interview_guide';
 $usesObservationGuideLayout = ($previewLayout['type'] ?? 'standard') === 'observation_guide';
+$usesFgdLayout = ($previewLayout['type'] ?? 'standard') === 'focus_group_discussion';
 $usesQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'questionnaire';
 $usesProductValidationQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'product_validation_questionnaire';
 $usesUserResponseQuestionnaireLayout = ($previewLayout['type'] ?? 'standard') === 'user_response_questionnaire';
@@ -432,6 +433,13 @@ $renderDetailText = static function (?string $value): string {
                                 <th><?= esc((string) $previewLayout['item']) ?></th>
                                 <th style="width: 280px;"><?= esc((string) $previewLayout['result']) ?></th>
                             </tr>
+                        <?php elseif ($usesFgdLayout): ?>
+                            <tr>
+                                <th style="width: 54px;">No</th>
+                                <th style="width: 220px;"><?= esc((string) $previewLayout['aspect']) ?></th>
+                                <th><?= esc((string) $previewLayout['item']) ?></th>
+                                <th style="width: 260px;"><?= esc((string) $previewLayout['comment']) ?></th>
+                            </tr>
                         <?php elseif ($usesQuestionnaireLayout || $usesProductValidationQuestionnaireLayout || $usesUserResponseQuestionnaireLayout): ?>
                             <tr>
                                 <th rowspan="2" style="width: 54px;">No</th>
@@ -465,7 +473,7 @@ $renderDetailText = static function (?string $value): string {
                                 <?php if ($usesDocumentReviewLayout): ?>
                                     <td><?= esc(document_review_source_label($item['sumber_dokumen'] ?? '')) ?></td>
                                 <?php endif; ?>
-                                <?php if ($usesInterviewGuideLayout || $usesObservationGuideLayout): ?>
+                                <?php if ($usesInterviewGuideLayout || $usesObservationGuideLayout || $usesFgdLayout): ?>
                                     <td></td>
                                 <?php else: ?>
                                     <?php foreach ($scaleRange as $score): ?>
@@ -498,6 +506,13 @@ $renderDetailText = static function (?string $value): string {
             <?php if ($usesUserResponseQuestionnaireLayout): ?>
                 <div class="instrument-ready-extra">
                     <h4>Catatan/Saran Pengguna</h4>
+                    <div class="instrument-ready-box"></div>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($usesFgdLayout): ?>
+                <div class="instrument-ready-extra">
+                    <h4>4. <?= esc((string) ($previewLayout['general_note'] ?? 'Catatan Umum FGD')) ?></h4>
                     <div class="instrument-ready-box"></div>
                 </div>
             <?php endif; ?>

@@ -865,7 +865,7 @@ class PublicForm extends BaseController
 
         $layoutType = (string) (instrument_preview_layout($link['jenis'] ?? '')['type'] ?? 'standard');
 
-        if (in_array($layoutType, ['interview_guide', 'observation_guide'], true)) {
+        if (in_array($layoutType, ['interview_guide', 'observation_guide', 'focus_group_discussion'], true)) {
             return 'isian';
         }
 

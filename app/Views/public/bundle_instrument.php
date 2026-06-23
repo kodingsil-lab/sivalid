@@ -719,6 +719,9 @@ $masterPengantar  = trim((string) ($instrumentEntry['pengantar'] ?? ''));
 $masterPetunjuk   = trim((string) ($instrumentEntry['petunjuk'] ?? ''));
 $pengantarValidasi = trim((string) ($instrumentEntry['pengantar_validasi'] ?? ''));
 $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''));
+$previewLayout = instrument_preview_layout($instrumentEntry['jenis'] ?? '');
+$previewLayoutType = (string) ($previewLayout['type'] ?? 'standard');
+$usesFgdPreview = $previewLayoutType === 'focus_group_discussion';
 
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
@@ -1187,11 +1190,18 @@ $text = static function (array $row, string $key, string $default = '-'): string
                     <table class="public-table">
                         <thead>
                         <tr>
-                            <th style="width: 76px;">No. Butir</th>
-                            <th>Butir Pernyataan</th>
-                            <?php foreach ($masterScaleRange as $score): ?>
-                                <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
-                            <?php endforeach; ?>
+                            <?php if ($usesFgdPreview): ?>
+                                <th style="width: 76px;">No</th>
+                                <th style="width: 220px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek yang Didiskusikan')) ?></th>
+                                <th><?= esc((string) ($previewLayout['item'] ?? 'Pertanyaan Pemandu/Fokus Diskusi')) ?></th>
+                                <th style="width: 260px;"><?= esc((string) ($previewLayout['comment'] ?? 'Komentar')) ?></th>
+                            <?php else: ?>
+                                <th style="width: 76px;">No. Butir</th>
+                                <th>Butir Pernyataan</th>
+                                <?php foreach ($masterScaleRange as $score): ?>
+                                    <th class="public-score-cell" style="width: 56px;"><?= esc((string) $score) ?></th>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tr>
                         </thead>
                         <tbody>
@@ -1207,18 +1217,28 @@ $text = static function (array $row, string $key, string $default = '-'): string
                             ?>
                             <tr>
                                 <td><?= esc((string) $modalButirNo++) ?></td>
-                                <td>
-                                    <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
-                                    <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc($aspectName) ?></span>
-                                </td>
-                                <?php foreach ($masterScaleRange as $score): ?>
-                                    <td class="public-score-cell">&bigcirc;</td>
-                                <?php endforeach; ?>
+                                <?php if ($usesFgdPreview): ?>
+                                    <td><?= esc($aspectName) ?></td>
+                                    <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                    <td></td>
+                                <?php else: ?>
+                                    <td>
+                                        <?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?>
+                                        <span class="public-item-aspect"><strong>Aspek:</strong> <?= esc($aspectName) ?></span>
+                                    </td>
+                                    <?php foreach ($masterScaleRange as $score): ?>
+                                        <td class="public-score-cell">&bigcirc;</td>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
+                <?php if ($usesFgdPreview): ?>
+                    <h3 class="public-modal-subtitle" style="margin-top:1rem;"><?= esc((string) ($previewLayout['general_note'] ?? 'Catatan Umum FGD')) ?></h3>
+                    <div style="border:1px solid #cbd5e1; min-height:130px;"></div>
+                <?php endif; ?>
             <?php endif; ?>
             </div>
         </div>

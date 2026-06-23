@@ -10,6 +10,7 @@ if (! function_exists('sivalid_default_instrument_types')) {
             'Angket',
             'Angket Validasi Produk',
             'Angket Respon Pengguna',
+            'Focus Group Discussion',
             'Tes Unjuk Kerja',
             'Rubrik Penilaian',
         ];
@@ -32,6 +33,14 @@ if (! function_exists('instrument_type_key')) {
 
         if (str_contains($jenis, 'pedoman observasi') || $jenis === 'observasi') {
             return 'pedoman_observasi';
+        }
+
+        if (
+            str_contains($jenis, 'focus group discussion')
+            || str_contains($jenis, 'pedoman fgd')
+            || $jenis === 'fgd'
+        ) {
+            return 'focus_group_discussion';
         }
 
         if (str_contains($jenis, 'angket validasi produk')) {
@@ -131,6 +140,14 @@ if (! function_exists('instrument_preview_layout')) {
                 'item' => 'Indikator',
                 'result' => 'Hasil Pengamatan',
             ],
+            'focus_group_discussion' => [
+                'type' => 'focus_group_discussion',
+                'title' => 'Format Pedoman FGD',
+                'aspect' => 'Aspek yang Didiskusikan',
+                'item' => 'Pertanyaan Pemandu/Fokus Diskusi',
+                'comment' => 'Komentar',
+                'general_note' => 'Catatan Umum FGD',
+            ],
             'angket' => [
                 'type' => 'questionnaire',
                 'title' => 'Angket',
@@ -203,6 +220,7 @@ if (! function_exists('instrument_item_entry_layout')) {
                 'document_review' => 'Tuliskan item telaah.',
                 'interview_guide' => 'Tuliskan pertanyaan wawancara.',
                 'observation_guide' => 'Tuliskan indikator yang diamati.',
+                'focus_group_discussion' => 'Tuliskan pertanyaan pemandu atau fokus diskusi.',
                 'performance_test' => 'Tuliskan fokus penilaian.',
                 'rubric_assessment' => 'Tuliskan indikator rubrik penilaian.',
                 default => 'Tuliskan butir pernyataan instrumen.',
@@ -260,6 +278,18 @@ if (! function_exists('instrument_public_justification_config')) {
                 'conclusion_label' => 'Kesimpulan Penilaian',
                 'conclusion_required' => true,
                 'conclusion_options' => ['Sangat Baik', 'Baik', 'Cukup', 'Kurang', 'Sangat Kurang'],
+            ],
+            'focus_group_discussion' => [
+                'template' => 'instrument_type',
+                'label' => 'Focus Group Discussion',
+                'show_comment' => true,
+                'comment_label' => 'Catatan Umum FGD',
+                'comment_placeholder' => 'Tuliskan catatan umum, masukan utama, atau rekomendasi dari FGD.',
+                'comment_required' => false,
+                'show_conclusion' => false,
+                'conclusion_label' => '',
+                'conclusion_required' => false,
+                'conclusion_options' => [],
             ],
             default => [
                 'template' => 'none',
