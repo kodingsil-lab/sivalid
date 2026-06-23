@@ -649,7 +649,7 @@ class InstrumentItems extends BaseController
             'interview_guide' => ['pertanyaan wawancara', 'pertanyaan', 'pernyataan', 'butir', 'butir pernyataan'],
             'observation_guide' => ['fokus pengamatan', 'indikator', 'indikator yang diamati', 'pernyataan', 'butir', 'butir pernyataan'],
             'focus_group_discussion' => ['pertanyaan pemandu/fokus diskusi', 'pertanyaan pemandu', 'fokus diskusi', 'pertanyaan', 'pernyataan', 'butir', 'butir pernyataan'],
-            'performance_test' => ['fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
+            'performance_test' => ['fokus penilaian', 'aspek penilaian', 'kriteria penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
             'rubric_assessment' => ['indikator', 'fokus penilaian', 'pernyataan', 'butir', 'butir pernyataan'],
             default => ['pernyataan', 'butir', 'butir pernyataan'],
         };

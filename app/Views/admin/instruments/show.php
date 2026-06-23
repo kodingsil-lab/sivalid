@@ -183,6 +183,38 @@ $renderDetailText = static function (?string $value): string {
         </div>
 
         <?php if ($usesPerformanceTestLayout): ?>
+            <?php
+            $performanceDefaultPurpose = 'Mengukur kemampuan mahasiswa dalam menghasilkan artikel ilmiah melalui proses menulis yang bertahap, yaitu Pra Menulis, Menulis Draf, Merevisi, Menyunting, dan Mempublikasikan.';
+            $performanceDefaultInstructions = implode("\n", [
+                '1. Mahasiswa mengerjakan tes unjuk kerja ini dengan mengikuti tahapan pembelajaran yang terdapat dalam buku ajar.',
+                '2. Artikel ilmiah dikembangkan melalui lima tahap Process Writing Approach, yaitu Pra Menulis, Menulis Draf, Merevisi, Menyunting, dan Mempublikasikan.',
+                '3. Setiap produk proses penulisan perlu disimpan sebagai bagian dari portofolio.',
+                '4. Artikel ditulis menggunakan bahasa Indonesia ragam ilmiah yang jelas, objektif, logis, dan sesuai kaidah penulisan ilmiah.',
+                '5. Artikel memuat kutipan dan daftar pustaka sesuai gaya penulisan ilmiah yang ditentukan.',
+                '6. Mahasiswa mengunggah produk proses dan artikel final melalui e-learning sesuai petunjuk dosen.',
+                '7. Penilaian dilakukan berdasarkan rubrik penilaian artikel ilmiah dan kelengkapan bukti proses menulis.',
+            ]);
+            $performanceDefaultTask = implode("\n", [
+                'Susunlah sebuah artikel ilmiah berdasarkan topik yang relevan dengan bidang keilmuan Anda atau tema lain yang disepakati bersama dosen. Artikel dikembangkan melalui tahapan Process Writing Approach dan didokumentasikan melalui produk pembelajaran pada setiap tahap.',
+                'Artikel yang dihasilkan harus memenuhi ketentuan berikut:',
+                '1. Artikel memiliki topik yang jelas, spesifik, relevan, dan layak dikembangkan secara ilmiah.',
+                '2. Artikel dikembangkan berdasarkan salah satu sumber kajian, seperti penelitian sederhana, kajian pustaka terbatas, analisis dokumen, observasi awal, wawancara singkat, angket sederhana, analisis teks, atau bahan kajian lain yang relevan.',
+                '3. Artikel memuat struktur utama artikel ilmiah: judul, abstrak, kata kunci, pendahuluan, metode, hasil dan pembahasan, simpulan, serta daftar pustaka.',
+                '4. Artikel menggunakan referensi ilmiah yang relevan dan dapat dipertanggungjawabkan.',
+                '5. Artikel ditulis menggunakan bahasa ilmiah yang objektif, jelas, logis, dan konsisten.',
+                '6. Artikel mengikuti format atau template artikel ilmiah yang disediakan dosen atau jurnal tujuan.',
+                '7. Artikel final disertai bukti proses penulisan dalam bentuk portofolio.',
+            ]);
+            $performancePurpose = trim((string) ($currentInstrument['keterangan'] ?? '')) !== ''
+                ? (string) $currentInstrument['keterangan']
+                : $performanceDefaultPurpose;
+            $performanceInstructions = trim((string) ($currentInstrument['petunjuk'] ?? '')) !== ''
+                ? (string) $currentInstrument['petunjuk']
+                : $performanceDefaultInstructions;
+            $performanceTask = trim((string) ($currentInstrument['pengantar'] ?? '')) !== ''
+                ? (string) $currentInstrument['pengantar']
+                : $performanceDefaultTask;
+            ?>
             <div class="instrument-performance-layout">
                 <section>
                     <h4>1. Identitas Tes</h4>
@@ -194,15 +226,15 @@ $renderDetailText = static function (?string $value): string {
                             </tr>
                             <tr>
                                 <th>Tujuan Tes</th>
-                                <td><?= esc((string) (!empty($currentInstrument['keterangan']) ? $currentInstrument['keterangan'] : 'Mengukur kemampuan peserta dalam menyelesaikan tugas unjuk kerja sesuai kriteria yang ditetapkan.')) ?></td>
+                                <td><?= esc($performancePurpose) ?></td>
                             </tr>
                             <tr>
                                 <th>Bentuk Tes</th>
-                                <td>Tes unjuk kerja berbasis tugas dan portofolio proses.</td>
+                                <td>Tes unjuk kerja berbasis tugas menulis artikel ilmiah dan portofolio proses.</td>
                             </tr>
                             <tr>
                                 <th>Produk yang Dinilai</th>
-                                <td><?= esc((string) (!empty($currentInstrument['sasaran']) ? $currentInstrument['sasaran'] : 'Produk akhir beserta bukti proses pengerjaan.')) ?></td>
+                                <td>Artikel ilmiah final beserta bukti proses penulisan.</td>
                             </tr>
                             <tr>
                                 <th>Waktu Pelaksanaan</th>
@@ -214,12 +246,12 @@ $renderDetailText = static function (?string $value): string {
 
                 <section>
                     <h4>2. Petunjuk Umum</h4>
-                    <?= $renderDetailText($currentInstrument['petunjuk'] ?? '') ?>
+                    <?= $renderDetailText($performanceInstructions) ?>
                 </section>
 
                 <section>
                     <h4>3. Tugas Unjuk Kerja</h4>
-                    <?= $renderDetailText($currentInstrument['pengantar'] ?? '') ?>
+                    <?= $renderDetailText($performanceTask) ?>
                 </section>
 
                 <section>
@@ -257,7 +289,7 @@ $renderDetailText = static function (?string $value): string {
                                 <tr>
                                     <td class="text-center">5</td>
                                     <td>Mempublikasikan</td>
-                                    <td>Produk final, abstrak, kata kunci, checklist kesiapan publikasi, bahan presentasi, unggahan, dan/atau rencana publikasi lanjutan.</td>
+                                    <td>Artikel final, abstrak, kata kunci, checklist kesiapan publikasi, bahan presentasi, unggahan artikel melalui e-learning, dan/atau rencana publikasi lanjutan.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -267,18 +299,19 @@ $renderDetailText = static function (?string $value): string {
                 <section>
                     <h4>5. Ketentuan Produk Final</h4>
                     <ol type="a">
-                        <li>Panjang dan format produk disesuaikan dengan ketentuan atau template yang digunakan.</li>
-                        <li>Produk memuat bagian utama secara lengkap sesuai karakteristik tugas.</li>
-                        <li>Rujukan, sitasi, dan daftar pustaka ditulis secara konsisten jika diperlukan.</li>
-                        <li>Produk merupakan hasil kerja peserta dan mencerminkan proses revisi berdasarkan umpan balik.</li>
-                        <li>Produk final dikumpulkan bersama portofolio proses pengerjaan.</li>
+                        <li>Panjang artikel disesuaikan dengan template yang digunakan, misalnya 8-10 halaman A4.</li>
+                        <li>Format penulisan mengikuti ketentuan yang ditetapkan dosen atau template jurnal tujuan.</li>
+                        <li>Artikel memuat bagian utama secara lengkap, antara lain judul, abstrak, kata kunci, pendahuluan, metode, hasil dan pembahasan, simpulan, dan daftar pustaka.</li>
+                        <li>Sitasi dan daftar pustaka ditulis secara konsisten.</li>
+                        <li>Artikel merupakan hasil kerja mahasiswa sendiri dan mencerminkan proses revisi berdasarkan umpan balik.</li>
+                        <li>Artikel final diunggah melalui e-learning bersama portofolio proses penulisan.</li>
                     </ol>
                 </section>
 
                 <section>
                     <h4>6. Aspek Penilaian</h4>
                     <?php if (empty($items)): ?>
-                        <p class="text-muted mb-0">Aspek penilaian belum tersedia.</p>
+                        <p class="text-muted mb-0">Aspek penilaian belum tersedia. Tambahkan butir dengan tipe skala, misalnya kelayakan topik, kelengkapan struktur artikel, kualitas isi, penggunaan bahasa ilmiah, teknik penulisan ilmiah, koherensi tulisan, dan keterlaksanaan proses menulis.</p>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-bordered table-vcenter instrument-ready-table">

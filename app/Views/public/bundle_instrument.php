@@ -722,6 +722,7 @@ $petunjukValidasi = trim((string) ($instrumentEntry['petunjuk_validasi'] ?? ''))
 $previewLayout = instrument_preview_layout($instrumentEntry['jenis'] ?? '');
 $previewLayoutType = (string) ($previewLayout['type'] ?? 'standard');
 $usesFgdPreview = $previewLayoutType === 'focus_group_discussion';
+$usesPerformancePreview = $previewLayoutType === 'performance_test';
 
 $scaleMin   = isset($scale['min']) ? (int) $scale['min'] : (int) ($instrumentEntry['skala_min'] ?? 1);
 $scaleMax   = isset($scale['max']) ? (int) $scale['max'] : (int) ($instrumentEntry['skala_max'] ?? 4);
@@ -1195,6 +1196,12 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 <th style="width: 220px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek yang Didiskusikan')) ?></th>
                                 <th><?= esc((string) ($previewLayout['item'] ?? 'Pertanyaan Pemandu/Fokus Diskusi')) ?></th>
                                 <th style="width: 260px;"><?= esc((string) ($previewLayout['comment'] ?? 'Komentar')) ?></th>
+                            <?php elseif ($usesPerformancePreview): ?>
+                                <th style="width: 76px;">No</th>
+                                <th style="width: 220px;"><?= esc((string) ($previewLayout['aspect'] ?? 'Aspek yang Dinilai')) ?></th>
+                                <th><?= esc((string) ($previewLayout['item'] ?? 'Fokus Penilaian')) ?></th>
+                                <th style="width: 180px;"><?= esc((string) ($previewLayout['score'] ?? 'Skor')) ?></th>
+                                <th style="width: 220px;"><?= esc((string) ($previewLayout['comment'] ?? 'Catatan')) ?></th>
                             <?php else: ?>
                                 <th style="width: 76px;">No. Butir</th>
                                 <th>Butir Pernyataan</th>
@@ -1220,6 +1227,11 @@ $text = static function (array $row, string $key, string $default = '-'): string
                                 <?php if ($usesFgdPreview): ?>
                                     <td><?= esc($aspectName) ?></td>
                                     <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                    <td></td>
+                                <?php elseif ($usesPerformancePreview): ?>
+                                    <td><?= esc($aspectName) ?></td>
+                                    <td><?= nl2br(esc((string) ($item['pernyataan'] ?? '-'))) ?></td>
+                                    <td></td>
                                     <td></td>
                                 <?php else: ?>
                                     <td>

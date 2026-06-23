@@ -174,6 +174,8 @@ if (! function_exists('instrument_preview_layout')) {
                 'title' => 'Tes Unjuk Kerja',
                 'aspect' => 'Aspek yang Dinilai',
                 'item' => 'Fokus Penilaian',
+                'score' => 'Skor',
+                'comment' => 'Catatan',
             ],
             'rubrik_penilaian' => [
                 'type' => 'rubric_assessment',
